@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from urllib.parse import urlparse
 
@@ -91,16 +92,17 @@ class Settings(BaseSettings):
         return value
 
     @model_validator(mode="after")
-    def validate_configuration(self) -> "Settings":
+    def validate_configuration(self) -> Settings:
         self.environment = self.environment.lower()
 
         if self.environment not in {"development", "test", "production"}:
-            raise ValueError(
-                "ENVIRONMENT must be development, test, or production."
-            )
+            raise ValueError("ENVIRONMENT must be development, test, or production.")
 
         parsed_base_url = urlparse(self.app_base_url)
-        if parsed_base_url.scheme not in {"http", "https"} or not parsed_base_url.netloc:
+        if (
+            parsed_base_url.scheme not in {"http", "https"}
+            or not parsed_base_url.netloc
+        ):
             raise ValueError("APP_BASE_URL must be an absolute HTTP or HTTPS URL.")
 
         if bool(self.turnstile_site_key) != bool(self.turnstile_secret_key):
@@ -129,12 +131,18 @@ class Settings(BaseSettings):
                 missing_or_unsafe.append("NEON_AUTH_BASE_URL is required")
             elif urlparse(self.neon_auth_base_url).scheme != "https":
                 missing_or_unsafe.append("NEON_AUTH_BASE_URL must use HTTPS")
-            if not self.database_url.startswith(("postgresql://", "postgresql+psycopg://")):
+            if not self.database_url.startswith(
+                ("postgresql://", "postgresql+psycopg://")
+            ):
                 missing_or_unsafe.append("DATABASE_URL must use PostgreSQL")
             if len(self.ip_hash_secret) < 32:
-                missing_or_unsafe.append("IP_HASH_SECRET must be at least 32 characters")
+                missing_or_unsafe.append(
+                    "IP_HASH_SECRET must be at least 32 characters"
+                )
             elif self.ip_hash_secret.startswith("calloff-local-development"):
-                missing_or_unsafe.append("IP_HASH_SECRET must not use the development value")
+                missing_or_unsafe.append(
+                    "IP_HASH_SECRET must not use the development value"
+                )
             if not self.turnstile_site_key or not self.turnstile_secret_key:
                 missing_or_unsafe.append("Cloudflare Turnstile keys are required")
             if self.turnstile_verify_url != (
@@ -158,7 +166,9 @@ class Settings(BaseSettings):
                     "TRUSTED_HOSTS must include the APP_BASE_URL hostname"
                 )
             if self.smtp_host and not self.smtp_use_tls:
-                missing_or_unsafe.append("SMTP_USE_TLS must be true when SMTP is enabled")
+                missing_or_unsafe.append(
+                    "SMTP_USE_TLS must be true when SMTP is enabled"
+                )
 
             if missing_or_unsafe:
                 raise ValueError(
@@ -175,7 +185,14 @@ class Settings(BaseSettings):
 
     @property
     def trusted_host_list(self) -> list[str]:
-        return [host.strip() for host in self.trusted_hosts.split(",") if host.strip()]
+        hosts = [host.strip() for host in self.trusted_hosts.split(",") if host.strip()]
+
+        render_hostname = os.getenv("RENDER_EXTERNAL_HOSTNAME", "").strip()
+
+        if render_hostname and render_hostname not in hosts:
+            hosts.append(render_hostname)
+
+        return hosts
 
     @property
     def turnstile_enabled(self) -> bool:
