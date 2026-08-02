@@ -16,8 +16,8 @@ in a real browser because no in-app browser target was available during this rev
 ## Verification completed
 
 - 25 real HTTP integration tests passed.
-- The permanent top fade and gradual bottom blur render only on the landing page;
-  public forms, pricing, and privacy pages remain overlay-free.
+- The gradual bottom blur renders only on the landing page; the navbar has no fade,
+  and public forms, pricing, and privacy pages remain overlay-free.
 - All 21 Jinja templates parsed and passed `djlint`.
 - All frontend JavaScript files passed `node --check`.
 - Python sources passed `compileall`.

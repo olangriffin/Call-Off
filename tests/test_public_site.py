@@ -244,7 +244,7 @@ class PublicSiteTestCase(unittest.TestCase):
         self.assertEqual(status_code, 200)
         self.assertIn("subcontractor delivery platform", body)
         self.assertNotIn("calloff.app", body)
-        self.assertIn("marketing-scroll-fade-top", body)
+        self.assertNotIn("marketing-scroll-fade-top", body)
         self.assertIn("marketing-bottom-blur", body)
         self.assertIn("marketing-scroll-fade.js", body)
 
