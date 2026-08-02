@@ -1,0 +1,108 @@
+{% extends "base.html" %} {% block title %} {% if project %} Programme | {{
+project.code }} | Calloff {% else %} Project not found | Calloff {% endif %} {%
+endblock %} {% block content %} {% if project %}
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow">{{ project.code }}</p>
+      <h2>Programme</h2>
+    </div>
+
+    <a href="/app/projects/{{ project.id }}">Back to project</a>
+  </div>
+
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow">Current revision</p>
+      <h2>{{ revision.revision_code }}</h2>
+    </div>
+
+    <a
+      href="/app/projects/{{ project.id }}/programme/new"
+      class="primary-button"
+    >
+      New activity
+    </a>
+  </div>
+
+  {% if error_message %}
+    <div role="alert">
+      <strong>Unable to complete action</strong>
+      <p>{{ error_message }}</p>
+    </div>
+  {% endif %}
+
+  {% if activity_rows %}
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Activity</th>
+          <th>Type</th>
+          <th>Work package</th>
+          <th>Status</th>
+          <th>Planned start</th>
+          <th>Planned finish</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for row in activity_rows %}
+        {% set activity = row.activity %}
+        <tr>
+          <td class="mono">{{ activity.activity_code }}</td>
+          <td style="padding-left: {{ row.depth * 20 }}px;">
+            {% if activity.is_summary %}<strong>{% endif %}
+            {{ activity.name }}
+            {% if activity.is_summary %}</strong>{% endif %}
+            {% if activity.is_milestone %}
+            <small>(milestone)</small> {% endif %}
+          </td>
+          <td>{{ activity.activity_type|title }}</td>
+          <td>
+            {% if activity.work_package %} {{ activity.work_package.code }} {%
+            else %} — {% endif %}
+          </td>
+          <td>{{ activity.status|replace("_", " ")|title }}</td>
+          <td>
+            {% if activity.planned_start %} {{
+            activity.planned_start.strftime("%d %b %Y") }} {% else %} — {% endif
+            %}
+          </td>
+          <td>
+            {% if activity.planned_finish %} {{
+            activity.planned_finish.strftime("%d %b %Y") }} {% else %} — {%
+            endif %}
+          </td>
+          <td>
+            <a href="/app/projects/{{ project.id }}/programme/{{ activity.id }}/edit">Edit</a>
+
+            <form class="inline-form" method="post" action="/app/projects/{{ project.id }}/programme/{{ activity.id }}/delete" data-confirm="Delete this activity?">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+              <button type="submit" class="ghost-button-sm">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <h3>No activities yet</h3>
+    <p>This programme does not currently contain any activities.</p>
+  </div>
+  {% endif %}
+</section>
+
+{% else %}
+<section class="panel">
+  <div class="empty-state">
+    <h2>Project not found</h2>
+    <p>The requested project does not exist or is unavailable.</p>
+    <a href="/app">Return to dashboard</a>
+  </div>
+</section>
+{% endif %} {% endblock %}

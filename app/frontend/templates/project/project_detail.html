@@ -1,0 +1,147 @@
+{% extends "base.html" %} {% block title %} {% if project %} {{ project.code }}
+| Calloff {% else %} Project not found | Calloff {% endif %} {% endblock %} {%
+block content %} {% if project %}
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow"><a href="/app">Projects</a> / {{ project.code }}</p>
+
+      <h2>{{ project.name }}</h2>
+
+      <p>{{ project.client_name or "No client recorded" }}</p>
+    </div>
+  </div>
+
+  <div class="metric-grid">
+    <article class="metric-card">
+      <span>Status</span>
+      <strong>{{ project.status|title }}</strong>
+      <small>Current project stage</small>
+    </article>
+
+    <article class="metric-card">
+      <span>Planned start</span>
+      <strong>
+        {% if project.planned_start %} {{ project.planned_start.strftime("%d %b
+        %Y") }} {% else %} — {% endif %}
+      </strong>
+      <small>Planned commencement</small>
+    </article>
+
+    <article class="metric-card">
+      <span>Planned finish</span>
+      <strong>
+        {% if project.planned_finish %} {{ project.planned_finish.strftime("%d
+        %b %Y") }} {% else %} — {% endif %}
+      </strong>
+      <small>Planned completion</small>
+    </article>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow">Delivery</p>
+      <h2>Project programme</h2>
+    </div>
+
+    <a href="/app/projects/{{ project.id }}/programme" class="primary-button">
+      View programme
+    </a>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow">Delivery</p>
+      <h2>Work packages</h2>
+    </div>
+
+    <a
+      href="/app/projects/{{ project.id }}/work-packages/new"
+      class="primary-button"
+    >
+      New work package
+    </a>
+  </div>
+
+  {% if work_packages %}
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Package name</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Planned start</th>
+          <th>Planned finish</th>
+          <th>Required on site</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for work_package in work_packages %}
+        <tr>
+          <td class="mono">
+            <a
+              href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}"
+            >
+              {{ work_package.code }}
+            </a>
+          </td>
+          <td>
+            <a
+              href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}"
+            >
+              {{ work_package.name }}
+            </a>
+          </td>
+          <td>
+            {% if work_package.package_type %} {{
+            work_package.package_type|replace("_", " ")|title }} {% else %} — {%
+            endif %}
+          </td>
+          <td>{{ work_package.status|title }}</td>
+
+          <td>
+            {% if work_package.planned_start %} {{
+            work_package.planned_start.strftime("%d %b %Y") }} {% else %} — {%
+            endif %}
+          </td>
+
+          <td>
+            {% if work_package.planned_finish %} {{
+            work_package.planned_finish.strftime("%d %b %Y") }} {% else %} — {%
+            endif %}
+          </td>
+
+          <td>
+            {% if work_package.required_on_site_date %} {{
+            work_package.required_on_site_date.strftime("%d %b %Y") }} {% else
+            %} — {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <h3>No work packages</h3>
+    <p>This project does not currently contain any work packages.</p>
+  </div>
+  {% endif %}
+</section>
+
+{% else %}
+<section class="panel">
+  <div class="empty-state">
+    <h2>Project not found</h2>
+    <p>The requested project does not exist or is unavailable.</p>
+    <a href="/app">Return to dashboard</a>
+  </div>
+</section>
+{% endif %} {% endblock %}

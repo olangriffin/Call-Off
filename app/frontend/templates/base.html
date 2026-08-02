@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Call-Off helps specialist subcontractors coordinate delivery, approvals, procurement and deadlines."
+    />
+
+    <title>{% block title %} {{ page_title }} | Call-Off {% endblock %}</title>
+
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="{{ url_for('static', path='assets/favicon.svg') }}"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap"
+    />
+
+    <link rel="stylesheet" href="{{ url_for('static', path='css/app.css') }}" />
+  </head>
+
+  <body class="{% block body_class %}{% endblock %}">
+    <div class="app-shell {% block shell_class %}{% endblock %}">
+      {% block sidebar %}
+      <aside class="sidebar">
+        <a href="/app" class="brand">
+          <span class="brand-logo"
+            >{{ inline_svg_asset("calloff-logo-horizontal-dark.svg") }}</span
+          >
+
+          <span class="brand-text">
+            <small class="brand-tagline">Construction control</small>
+          </span>
+        </a>
+
+        <nav class="navigation">
+          <a href="/app" class="navigation-link active">Projects</a>
+        </nav>
+        <div class="theme-control">
+          <span class="theme-control-label">Appearance</span>
+
+          <button
+            type="button"
+            class="theme-toggle"
+            id="theme-toggle"
+            aria-label="Switch to dark mode"
+            aria-pressed="false"
+          >
+            {{ inline_svg_asset("theme.svg") }}
+          </button>
+        </div>
+
+        <div class="sidebar-footer">
+          {% if current_user is defined and current_user %}
+          <div>
+            <strong>{{ current_user.name }}</strong>
+            <small>{{ current_user.email }}</small>
+            <small> {{ current_role|replace("_", " ")|title }} </small>
+          </div>
+
+          <small>{{ company_name }}</small>
+
+          <form method="post" action="/logout">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+            <button type="submit" class="navigation-link">Sign out</button>
+          </form>
+          {% else %}
+          <small>{{ company_name }}</small>
+          {% endif %}
+        </div>
+      </aside>
+      {% endblock %}
+
+      <main class="main-content">
+        <section class="page-content">
+          {% block content %}{% endblock %}
+        </section>
+      </main>
+    </div>
+    <script src="{{ url_for('static', path='js/theme-toggle.js') }}"></script>
+    <script src="{{ url_for('static', path='js/smooth-inputs.js') }}"></script>
+    <script src="{{ url_for('static', path='js/confirm-actions.js') }}"></script>
+  </body>
+</html>

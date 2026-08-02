@@ -1,0 +1,15 @@
+{% extends "marketing/base.html" %}
+{% block title %}{{ status_code }} | Call-Off{% endblock %}
+{% block content %}
+
+<section class="error-page" aria-labelledby="error-heading">
+  <p class="error-code">{{ status_code }}</p>
+  <h1 id="error-heading">{{ error_heading }}</h1>
+  <p>{{ error_message }}</p>
+  <div class="hero-actions">
+    <a href="/" class="primary-button">Return home</a>
+    <a href="/early-access" class="ghost-button">Early Access</a>
+  </div>
+</section>
+
+{% endblock %}

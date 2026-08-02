@@ -1,0 +1,58 @@
+services:
+  - type: web
+    name: call-off
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    preDeployCommand: alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips="*" --no-access-log
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.14.3
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: AUTH_COOKIE_SECURE
+        value: "true"
+      - key: ALLOW_PUBLIC_REGISTRATION
+        value: "false"
+      - key: APP_BASE_URL
+        sync: false
+      - key: TRUSTED_HOSTS
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: NEON_AUTH_BASE_URL
+        sync: false
+      - key: CONTACT_EMAIL
+        sync: false
+      - key: LEGAL_ENTITY_NAME
+        sync: false
+      - key: PRIVACY_RETENTION_DAYS
+        value: "365"
+      - key: IP_HASH_SECRET
+        generateValue: true
+      - key: EARLY_ACCESS_RATE_LIMIT
+        value: "5"
+      - key: EARLY_ACCESS_RATE_WINDOW_MINUTES
+        value: "60"
+      - key: TURNSTILE_SITE_KEY
+        sync: false
+      - key: TURNSTILE_SECRET_KEY
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_USE_TLS
+        value: "true"
+      - key: SMTP_FROM_EMAIL
+        sync: false
+      - key: EARLY_ACCESS_NOTIFICATION_EMAIL
+        sync: false

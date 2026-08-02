@@ -1,0 +1,78 @@
+{% extends "marketing/base.html" %}
+{% block title %}Indicative pricing | Call-Off{% endblock %}
+{% block meta_description %}Indicative early-access pricing for Call-Off, the subcontractor delivery platform.{% endblock %}
+{% block content %}
+
+<section class="pricing-hero">
+  <span class="hero-illustration" aria-hidden="true">
+    {{ inline_svg_asset("favicon.svg") }}
+  </span>
+  <p class="pricing-kicker">Indicative early-access pricing</p>
+  <h1>Plans for controlled delivery across every project.</h1>
+  <p>
+    These plans are intended to guide early-access conversations. Pricing, limits
+    and included capabilities may change before general availability.
+  </p>
+</section>
+
+<section class="pricing-section" aria-labelledby="pricing-heading">
+  <div class="section-header">
+    <h2 id="pricing-heading">Choose a starting point</h2>
+  </div>
+
+  <div class="pricing-grid">
+    <article class="pricing-card">
+      <div>
+        <h3>Starter</h3>
+        <p class="pricing-price"><span>&euro;299</span><small>/ month</small></p>
+      </div>
+      <p>Up to 5 internal users and 3 active projects.</p>
+      <a href="/early-access" class="ghost-button">Apply for Starter</a>
+    </article>
+
+    <article class="pricing-card pricing-card-featured">
+      <div>
+        <h3>Professional</h3>
+        <p class="pricing-price"><span>&euro;699</span><small>/ month</small></p>
+      </div>
+      <p>Up to 15 users and 15 active projects.</p>
+      <a href="/early-access" class="primary-button">Apply for Professional</a>
+    </article>
+
+    <article class="pricing-card">
+      <div>
+        <h3>Business</h3>
+        <p class="pricing-price"><span>&euro;1,299</span><small>/ month</small></p>
+      </div>
+      <p>Up to 40 users, advanced reporting and integrations.</p>
+      <a href="/early-access" class="ghost-button">Discuss Business</a>
+    </article>
+
+    <article class="pricing-card pricing-card-enterprise">
+      <div>
+        <h3>Enterprise</h3>
+        <p class="pricing-price">
+          <span>Custom</span><small>from &euro;20,000 / year</small>
+        </p>
+      </div>
+      <p>
+        For large subcontractors with security and custom integration requirements.
+      </p>
+      <a href="/early-access" class="ghost-button">Discuss Enterprise</a>
+    </article>
+  </div>
+</section>
+
+<section class="cta-section pricing-cta" id="cta">
+  <h2>Find the right early-access path.</h2>
+  <p>
+    Tell us about your projects, users and delivery challenges so we can assess
+    whether an early-access plan or pilot is suitable.
+  </p>
+  <div class="hero-actions">
+    <a href="/early-access" class="primary-button">Apply for Early Access</a>
+    <a href="/" class="ghost-button">Back to overview</a>
+  </div>
+</section>
+
+{% endblock %}

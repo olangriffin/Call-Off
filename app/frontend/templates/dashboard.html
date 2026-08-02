@@ -1,0 +1,80 @@
+{% extends "base.html" %} {% block title %} Projects | Calloff {% endblock %} {%
+block content %}
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow">Portfolio</p>
+      <h2>Projects</h2>
+      <p>View and manage projects for {{ company_name }}.</p>
+    </div>
+
+    {% if current_role == "project_manager" %}
+    <a href="/app/projects/new" class="primary-button"> New project </a>
+    {% endif %}
+  </div>
+
+  {% if projects %}
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>Client</th>
+          <th>Status</th>
+          <th>Planned start</th>
+          <th>Planned finish</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for project in projects %}
+        <tr>
+          <td>
+            <a href="/app/projects/{{ project.id }}">
+              <strong>{{ project.code }}</strong><br />
+              <span>{{ project.name }}</span>
+            </a>
+          </td>
+
+          <td>{{ project.client_name or "—" }}</td>
+
+          <td>
+            <span
+              class="{% if project.status|lower == 'active' %}status-success{% endif %}"
+            >
+              {{ project.status|title }}
+            </span>
+          </td>
+
+          <td>
+            {% if project.planned_start %} {{ project.planned_start.strftime("%d
+            %b %Y") }} {% else %} — {% endif %}
+          </td>
+
+          <td>
+            {% if project.planned_finish %} {{
+            project.planned_finish.strftime("%d %b %Y") }} {% else %} — {% endif
+            %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <h3>No projects yet</h3>
+
+    <p>
+      Create the first project for {{ company_name }} to begin managing
+      packages, deliverables and programme information.
+    </p>
+
+    <a href="/app/projects/new" class="primary-button">
+      Create first project
+    </a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

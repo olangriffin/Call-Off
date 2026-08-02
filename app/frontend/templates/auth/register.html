@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Create account | Call-Off
+{% endblock %}
+
+{% block content %}
+<section class="panel">
+  {% if registration_enabled %}
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">Temporary registration</p>
+        <h2>Create account</h2>
+      </div>
+
+      <a href="/login">Sign in</a>
+    </div>
+
+    {% if error_message %}
+      <div role="alert">
+        <strong>Unable to create account</strong>
+        <p>{{ error_message }}</p>
+      </div>
+    {% endif %}
+
+    <form method="post" action="/register">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
+      <div>
+        <label for="name">Full name</label>
+
+        <input
+          id="name"
+          name="name"
+          type="text"
+          autocomplete="name"
+          maxlength="200"
+          value="{{ form_values.name if form_values else '' }}"
+          required
+        >
+      </div>
+
+      <div>
+        <label for="email">Email address</label>
+
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          maxlength="320"
+          value="{{ form_values.email if form_values else '' }}"
+          required
+        >
+      </div>
+
+      <div>
+        <label for="password">Password</label>
+
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="new-password"
+          maxlength="1024"
+          required
+        >
+      </div>
+
+      <div>
+        <label for="confirm_password">Confirm password</label>
+
+        <input
+          id="confirm_password"
+          name="confirm_password"
+          type="password"
+          autocomplete="new-password"
+          maxlength="1024"
+          required
+        >
+      </div>
+
+      <div>
+        <button type="submit" class="primary-button">
+          Create account
+        </button>
+
+        <a href="/login" class="ghost-button-sm">
+          Cancel
+        </a>
+      </div>
+    </form>
+
+  {% else %}
+    <div class="empty-state">
+      <h2>Registration unavailable</h2>
+      <p>New accounts can only be created by invitation.</p>
+      <a href="/login">Return to login</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

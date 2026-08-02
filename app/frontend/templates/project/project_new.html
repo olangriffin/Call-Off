@@ -1,0 +1,53 @@
+{% extends "base.html" %} {% block title %} New project | Calloff {%
+endblock %} {% block content %}
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow">Projects</p>
+      <h2>Create new project</h2>
+    </div>
+
+    <a href="/app">Cancel</a>
+  </div>
+
+  <form method="post" action="/app/projects/new">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+    <p>
+      <label for="code">Project code</label><br />
+      <input id="code" name="code" type="text" required />
+    </p>
+
+    <p>
+      <label for="name">Project name</label><br />
+      <input id="name" name="name" type="text" required />
+    </p>
+
+    <p>
+      <label for="client_name">Client</label><br />
+      <input id="client_name" name="client_name" type="text" />
+    </p>
+
+    <p>
+      <label for="status">Status</label><br />
+      <select id="status" name="status">
+        <option value="planning">Planning</option>
+        <option value="active">Active</option>
+        <option value="on_hold">On hold</option>
+        <option value="completed">Completed</option>
+      </select>
+    </p>
+
+    <p>
+      <label for="planned_start">Planned start</label><br />
+      <input id="planned_start" name="planned_start" type="date" />
+    </p>
+
+    <p>
+      <label for="planned_finish">Planned finish</label><br />
+      <input id="planned_finish" name="planned_finish" type="date" />
+    </p>
+
+    <button type="submit" class="primary-button">Create project</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if deliverable %}
+    New revision | {{ deliverable.reference }} | Calloff
+  {% else %}
+    Deliverable not found | Calloff
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if project and work_package and deliverable %}
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow">{{ work_package.code }} / {{ deliverable.reference }}</p>
+      <h2>Issue new revision</h2>
+    </div>
+
+    <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}">
+      Back to deliverable
+    </a>
+  </div>
+
+  {% if error_message %}
+  <div class="form-alert" role="alert">
+    <strong>Unable to create revision</strong>
+    <p>{{ error_message }}</p>
+  </div>
+  {% endif %}
+
+  <form
+    method="post"
+    action="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/new"
+    class="form-grid"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+    <div class="form-field">
+      <label for="revision_code">Revision code</label>
+      <input
+        id="revision_code"
+        name="revision_code"
+        type="text"
+        maxlength="30"
+        value="{{ form_values.revision_code if form_values else '' }}"
+        required
+      >
+    </div>
+
+    <div class="form-field">
+      <label for="issue_purpose">Issue purpose</label>
+      <input
+        id="issue_purpose"
+        name="issue_purpose"
+        type="text"
+        maxlength="50"
+        placeholder="For approval, construction, information..."
+        value="{{ form_values.issue_purpose if form_values else '' }}"
+      >
+    </div>
+
+    <div class="form-field">
+      <label for="issue_date">Issue date</label>
+      <input
+        id="issue_date"
+        name="issue_date"
+        type="date"
+        value="{{ form_values.issue_date if form_values else '' }}"
+        required
+      >
+    </div>
+
+    <div class="form-field form-field-full">
+      <label for="notes">Notes</label>
+      <textarea id="notes" name="notes" rows="4">{{ form_values.notes if form_values else '' }}</textarea>
+    </div>
+
+    <div class="form-actions form-field-full">
+      <button type="submit" class="primary-button">
+        Issue revision
+      </button>
+      <a
+        href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}"
+        class="ghost-button-sm"
+      >Cancel</a>
+    </div>
+  </form>
+</section>
+{% else %}
+<section class="panel">
+  <div class="empty-state">
+    <h2>Deliverable not found</h2>
+    <p>The requested deliverable does not exist or is unavailable.</p>
+    <a href="/app">Return to dashboard</a>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

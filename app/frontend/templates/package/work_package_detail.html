@@ -1,0 +1,170 @@
+{% extends "base.html" %} {% block title %} {% if work_package %} {{
+work_package.code }} | Calloff {% else %} Work package not found | Calloff {%
+endif %} {% endblock %} {% block content %} {% if project and work_package %}
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow">
+        <a href="/app/projects/{{ project.id }}"> {{ project.code }} </a>
+        / {{ work_package.code }}
+      </p>
+
+      <h2>{{ work_package.name }}</h2>
+
+      <p>
+        {{ work_package.package_type|replace("_", " ")|title if
+        work_package.package_type else "Work package" }} / {{
+        work_package.status|replace("_", " ")|title }}
+      </p>
+    </div>
+  </div>
+
+  <div class="readiness-banner readiness-{{ readiness.key }}">
+    <div>
+      <p class="eyebrow">Package readiness</p>
+      <div class="readiness-title">
+        <span class="badge {{ readiness.css_class }}"
+          >{{ readiness.label }}</span
+        >
+        <strong>{{ readiness.completion_percentage }}% complete</strong>
+      </div>
+      <p>{{ readiness.description }}</p>
+    </div>
+
+    <div class="readiness-date">
+      <span>Required on site</span>
+      <strong>
+        {% if work_package.required_on_site_date %} {{
+        work_package.required_on_site_date.strftime("%d %b %Y") }} {% else %}—{%
+        endif %}
+      </strong>
+    </div>
+  </div>
+
+  <div class="metric-grid">
+    <article class="metric-card">
+      <span>Deliverables complete</span>
+      <strong
+        >{{ readiness.complete_deliverables }}/{{ readiness.total_deliverables
+        }}</strong
+      >
+      <small>Complete or accepted</small>
+    </article>
+
+    <article class="metric-card">
+      <span>Overdue issues</span>
+      <strong
+        class="{% if readiness.overdue_issue_count %}status-critical{% endif %}"
+        >{{ readiness.overdue_issue_count }}</strong
+      >
+      <small>Planned issue dates passed</small>
+    </article>
+
+    <article class="metric-card">
+      <span>Overdue approvals</span>
+      <strong
+        class="{% if readiness.overdue_approval_count %}status-critical{% endif %}"
+        >{{ readiness.overdue_approval_count }}</strong
+      >
+      <small>Required approval dates passed</small>
+    </article>
+
+    <article class="metric-card">
+      <span>Pending approvals</span>
+      <strong>{{ readiness.pending_approval_count }}</strong>
+      <small>Latest revision not accepted</small>
+    </article>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow">Design and approval control</p>
+      <h2>Deliverables</h2>
+    </div>
+
+    <a
+      href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/new"
+      class="primary-button"
+      >New deliverable</a
+    >
+  </div>
+
+  {% if deliverables %}
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Deliverable</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Planned issue</th>
+          <th>Required approval</th>
+          <th>Revisions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for deliverable in deliverables %}
+        <tr>
+          <td class="mono">
+            <a
+              href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}"
+            >
+              {{ deliverable.reference }}
+            </a>
+          </td>
+          <td>
+            <a
+              href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}"
+            >
+              {{ deliverable.name }}
+            </a>
+          </td>
+          <td>{{ deliverable.deliverable_type|replace("_", " ")|title }}</td>
+          <td>{{ deliverable.status|replace("_", " ")|title }}</td>
+          <td>
+            {% if deliverable.planned_issue_date %}{{
+            deliverable.planned_issue_date.strftime("%d %b %Y") }}{% else %}—{%
+            endif %}
+          </td>
+          <td>
+            {% if deliverable.required_approval_date %}{{
+            deliverable.required_approval_date.strftime("%d %b %Y") }}{% else
+            %}—{% endif %}
+          </td>
+          <td>{{ deliverable.revisions|length }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <h3>No deliverables</h3>
+    <p>
+      Add the design, approval and call-off records required to make this
+      package site-ready.
+    </p>
+    <a
+      href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/new"
+      class="primary-button"
+      >Create first deliverable</a
+    >
+  </div>
+  {% endif %}
+</section>
+{% else %}
+<section class="panel">
+  <div class="empty-state">
+    <h2>Work package not found</h2>
+    <p>The requested work package does not exist or is unavailable.</p>
+    {% if project %}
+    <a href="/app/projects/{{ project.id }}">Return to project</a>
+    {% else %}
+    <a href="/app">Return to dashboard</a>
+    {% endif %}
+  </div>
+</section>
+{% endif %} {% endblock %}

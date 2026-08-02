@@ -1,0 +1,13 @@
+{
+
+  "[jinja-html]": {
+    "editor.defaultFormatter": "monosans.djlint",
+    "editor.formatOnSave": true
+  },
+  "files.associations": {
+    "app/frontend/templates/**/*.html": "jinja-html"
+  },
+
+  "djlint.pythonPath": "/home/olan/Projects/Call-Off/.venv/bin/python3",
+  "djlint.showInstallError": false
+}

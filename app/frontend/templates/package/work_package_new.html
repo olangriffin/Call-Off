@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if project %}
+    New work package | {{ project.code }} | Calloff
+  {% else %}
+    Project not found | Calloff
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if project %}
+  <section class="panel">
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">{{ project.code }}</p>
+        <h2>New work package</h2>
+      </div>
+
+      <a href="/app/projects/{{ project.id }}">Back to project</a>
+    </div>
+
+    {% if error_message %}
+      <div role="alert">
+        <strong>Unable to create work package</strong>
+        <p>{{ error_message }}</p>
+      </div>
+    {% endif %}
+
+    <form
+      method="post"
+      action="/app/projects/{{ project.id }}/work-packages/new"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+      <div>
+        <label for="code">Package code</label>
+        <input
+          id="code"
+          name="code"
+          type="text"
+          maxlength="50"
+          value="{{ form_values.code if form_values else '' }}"
+          required
+        >
+      </div>
+
+      <div>
+        <label for="name">Package name</label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          maxlength="200"
+          value="{{ form_values.name if form_values else '' }}"
+          required
+        >
+      </div>
+
+      <div>
+        <label for="package_type">Package type</label>
+        <input
+          id="package_type"
+          name="package_type"
+          type="text"
+          maxlength="100"
+          value="{{ form_values.package_type if form_values else '' }}"
+        >
+      </div>
+
+      <div>
+        <label for="status">Status</label>
+        <select id="status" name="status" required>
+          <option value="planning"
+            {% if form_values and form_values.status == "planning" %}selected{% endif %}>
+            Planning
+          </option>
+
+          <option value="active"
+            {% if not form_values or form_values.status == "active" %}selected{% endif %}>
+            Active
+          </option>
+
+          <option value="on_hold"
+            {% if form_values and form_values.status == "on_hold" %}selected{% endif %}>
+            On hold
+          </option>
+
+          <option value="completed"
+            {% if form_values and form_values.status == "completed" %}selected{% endif %}>
+            Completed
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          name="description"
+          rows="4"
+        >{{ form_values.description if form_values else '' }}</textarea>
+      </div>
+
+      <div>
+        <label for="planned_start">Planned start</label>
+        <input
+          id="planned_start"
+          name="planned_start"
+          type="date"
+          value="{{ form_values.planned_start if form_values else '' }}"
+        >
+      </div>
+
+      <div>
+        <label for="planned_finish">Planned finish</label>
+        <input
+          id="planned_finish"
+          name="planned_finish"
+          type="date"
+          value="{{ form_values.planned_finish if form_values else '' }}"
+        >
+      </div>
+
+      <div>
+        <label for="required_on_site_date">Required on site</label>
+        <input
+          id="required_on_site_date"
+          name="required_on_site_date"
+          type="date"
+          value="{{ form_values.required_on_site_date if form_values else '' }}"
+        >
+      </div>
+
+      <div>
+        <button type="submit" class="primary-button">
+          Create work package
+        </button>
+
+        <a
+          href="/app/projects/{{ project.id }}"
+          class="ghost-button-sm"
+        >
+          Cancel
+        </a>
+      </div>
+    </form>
+  </section>
+
+{% else %}
+  <section class="panel">
+    <div class="empty-state">
+      <h2>Project not found</h2>
+      <p>The requested project does not exist or is unavailable.</p>
+      <a href="/app">Return to dashboard</a>
+    </div>
+  </section>
+{% endif %}
+{% endblock %}

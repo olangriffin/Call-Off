@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if revision %}
+    Record approval | {{ revision.revision_code }} | Calloff
+  {% else %}
+    Revision not found | Calloff
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if project and work_package and deliverable and revision %}
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow">{{ deliverable.reference }} / {{ revision.revision_code }}</p>
+      <h2>Send revision for approval</h2>
+    </div>
+
+    <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}">
+      Back to deliverable
+    </a>
+  </div>
+
+  {% if error_message %}
+  <div class="form-alert" role="alert">
+    <strong>Unable to record approval</strong>
+    <p>{{ error_message }}</p>
+  </div>
+  {% endif %}
+
+  <form
+    method="post"
+    action="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/{{ revision.id }}/approvals/new"
+    class="form-grid"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+    <div class="form-field">
+      <label for="approval_stage">Approval stage</label>
+      {% set stage = form_values.approval_stage if form_values else 'external_review' %}
+      <select id="approval_stage" name="approval_stage" required>
+        <option value="internal_review" {% if stage == "internal_review" %}selected{% endif %}>Internal review</option>
+        <option value="external_review" {% if stage == "external_review" %}selected{% endif %}>External review</option>
+        <option value="client_approval" {% if stage == "client_approval" %}selected{% endif %}>Client approval</option>
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label for="reviewer_name">Reviewer or organisation</label>
+      <input
+        id="reviewer_name"
+        name="reviewer_name"
+        type="text"
+        maxlength="200"
+        value="{{ form_values.reviewer_name if form_values else '' }}"
+      >
+    </div>
+
+    <div class="form-field">
+      <label for="status">Outcome</label>
+      {% set selected_status = form_values.status if form_values else 'pending' %}
+      <select id="status" name="status" required>
+        <option value="pending" {% if selected_status == "pending" %}selected{% endif %}>Pending</option>
+        <option value="approved" {% if selected_status == "approved" %}selected{% endif %}>Approved</option>
+        <option value="accepted_with_comments" {% if selected_status == "accepted_with_comments" %}selected{% endif %}>Accepted with comments</option>
+        <option value="rejected" {% if selected_status == "rejected" %}selected{% endif %}>Rejected</option>
+        <option value="revise_and_resubmit" {% if selected_status == "revise_and_resubmit" %}selected{% endif %}>Revise and resubmit</option>
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label for="submitted_date">Submitted date</label>
+      <input
+        id="submitted_date"
+        name="submitted_date"
+        type="date"
+        value="{{ form_values.submitted_date if form_values else '' }}"
+        required
+      >
+    </div>
+
+    <div class="form-field">
+      <label for="response_due_date">Response due</label>
+      <input
+        id="response_due_date"
+        name="response_due_date"
+        type="date"
+        value="{{ form_values.response_due_date if form_values else '' }}"
+        required
+      >
+    </div>
+
+    <div class="form-field">
+      <label for="response_received_date">Response received</label>
+      <input
+        id="response_received_date"
+        name="response_received_date"
+        type="date"
+        value="{{ form_values.response_received_date if form_values else '' }}"
+      >
+    </div>
+
+    <div class="form-field form-field-full">
+      <label for="comments">Comments</label>
+      <textarea id="comments" name="comments" rows="4">{{ form_values.comments if form_values else '' }}</textarea>
+    </div>
+
+    <div class="form-actions form-field-full">
+      <button type="submit" class="primary-button">
+        Send for approval
+      </button>
+      <a
+        href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}"
+        class="ghost-button-sm"
+      >Cancel</a>
+    </div>
+  </form>
+</section>
+{% else %}
+<section class="panel">
+  <div class="empty-state">
+    <h2>Revision not found</h2>
+    <p>The requested revision does not exist or is unavailable.</p>
+    <a href="/app">Return to dashboard</a>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

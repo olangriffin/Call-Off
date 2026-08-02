@@ -1,0 +1,21 @@
+<svg
+  class="brand-mark-icon"
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 333 240"
+  aria-hidden="true"
+>
+  <g fill="none" stroke-linecap="butt" stroke-width="32">
+    <path
+      d="M 168.42,63.80 A 84,84 0 1 0 168.42,176.20"
+      stroke="currentColor"
+    />
+    <path
+      d="M 310.88,124.40 A 84,84 0 1 1 222.60,36.12"
+      stroke="currentColor"
+    />
+    <path
+      d="M 231.40,36.12 A 84,84 0 0 1 310.88,115.60"
+      stroke="#FFD400"
+    />
+  </g>
+</svg>

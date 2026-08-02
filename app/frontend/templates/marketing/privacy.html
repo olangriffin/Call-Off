@@ -1,0 +1,82 @@
+{% extends "marketing/base.html" %}
+{% block title %}Privacy | Call-Off{% endblock %}
+{% block meta_description %}How Call-Off handles information submitted through the early-access application.{% endblock %}
+{% block content %}
+
+<article class="legal-page">
+  <header>
+    <h1>Privacy</h1>
+    <p>
+      This notice explains how information submitted through the Call-Off
+      early-access application is handled.
+    </p>
+  </header>
+
+  <section>
+    <h2>Who handles your information</h2>
+    {% if legal_entity_name %}
+    <p>{{ legal_entity_name }} operates Call-Off and controls this application data.</p>
+    {% else %}
+    <p>
+      <strong>Operator details are awaiting production configuration.</strong>
+      Contact <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> for the
+      current operator details.
+    </p>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2>Information collected</h2>
+    <p>
+      We collect the information entered in the application: your name, work email,
+      company, job title, trade, company size, number of active projects, current
+      tools, delivery challenge, interest level and any optional additional
+      information. A shortened user-agent value may also be stored for operational
+      troubleshooting.
+    </p>
+  </section>
+
+  <section>
+    <h2>Why and how it is used</h2>
+    <p>
+      The information is used to assess early-access suitability, review potential
+      pilot or design-partner opportunities, contact applicants and plan guided
+      onboarding. It is not used to promise acceptance or immediate access.
+    </p>
+  </section>
+
+  <section>
+    <h2>Storage and spam protection</h2>
+    <p>
+      Applications are stored in the Call-Off database. The application stores a
+      keyed hash of the submitting IP address, rather than the raw address, to limit
+      repeated automated submissions. Cloudflare Turnstile may process technical
+      information when it is enabled for spam verification.
+    </p>
+    <p>
+      Application records are intended to be reviewed or deleted within
+      {{ privacy_retention_days }} days unless they are needed for an ongoing
+      early-access, pilot or legal process.
+    </p>
+  </section>
+
+  <section>
+    <h2>Your requests</h2>
+    <p>
+      You can request access to, correction of or deletion of your application
+      information by emailing
+      <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>. We may need to
+      confirm your identity before completing a request.
+    </p>
+  </section>
+
+  <section>
+    <h2>Contact</h2>
+    <p>
+      Privacy questions and requests can be sent to
+      <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.
+    </p>
+  </section>
+</article>
+
+{% endblock %}
