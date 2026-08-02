@@ -2,6 +2,11 @@
 {% block title %}Call-Off | Subcontractor delivery control{% endblock %}
 {% block content %}
 
+<div
+  class="marketing-scroll-fade marketing-scroll-fade-top"
+  aria-hidden="true"
+></div>
+
 <section class="hero">
   <span class="hero-illustration" aria-hidden="true">
     {{ inline_svg_asset("favicon.svg") }}
@@ -168,4 +173,17 @@
   </div>
 </section>
 
+<div class="gradual-blur marketing-bottom-blur" aria-hidden="true">
+  <div class="gradual-blur-inner">
+    <div class="gradual-blur-layer gradual-blur-layer-1"></div>
+    <div class="gradual-blur-layer gradual-blur-layer-2"></div>
+    <div class="gradual-blur-layer gradual-blur-layer-3"></div>
+    <div class="gradual-blur-layer gradual-blur-layer-4"></div>
+    <div class="gradual-blur-layer gradual-blur-layer-5"></div>
+  </div>
+</div>
+
+{% endblock %}
+{% block extra_scripts %}
+<script src="{{ url_for('static', path='js/marketing-scroll-fade.js') }}"></script>
 {% endblock %}
