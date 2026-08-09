@@ -8,7 +8,7 @@ block content %}
       <p>View and manage projects for {{ company_name }}.</p>
     </div>
 
-    {% if current_role == "project_manager" %}
+    {% if can_create_projects %}
     <a href="/app/projects/new" class="primary-button"> New project </a>
     {% endif %}
   </div>
@@ -71,9 +71,11 @@ block content %}
       packages, deliverables and programme information.
     </p>
 
-    <a href="/app/projects/new" class="primary-button">
-      Create first project
-    </a>
+    {% if can_create_projects %}
+      <a href="/app/projects/new" class="primary-button">
+        Create first project
+      </a>
+    {% endif %}
   </div>
   {% endif %}
 </section>

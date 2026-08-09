@@ -56,7 +56,8 @@
 
   function shouldShowCaret(input) {
     if (document.activeElement !== input) return false;
-    if (input.selectionStart === null || input.selectionEnd === null) return true;
+    if (input.selectionStart === null || input.selectionEnd === null)
+      return true;
 
     return input.selectionStart === input.selectionEnd;
   }
@@ -158,7 +159,9 @@
   });
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => initialiseSmoothInputs());
+    document.addEventListener("DOMContentLoaded", () =>
+      initialiseSmoothInputs(),
+    );
   } else {
     initialiseSmoothInputs();
   }

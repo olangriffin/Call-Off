@@ -13,6 +13,7 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
+from app.backend.core.auth import CurrentOrganisationAccess
 from app.backend.database.session import get_db
 from app.backend.models.package.deliverable import Deliverable
 from app.backend.models.package.package import WorkPackage
@@ -171,7 +172,7 @@ def create_approval_route(
     revision_id: uuid.UUID,
     approval_data: ApprovalCreate,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> ApprovalRead:
     revision = require_revision(
         database,
@@ -179,7 +180,7 @@ def create_approval_route(
         work_package_id,
         deliverable_id,
         revision_id,
-        organization_id,
+        access.organization_id,
     )
 
     return create_approval(
@@ -199,7 +200,7 @@ def list_approvals_route(
     deliverable_id: uuid.UUID,
     revision_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=200)] = 100,
 ) -> list[ApprovalRead]:
@@ -209,7 +210,7 @@ def list_approvals_route(
         work_package_id,
         deliverable_id,
         revision_id,
-        organization_id,
+        access.organization_id,
     )
 
     return list_approvals(
@@ -231,7 +232,7 @@ def get_approval_route(
     revision_id: uuid.UUID,
     approval_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> ApprovalRead:
     require_revision(
         database,
@@ -239,7 +240,7 @@ def get_approval_route(
         work_package_id,
         deliverable_id,
         revision_id,
-        organization_id,
+        access.organization_id,
     )
 
     approval = get_approval(
@@ -269,7 +270,7 @@ def update_approval_route(
     approval_id: uuid.UUID,
     approval_data: ApprovalUpdate,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> ApprovalRead:
     require_revision(
         database,
@@ -277,7 +278,7 @@ def update_approval_route(
         work_package_id,
         deliverable_id,
         revision_id,
-        organization_id,
+        access.organization_id,
     )
 
     approval = get_approval(
@@ -316,7 +317,7 @@ def delete_approval_route(
     revision_id: uuid.UUID,
     approval_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> Response:
     require_revision(
         database,
@@ -324,7 +325,7 @@ def delete_approval_route(
         work_package_id,
         deliverable_id,
         revision_id,
-        organization_id,
+        access.organization_id,
     )
 
     approval = get_approval(

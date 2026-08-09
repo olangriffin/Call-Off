@@ -18,6 +18,7 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
+from app.backend.core.auth import CurrentOrganisationAccess
 from app.backend.database.session import get_db
 from app.backend.models.package.package import WorkPackage
 from app.backend.models.project import Project
@@ -98,13 +99,13 @@ def create_deliverable_route(
     work_package_id: uuid.UUID,
     deliverable_data: DeliverableCreate,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> DeliverableRead:
     work_package = require_work_package(
         database,
         project_id,
         work_package_id,
-        organization_id,
+        access.organization_id,
     )
 
     try:
@@ -128,7 +129,7 @@ def list_deliverables_route(
     project_id: uuid.UUID,
     work_package_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=200)] = 100,
 ) -> list[DeliverableRead]:
@@ -136,7 +137,7 @@ def list_deliverables_route(
         database,
         project_id,
         work_package_id,
-        organization_id,
+        access.organization_id,
     )
 
     return list_deliverables(
@@ -156,13 +157,13 @@ def get_deliverable_route(
     work_package_id: uuid.UUID,
     deliverable_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> DeliverableRead:
     require_work_package(
         database,
         project_id,
         work_package_id,
-        organization_id,
+        access.organization_id,
     )
 
     deliverable = get_deliverable(
@@ -190,13 +191,13 @@ def update_deliverable_route(
     deliverable_id: uuid.UUID,
     deliverable_data: DeliverableUpdate,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> DeliverableRead:
     require_work_package(
         database,
         project_id,
         work_package_id,
-        organization_id,
+        access.organization_id,
     )
 
     deliverable = get_deliverable(
@@ -238,13 +239,13 @@ def delete_deliverable_route(
     work_package_id: uuid.UUID,
     deliverable_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> Response:
     require_work_package(
         database,
         project_id,
         work_package_id,
-        organization_id,
+        access.organization_id,
     )
 
     deliverable = get_deliverable(

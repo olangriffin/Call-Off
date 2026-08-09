@@ -6,6 +6,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
+from app.backend.core.auth import (
+    CurrentOrganisationAccess,
+    ProjectCreationAccess,
+)
 from app.backend.database.session import get_db
 from app.backend.schemas.project import (
     ProjectCreate,
@@ -39,9 +43,14 @@ DatabaseSession = Annotated[Session, Depends(get_db)]
 def create_project_route(
     project_data: ProjectCreate,
     database: DatabaseSession,
+    access: ProjectCreationAccess,
 ) -> ProjectRead:
     try:
-        return create_project(database, project_data)
+        return create_project(
+            database,
+            access.organization_id,
+            project_data,
+        )
     except OrganisationNotFoundError as error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -60,13 +69,13 @@ def create_project_route(
 )
 def list_projects_route(
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=200)] = 100,
 ) -> list[ProjectRead]:
     return list_projects(
         database,
-        organization_id,
+        access.organization_id,
         offset=offset,
         limit=limit,
     )
@@ -79,12 +88,12 @@ def list_projects_route(
 def get_project_route(
     project_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> ProjectRead:
     project = get_project(
         database,
         project_id,
-        organization_id,
+        access.organization_id,
     )
 
     if project is None:
@@ -104,12 +113,12 @@ def update_project_route(
     project_id: uuid.UUID,
     project_data: ProjectUpdate,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> ProjectRead:
     project = get_project(
         database,
         project_id,
-        organization_id,
+        access.organization_id,
     )
 
     if project is None:
@@ -143,12 +152,12 @@ def update_project_route(
 def delete_project_route(
     project_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> Response:
     project = get_project(
         database,
         project_id,
-        organization_id,
+        access.organization_id,
     )
 
     if project is None:

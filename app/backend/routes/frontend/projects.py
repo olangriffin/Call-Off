@@ -1,10 +1,13 @@
 import uuid
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import ValidationError
 
-from app.backend.core.auth import FrontendOrganisationAccess
+from app.backend.core.auth import (
+    FrontendOrganisationAccess,
+    FrontendProjectCreationAccess,
+)
 from app.backend.core.csrf import verified_form
 from app.backend.routes.frontend.common import (
     DatabaseSession,
@@ -31,13 +34,8 @@ router = APIRouter(
 )
 def new_project_page(
     request: Request,
-    access: FrontendOrganisationAccess,
+    access: FrontendProjectCreationAccess,
 ) -> HTMLResponse:
-    if access.role != "project_manager":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only project managers can create projects.",
-        )
     return templates.TemplateResponse(
         request=request,
         name="project/project_new.html",
@@ -56,13 +54,8 @@ def new_project_page(
 async def create_project_page(
     request: Request,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendProjectCreationAccess,
 ):
-    if access.role != "project_manager":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only project managers can create projects.",
-        )
     form = await verified_form(request)
 
     form_values = {
@@ -76,7 +69,6 @@ async def create_project_page(
 
     project_values = {
         **form_values,
-        "organization_id": access.organization_id,
         "client_name": form_values["client_name"] or None,
         "planned_start": form_values["planned_start"] or None,
         "planned_finish": form_values["planned_finish"] or None,
@@ -89,6 +81,7 @@ async def create_project_page(
 
         project = create_project(
             database,
+            access.organization_id,
             project_data,
         )
 

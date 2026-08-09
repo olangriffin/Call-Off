@@ -13,6 +13,7 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
+from app.backend.core.auth import CurrentOrganisationAccess
 from app.backend.database.session import get_db
 from app.backend.schemas.programme_activity import (
     ProgrammeActivityCreate,
@@ -67,9 +68,13 @@ def create_activity_route(
     project_id: uuid.UUID,
     activity_data: ProgrammeActivityCreate,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> ProgrammeActivityRead:
-    revision = require_project_and_revision(database, project_id, organization_id)
+    revision = require_project_and_revision(
+        database,
+        project_id,
+        access.organization_id,
+    )
 
     try:
         return create_activity(database, revision, activity_data)
@@ -92,11 +97,15 @@ def create_activity_route(
 def list_activities_route(
     project_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=500)] = 200,
 ) -> list[ProgrammeActivityRead]:
-    revision = require_project_and_revision(database, project_id, organization_id)
+    revision = require_project_and_revision(
+        database,
+        project_id,
+        access.organization_id,
+    )
 
     return list_activities(database, revision.id, offset=offset, limit=limit)
 
@@ -109,9 +118,13 @@ def get_activity_route(
     project_id: uuid.UUID,
     activity_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> ProgrammeActivityRead:
-    revision = require_project_and_revision(database, project_id, organization_id)
+    revision = require_project_and_revision(
+        database,
+        project_id,
+        access.organization_id,
+    )
 
     activity = get_activity(database, activity_id, revision.id)
 
@@ -133,9 +146,13 @@ def update_activity_route(
     activity_id: uuid.UUID,
     activity_data: ProgrammeActivityUpdate,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> ProgrammeActivityRead:
-    revision = require_project_and_revision(database, project_id, organization_id)
+    revision = require_project_and_revision(
+        database,
+        project_id,
+        access.organization_id,
+    )
 
     activity = get_activity(database, activity_id, revision.id)
 
@@ -171,9 +188,13 @@ def delete_activity_route(
     project_id: uuid.UUID,
     activity_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> Response:
-    revision = require_project_and_revision(database, project_id, organization_id)
+    revision = require_project_and_revision(
+        database,
+        project_id,
+        access.organization_id,
+    )
 
     activity = get_activity(database, activity_id, revision.id)
 

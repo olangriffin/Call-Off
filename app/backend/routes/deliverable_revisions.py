@@ -13,6 +13,7 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
+from app.backend.core.auth import CurrentOrganisationAccess
 from app.backend.database.session import get_db
 from app.backend.models.package.deliverable import Deliverable
 from app.backend.models.package.package import WorkPackage
@@ -135,14 +136,14 @@ def create_deliverable_revision_route(
     deliverable_id: uuid.UUID,
     revision_data: DeliverableRevisionCreate,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> DeliverableRevisionRead:
     deliverable = require_deliverable(
         database,
         project_id,
         work_package_id,
         deliverable_id,
-        organization_id,
+        access.organization_id,
     )
 
     try:
@@ -167,7 +168,7 @@ def list_deliverable_revisions_route(
     work_package_id: uuid.UUID,
     deliverable_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=200)] = 100,
 ) -> list[DeliverableRevisionRead]:
@@ -176,7 +177,7 @@ def list_deliverable_revisions_route(
         project_id,
         work_package_id,
         deliverable_id,
-        organization_id,
+        access.organization_id,
     )
 
     return list_deliverable_revisions(
@@ -197,14 +198,14 @@ def get_deliverable_revision_route(
     deliverable_id: uuid.UUID,
     revision_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> DeliverableRevisionRead:
     require_deliverable(
         database,
         project_id,
         work_package_id,
         deliverable_id,
-        organization_id,
+        access.organization_id,
     )
 
     revision = get_deliverable_revision(
@@ -233,14 +234,14 @@ def update_deliverable_revision_route(
     revision_id: uuid.UUID,
     revision_data: DeliverableRevisionUpdate,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> DeliverableRevisionRead:
     require_deliverable(
         database,
         project_id,
         work_package_id,
         deliverable_id,
-        organization_id,
+        access.organization_id,
     )
 
     revision = get_deliverable_revision(
@@ -283,14 +284,14 @@ def delete_deliverable_revision_route(
     deliverable_id: uuid.UUID,
     revision_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> Response:
     require_deliverable(
         database,
         project_id,
         work_package_id,
         deliverable_id,
-        organization_id,
+        access.organization_id,
     )
 
     revision = get_deliverable_revision(

@@ -29,20 +29,24 @@ class InvalidProjectUpdateError(ProjectServiceError):
 
 def create_project(
     database: Session,
+    organization_id: str,
     project_data: ProjectCreate,
 ) -> Project:
     organisation_exists = database.scalar(
         select(Organisation.id).where(
-            Organisation.id == project_data.organization_id
+            Organisation.id == organization_id
         )
     )
 
     if organisation_exists is None:
         raise OrganisationNotFoundError(
-            f"Organisation '{project_data.organization_id}' was not found."
+            f"Organisation '{organization_id}' was not found."
         )
 
-    project = Project(**project_data.model_dump())
+    project = Project(
+        organization_id=organization_id,
+        **project_data.model_dump(),
+    )
 
     database.add(project)
 

@@ -1,7 +1,7 @@
-{% extends "marketing/base.html" %}
-{% block title %}Apply for Early Access | Call-Off{% endblock %}
-{% block meta_description %}Apply for controlled early access to Call-Off and help shape a subcontractor delivery platform.{% endblock %}
-{% block content %}
+{% extends "marketing/base.html" %} {% block title %}Apply for Early Access |
+Call-Off{% endblock %} {% block meta_description %}Apply for controlled early
+access to Call-Off and help shape a subcontractor delivery platform.{% endblock
+%} {% block content %}
 
 <section class="early-access-hero">
   <span class="hero-illustration" aria-hidden="true">
@@ -13,12 +13,15 @@
     products and services more reliably for clients.
   </p>
   <p>
-    We are inviting a limited number of subcontractors to help shape the platform
-    through early access and structured feedback.
+    We are inviting a limited number of subcontractors to help shape the
+    platform through early access and structured feedback.
   </p>
 </section>
 
-<section class="early-access-layout" aria-labelledby="early-access-form-heading">
+<section
+  class="early-access-layout"
+  aria-labelledby="early-access-form-heading"
+>
   <aside class="early-access-benefits" aria-labelledby="benefits-heading">
     <h2 id="benefits-heading">What applicants may receive</h2>
     <ul>
@@ -29,8 +32,8 @@
       <li>Priority access to pilot features</li>
     </ul>
     <p>
-      Applying does not guarantee acceptance, a launch date or immediate platform
-      access.
+      Applying does not guarantee acceptance, a launch date or immediate
+      platform access.
     </p>
   </aside>
 
@@ -63,7 +66,11 @@
       class="early-access-form"
       data-early-access-form
     >
-      <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+      <input
+        type="hidden"
+        name="csrf_token"
+        value="{{ csrf_token(request) }}"
+      />
       <div class="early-access-honeypot" aria-hidden="true">
         <label for="website">Website</label>
         <input
@@ -77,7 +84,9 @@
       </div>
 
       <div class="early-access-field">
-        <label for="full_name">Full name <span aria-hidden="true">*</span></label>
+        <label for="full_name"
+          >Full name <span aria-hidden="true">*</span></label
+        >
         <input
           id="full_name"
           name="full_name"
@@ -93,7 +102,9 @@
       </div>
 
       <div class="early-access-field">
-        <label for="work_email">Work email <span aria-hidden="true">*</span></label>
+        <label for="work_email"
+          >Work email <span aria-hidden="true">*</span></label
+        >
         <input
           id="work_email"
           name="work_email"
@@ -110,7 +121,9 @@
       </div>
 
       <div class="early-access-field">
-        <label for="company_name">Company name <span aria-hidden="true">*</span></label>
+        <label for="company_name"
+          >Company name <span aria-hidden="true">*</span></label
+        >
         <input
           id="company_name"
           name="company_name"
@@ -122,11 +135,15 @@
           aria-invalid="{{ 'true' if errors.company_name else 'false' }}"
           required
         />
-        <p class="field-error" id="company_name_error">{{ errors.company_name }}</p>
+        <p class="field-error" id="company_name_error">
+          {{ errors.company_name }}
+        </p>
       </div>
 
       <div class="early-access-field">
-        <label for="job_title">Job title <span aria-hidden="true">*</span></label>
+        <label for="job_title"
+          >Job title <span aria-hidden="true">*</span></label
+        >
         <input
           id="job_title"
           name="job_title"
@@ -161,7 +178,9 @@
       </div>
 
       <div class="early-access-field">
-        <label for="company_size">Company size <span aria-hidden="true">*</span></label>
+        <label for="company_size"
+          >Company size <span aria-hidden="true">*</span></label
+        >
         <select
           id="company_size"
           name="company_size"
@@ -171,12 +190,17 @@
         >
           <option value="">Select company size</option>
           {% for option in company_sizes %}
-          <option value="{{ option }}" {% if form_values.company_size == option %}selected{% endif %}>
+          <option
+            value="{{ option }}"
+            {% if form_values.company_size == option %}selected{% endif %}
+          >
             {{ option }} people
           </option>
           {% endfor %}
         </select>
-        <p class="field-error" id="company_size_error">{{ errors.company_size }}</p>
+        <p class="field-error" id="company_size_error">
+          {{ errors.company_size }}
+        </p>
       </div>
 
       <div class="early-access-field">
@@ -192,12 +216,17 @@
         >
           <option value="">Select active projects</option>
           {% for option in active_project_counts %}
-          <option value="{{ option }}" {% if form_values.active_projects == option %}selected{% endif %}>
+          <option
+            value="{{ option }}"
+            {% if form_values.active_projects == option %}selected{% endif %}
+          >
             {{ option }} active projects
           </option>
           {% endfor %}
         </select>
-        <p class="field-error" id="active_projects_error">{{ errors.active_projects }}</p>
+        <p class="field-error" id="active_projects_error">
+          {{ errors.active_projects }}
+        </p>
       </div>
 
       <div class="early-access-field early-access-field-full">
@@ -212,8 +241,12 @@
           aria-describedby="current_tools_error"
           aria-invalid="{{ 'true' if errors.current_tools else 'false' }}"
           required
-        >{{ form_values.current_tools | default('') }}</textarea>
-        <p class="field-error" id="current_tools_error">{{ errors.current_tools }}</p>
+        >
+{{ form_values.current_tools | default('') }}</textarea
+        >
+        <p class="field-error" id="current_tools_error">
+          {{ errors.current_tools }}
+        </p>
       </div>
 
       <div class="early-access-field early-access-field-full">
@@ -228,7 +261,9 @@
           aria-describedby="biggest_delivery_challenge_error"
           aria-invalid="{{ 'true' if errors.biggest_delivery_challenge else 'false' }}"
           required
-        >{{ form_values.biggest_delivery_challenge | default('') }}</textarea>
+        >
+{{ form_values.biggest_delivery_challenge | default('') }}</textarea
+        >
         <p class="field-error" id="biggest_delivery_challenge_error">
           {{ errors.biggest_delivery_challenge }}
         </p>
@@ -242,19 +277,39 @@
         <legend>Interest level <span aria-hidden="true">*</span></legend>
         <div class="interest-options">
           <label>
-            <input type="radio" name="interest_level" value="early_access" {% if form_values.interest_level == "early_access" %}checked{% endif %} required />
+            <input
+              type="radio"
+              name="interest_level"
+              value="early_access"
+              {% if form_values.interest_level == "early_access" %}checked{% endif %}
+              required
+            />
             Early access
           </label>
           <label>
-            <input type="radio" name="interest_level" value="pilot_customer" {% if form_values.interest_level == "pilot_customer" %}checked{% endif %} required />
+            <input
+              type="radio"
+              name="interest_level"
+              value="pilot_customer"
+              {% if form_values.interest_level == "pilot_customer" %}checked{% endif %}
+              required
+            />
             Pilot customer
           </label>
           <label>
-            <input type="radio" name="interest_level" value="design_partner" {% if form_values.interest_level == "design_partner" %}checked{% endif %} required />
+            <input
+              type="radio"
+              name="interest_level"
+              value="design_partner"
+              {% if form_values.interest_level == "design_partner" %}checked{% endif %}
+              required
+            />
             Design partner
           </label>
         </div>
-        <p class="field-error" id="interest_level_error">{{ errors.interest_level }}</p>
+        <p class="field-error" id="interest_level_error">
+          {{ errors.interest_level }}
+        </p>
       </fieldset>
 
       <div class="early-access-field early-access-field-full">
@@ -266,7 +321,9 @@
           name="additional_information"
           rows="4"
           maxlength="4000"
-        >{{ form_values.additional_information | default('') }}</textarea>
+        >
+{{ form_values.additional_information | default('') }}</textarea
+        >
       </div>
 
       {% if turnstile_site_key %}
@@ -276,8 +333,9 @@
       {% endif %}
 
       <p class="early-access-privacy">
-        Your information will only be used to review your early-access application
-        and contact you about Call-Off. Read the <a href="/privacy">privacy policy</a>.
+        Your information will only be used to review your early-access
+        application and contact you about Call-Off. Read the
+        <a href="/privacy">privacy policy</a>.
       </p>
 
       <button type="submit" class="primary-button" data-submit-button>
@@ -288,10 +346,12 @@
   </section>
 </section>
 
-{% endblock %}
-{% block extra_scripts %}
-{% if turnstile_site_key %}
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endblock %} {% block extra_scripts %} {% if turnstile_site_key %}
+<script
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+  async
+  defer
+></script>
 {% endif %}
 <script src="{{ url_for('static', path='js/early-access.js') }}"></script>
 {% endblock %}

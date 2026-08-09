@@ -13,6 +13,7 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
+from app.backend.core.auth import CurrentOrganisationAccess
 from app.backend.database.session import get_db
 from app.backend.models.project import Project
 from app.backend.schemas.work_package import (
@@ -68,12 +69,12 @@ def create_work_package_route(
     project_id: uuid.UUID,
     work_package_data: WorkPackageCreate,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> WorkPackageRead:
     project = require_project(
         database,
         project_id,
-        organization_id,
+        access.organization_id,
     )
 
     try:
@@ -96,14 +97,14 @@ def create_work_package_route(
 def list_work_packages_route(
     project_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=200)] = 100,
 ) -> list[WorkPackageRead]:
     require_project(
         database,
         project_id,
-        organization_id,
+        access.organization_id,
     )
 
     return list_work_packages(
@@ -122,12 +123,12 @@ def get_work_package_route(
     project_id: uuid.UUID,
     work_package_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> WorkPackageRead:
     require_project(
         database,
         project_id,
-        organization_id,
+        access.organization_id,
     )
 
     work_package = get_work_package(
@@ -154,12 +155,12 @@ def update_work_package_route(
     work_package_id: uuid.UUID,
     work_package_data: WorkPackageUpdate,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> WorkPackageRead:
     require_project(
         database,
         project_id,
-        organization_id,
+        access.organization_id,
     )
 
     work_package = get_work_package(
@@ -200,12 +201,12 @@ def delete_work_package_route(
     project_id: uuid.UUID,
     work_package_id: uuid.UUID,
     database: DatabaseSession,
-    organization_id: Annotated[str, Query(min_length=1)],
+    access: CurrentOrganisationAccess,
 ) -> Response:
     require_project(
         database,
         project_id,
-        organization_id,
+        access.organization_id,
     )
 
     work_package = get_work_package(

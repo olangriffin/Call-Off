@@ -173,6 +173,7 @@ async def require_organisation_access(
             select(Membership).where(
                 Membership.user_id == user_id,
                 Membership.status == "active",
+                Membership.revoked_at.is_(None),
             )
         )
     )
@@ -222,6 +223,40 @@ CurrentOrganisationAccess = Annotated[
     Depends(require_organisation_access),
 ]
 
+PROJECT_CREATOR_ROLES = frozenset({"owner", "project_manager"})
+
+
+def can_create_projects(access: OrganisationAccessContext) -> bool:
+    """Return whether the authenticated membership may create projects."""
+
+    return access.role in PROJECT_CREATOR_ROLES
+
+
+def enforce_project_creation_access(
+    access: OrganisationAccessContext,
+) -> OrganisationAccessContext:
+    """Enforce the shared project-creation capability rule."""
+
+    if not can_create_projects(access):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only owners and project managers can create projects.",
+        )
+
+    return access
+
+
+def require_project_creation_access(
+    access: CurrentOrganisationAccess,
+) -> OrganisationAccessContext:
+    return enforce_project_creation_access(access)
+
+
+ProjectCreationAccess = Annotated[
+    OrganisationAccessContext,
+    Depends(require_project_creation_access),
+]
+
 
 class FrontendAuthenticationRequired(Exception):
     """Raised when a protected HTML page requires login."""
@@ -246,4 +281,16 @@ async def require_frontend_organisation_access(
 FrontendOrganisationAccess = Annotated[
     OrganisationAccessContext,
     Depends(require_frontend_organisation_access),
+]
+
+
+def require_frontend_project_creation_access(
+    access: FrontendOrganisationAccess,
+) -> OrganisationAccessContext:
+    return enforce_project_creation_access(access)
+
+
+FrontendProjectCreationAccess = Annotated[
+    OrganisationAccessContext,
+    Depends(require_frontend_project_creation_access),
 ]

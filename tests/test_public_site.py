@@ -245,8 +245,8 @@ class PublicSiteTestCase(unittest.TestCase):
         self.assertIn("subcontractor delivery platform", body)
         self.assertNotIn("calloff.app", body)
         self.assertIn("marketing-scroll-fade-top", body)
-        self.assertIn("marketing-bottom-blur", body)
-        self.assertIn("marketing-scroll-fade.js", body)
+        self.assertNotIn("marketing-bottom-blur", body)
+        self.assertNotIn("marketing-scroll-fade.js", body)
 
     def test_landing_overlays_do_not_render_on_form_or_pricing_pages(self) -> None:
         for path in ("/early-access", "/pricing", "/privacy"):

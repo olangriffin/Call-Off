@@ -31,7 +31,10 @@ class ProjectBase(BaseModel):
 
 
 class ProjectCreate(ProjectBase):
-    organization_id: str = Field(min_length=1)
+    model_config = ConfigDict(
+        extra="forbid",
+        str_strip_whitespace=True,
+    )
 
 
 class ProjectUpdate(BaseModel):
