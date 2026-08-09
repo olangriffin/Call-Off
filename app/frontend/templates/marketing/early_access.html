@@ -1,357 +1,280 @@
 {% extends "marketing/base.html" %} {% block title %}Apply for Early Access |
 Call-Off{% endblock %} {% block meta_description %}Apply for controlled early
-access to Call-Off and help shape a subcontractor delivery platform.{% endblock
+access to Call-Off and help shape a subcontractor delivery platform.
+{% endblock
 %} {% block content %}
-
 <section class="early-access-hero">
-  <span class="hero-illustration" aria-hidden="true">
-    {{ inline_svg_asset("favicon.svg") }}
-  </span>
-  <h1>Apply for Early Access</h1>
-  <p>
-    Call-Off helps specialist subcontractors plan, coordinate and deliver their
-    products and services more reliably for clients.
-  </p>
-  <p>
-    We are inviting a limited number of subcontractors to help shape the
-    platform through early access and structured feedback.
-  </p>
-</section>
-
-<section
-  class="early-access-layout"
-  aria-labelledby="early-access-form-heading"
->
-  <aside class="early-access-benefits" aria-labelledby="benefits-heading">
-    <h2 id="benefits-heading">What applicants may receive</h2>
-    <ul>
-      <li>Early access to Call-Off</li>
-      <li>Direct input into product development</li>
-      <li>Guided onboarding</li>
-      <li>Founding-customer pricing</li>
-      <li>Priority access to pilot features</li>
-    </ul>
+    <span class="hero-illustration" aria-hidden="true">{{ inline_svg_asset("favicon.svg") }}</span>
+    <h1>Apply for Early Access</h1>
     <p>
-      Applying does not guarantee acceptance, a launch date or immediate
-      platform access.
+        Call-Off helps specialist subcontractors plan, coordinate and deliver
+        their products and services more reliably for clients.
     </p>
-  </aside>
-
-  <section class="early-access-form-panel">
-    {% if success %}
-    <div class="early-access-success" role="status" tabindex="-1">
-      <h2>Application received</h2>
-      <p>
-        Thank you for your interest in Call-Off. We will review your application
-        and contact you regarding early access opportunities.
-      </p>
-      <a href="/" class="ghost-button">Back to overview</a>
-    </div>
-    {% else %}
-    <div class="section-header">
-      <h2 id="early-access-form-heading">Tell us about your team</h2>
-      <p>Required fields are marked with <span aria-hidden="true">*</span>.</p>
-    </div>
-
-    {% if errors %}
-    <div class="early-access-error-summary" role="alert" tabindex="-1">
-      <strong>Unable to submit application</strong>
-      <p>{{ errors.form or "Review the highlighted fields and try again." }}</p>
-    </div>
-    {% endif %}
-
-    <form
-      method="post"
-      action="/early-access"
-      class="early-access-form"
-      data-early-access-form
-    >
-      <input
-        type="hidden"
-        name="csrf_token"
-        value="{{ csrf_token(request) }}"
-      />
-      <div class="early-access-honeypot" aria-hidden="true">
-        <label for="website">Website</label>
-        <input
-          id="website"
-          name="website"
-          type="text"
-          tabindex="-1"
-          autocomplete="off"
-          data-smooth-input="false"
-        />
-      </div>
-
-      <div class="early-access-field">
-        <label for="full_name"
-          >Full name <span aria-hidden="true">*</span></label
-        >
-        <input
-          id="full_name"
-          name="full_name"
-          type="text"
-          autocomplete="name"
-          maxlength="200"
-          value="{{ form_values.full_name | default('') }}"
-          aria-describedby="full_name_error"
-          aria-invalid="{{ 'true' if errors.full_name else 'false' }}"
-          required
-        />
-        <p class="field-error" id="full_name_error">{{ errors.full_name }}</p>
-      </div>
-
-      <div class="early-access-field">
-        <label for="work_email"
-          >Work email <span aria-hidden="true">*</span></label
-        >
-        <input
-          id="work_email"
-          name="work_email"
-          type="email"
-          inputmode="email"
-          autocomplete="email"
-          maxlength="320"
-          value="{{ form_values.work_email | default('') }}"
-          aria-describedby="work_email_error"
-          aria-invalid="{{ 'true' if errors.work_email else 'false' }}"
-          required
-        />
-        <p class="field-error" id="work_email_error">{{ errors.work_email }}</p>
-      </div>
-
-      <div class="early-access-field">
-        <label for="company_name"
-          >Company name <span aria-hidden="true">*</span></label
-        >
-        <input
-          id="company_name"
-          name="company_name"
-          type="text"
-          autocomplete="organization"
-          maxlength="200"
-          value="{{ form_values.company_name | default('') }}"
-          aria-describedby="company_name_error"
-          aria-invalid="{{ 'true' if errors.company_name else 'false' }}"
-          required
-        />
-        <p class="field-error" id="company_name_error">
-          {{ errors.company_name }}
-        </p>
-      </div>
-
-      <div class="early-access-field">
-        <label for="job_title"
-          >Job title <span aria-hidden="true">*</span></label
-        >
-        <input
-          id="job_title"
-          name="job_title"
-          type="text"
-          autocomplete="organization-title"
-          maxlength="160"
-          value="{{ form_values.job_title | default('') }}"
-          aria-describedby="job_title_error"
-          aria-invalid="{{ 'true' if errors.job_title else 'false' }}"
-          required
-        />
-        <p class="field-error" id="job_title_error">{{ errors.job_title }}</p>
-      </div>
-
-      <div class="early-access-field">
-        <label for="subcontractor_type">
-          Subcontractor type or trade <span aria-hidden="true">*</span>
-        </label>
-        <input
-          id="subcontractor_type"
-          name="subcontractor_type"
-          type="text"
-          maxlength="160"
-          value="{{ form_values.subcontractor_type | default('') }}"
-          aria-describedby="subcontractor_type_error"
-          aria-invalid="{{ 'true' if errors.subcontractor_type else 'false' }}"
-          required
-        />
-        <p class="field-error" id="subcontractor_type_error">
-          {{ errors.subcontractor_type }}
-        </p>
-      </div>
-
-      <div class="early-access-field">
-        <label for="company_size"
-          >Company size <span aria-hidden="true">*</span></label
-        >
-        <select
-          id="company_size"
-          name="company_size"
-          aria-describedby="company_size_error"
-          aria-invalid="{{ 'true' if errors.company_size else 'false' }}"
-          required
-        >
-          <option value="">Select company size</option>
-          {% for option in company_sizes %}
-          <option
-            value="{{ option }}"
-            {% if form_values.company_size == option %}selected{% endif %}
-          >
-            {{ option }} people
-          </option>
-          {% endfor %}
-        </select>
-        <p class="field-error" id="company_size_error">
-          {{ errors.company_size }}
-        </p>
-      </div>
-
-      <div class="early-access-field">
-        <label for="active_projects">
-          Number of active projects <span aria-hidden="true">*</span>
-        </label>
-        <select
-          id="active_projects"
-          name="active_projects"
-          aria-describedby="active_projects_error"
-          aria-invalid="{{ 'true' if errors.active_projects else 'false' }}"
-          required
-        >
-          <option value="">Select active projects</option>
-          {% for option in active_project_counts %}
-          <option
-            value="{{ option }}"
-            {% if form_values.active_projects == option %}selected{% endif %}
-          >
-            {{ option }} active projects
-          </option>
-          {% endfor %}
-        </select>
-        <p class="field-error" id="active_projects_error">
-          {{ errors.active_projects }}
-        </p>
-      </div>
-
-      <div class="early-access-field early-access-field-full">
-        <label for="current_tools">
-          Current tools used <span aria-hidden="true">*</span>
-        </label>
-        <textarea
-          id="current_tools"
-          name="current_tools"
-          rows="4"
-          maxlength="2000"
-          aria-describedby="current_tools_error"
-          aria-invalid="{{ 'true' if errors.current_tools else 'false' }}"
-          required
-        >
-{{ form_values.current_tools | default('') }}</textarea
-        >
-        <p class="field-error" id="current_tools_error">
-          {{ errors.current_tools }}
-        </p>
-      </div>
-
-      <div class="early-access-field early-access-field-full">
-        <label for="biggest_delivery_challenge">
-          Biggest delivery challenge <span aria-hidden="true">*</span>
-        </label>
-        <textarea
-          id="biggest_delivery_challenge"
-          name="biggest_delivery_challenge"
-          rows="4"
-          maxlength="4000"
-          aria-describedby="biggest_delivery_challenge_error"
-          aria-invalid="{{ 'true' if errors.biggest_delivery_challenge else 'false' }}"
-          required
-        >
-{{ form_values.biggest_delivery_challenge | default('') }}</textarea
-        >
-        <p class="field-error" id="biggest_delivery_challenge_error">
-          {{ errors.biggest_delivery_challenge }}
-        </p>
-      </div>
-
-      <fieldset
-        class="early-access-field early-access-field-full"
-        aria-describedby="interest_level_error"
-        aria-invalid="{{ 'true' if errors.interest_level else 'false' }}"
-      >
-        <legend>Interest level <span aria-hidden="true">*</span></legend>
-        <div class="interest-options">
-          <label>
-            <input
-              type="radio"
-              name="interest_level"
-              value="early_access"
-              {% if form_values.interest_level == "early_access" %}checked{% endif %}
-              required
-            />
-            Early access
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="interest_level"
-              value="pilot_customer"
-              {% if form_values.interest_level == "pilot_customer" %}checked{% endif %}
-              required
-            />
-            Pilot customer
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="interest_level"
-              value="design_partner"
-              {% if form_values.interest_level == "design_partner" %}checked{% endif %}
-              required
-            />
-            Design partner
-          </label>
-        </div>
-        <p class="field-error" id="interest_level_error">
-          {{ errors.interest_level }}
-        </p>
-      </fieldset>
-
-      <div class="early-access-field early-access-field-full">
-        <label for="additional_information">
-          Additional information <span>Optional</span>
-        </label>
-        <textarea
-          id="additional_information"
-          name="additional_information"
-          rows="4"
-          maxlength="4000"
-        >
-{{ form_values.additional_information | default('') }}</textarea
-        >
-      </div>
-
-      {% if turnstile_site_key %}
-      <div class="early-access-turnstile">
-        <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
-      </div>
-      {% endif %}
-
-      <p class="early-access-privacy">
-        Your information will only be used to review your early-access
-        application and contact you about Call-Off. Read the
-        <a href="/privacy">privacy policy</a>.
-      </p>
-
-      <button type="submit" class="primary-button" data-submit-button>
-        <span data-submit-label>Apply for Early Access</span>
-      </button>
-    </form>
-    {% endif %}
-  </section>
+    <p>
+        We are inviting a limited number of subcontractors to help shape the
+        platform through early access and structured feedback.
+    </p>
 </section>
-
-{% endblock %} {% block extra_scripts %} {% if turnstile_site_key %}
-<script
-  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-  async
-  defer
-></script>
-{% endif %}
-<script src="{{ url_for('static', path='js/early-access.js') }}"></script>
+<section class="early-access-section"
+         aria-labelledby="early-access-form-heading">
+    {% if success %}
+        <div class="early-access-success early-access-form-card"
+             role="status"
+             tabindex="-1">
+            <h2 id="early-access-form-heading">Application received</h2>
+            <p>
+                Thank you for your interest in Call-Off. We will review your application
+                and contact you regarding early access opportunities.
+            </p>
+            <a href="/" class="ghost-button">Back to overview</a>
+        </div>
+    {% else %}
+        <div class="section-header">
+            <h2 id="early-access-form-heading">Tell us about your team</h2>
+            <p>Required fields are marked with <span aria-hidden="true">*</span>.</p>
+        </div>
+        {% if errors %}
+            <div class="early-access-error-summary" role="alert" tabindex="-1">
+                <strong>Unable to submit application</strong>
+                <p>{{ errors.form or "Review the highlighted fields and try again." }}</p>
+            </div>
+        {% endif %}
+        <form method="post"
+              action="/early-access"
+              class="early-access-form"
+              data-early-access-form>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+            <div class="early-access-honeypot" aria-hidden="true">
+                <label for="website">Website</label>
+                <input id="website"
+                       name="website"
+                       type="text"
+                       tabindex="-1"
+                       autocomplete="off"
+                       data-smooth-input="false" />
+            </div>
+            <div class="early-access-form-grid">
+                <section class="early-access-form-card early-access-form-card-profile"
+                         aria-labelledby="early-access-details-heading">
+                    <div class="early-access-form-card-header">
+                        <span class="step-number" aria-hidden="true">01</span>
+                        <div>
+                            <h3 id="early-access-details-heading">Contact and company</h3>
+                            <p>Tell us who you are and where you work.</p>
+                        </div>
+                    </div>
+                    <div class="early-access-fields">
+                        <div class="early-access-field">
+                            <label for="full_name">Full name <span aria-hidden="true">*</span></label>
+                            <input id="full_name"
+                                   name="full_name"
+                                   type="text"
+                                   autocomplete="name"
+                                   maxlength="200"
+                                   value="{{ form_values.full_name | default("") }}"
+                                   aria-describedby="full_name_error"
+                                   aria-invalid="{{ 'true' if errors.full_name else 'false' }}"
+                                   required />
+                            <p class="field-error" id="full_name_error">{{ errors.full_name }}</p>
+                        </div>
+                        <div class="early-access-field">
+                            <label for="work_email">Work email <span aria-hidden="true">*</span></label>
+                            <input id="work_email"
+                                   name="work_email"
+                                   type="email"
+                                   inputmode="email"
+                                   autocomplete="email"
+                                   maxlength="320"
+                                   value="{{ form_values.work_email | default("") }}"
+                                   aria-describedby="work_email_error"
+                                   aria-invalid="{{ 'true' if errors.work_email else 'false' }}"
+                                   required />
+                            <p class="field-error" id="work_email_error">{{ errors.work_email }}</p>
+                        </div>
+                    </div>
+                    <div class="early-access-fields">
+                        <div class="early-access-field">
+                            <label for="company_name">Company name <span aria-hidden="true">*</span></label>
+                            <input id="company_name"
+                                   name="company_name"
+                                   type="text"
+                                   autocomplete="organization"
+                                   maxlength="200"
+                                   value="{{ form_values.company_name | default("") }}"
+                                   aria-describedby="company_name_error"
+                                   aria-invalid="{{ 'true' if errors.company_name else 'false' }}"
+                                   required />
+                            <p class="field-error" id="company_name_error">{{ errors.company_name }}</p>
+                        </div>
+                        <div class="early-access-field">
+                            <label for="job_title">Job title <span aria-hidden="true">*</span></label>
+                            <input id="job_title"
+                                   name="job_title"
+                                   type="text"
+                                   autocomplete="organization-title"
+                                   maxlength="160"
+                                   value="{{ form_values.job_title | default("") }}"
+                                   aria-describedby="job_title_error"
+                                   aria-invalid="{{ 'true' if errors.job_title else 'false' }}"
+                                   required />
+                            <p class="field-error" id="job_title_error">{{ errors.job_title }}</p>
+                        </div>
+                        <div class="early-access-field">
+                            <label for="subcontractor_type">
+                                Subcontractor type or trade <span aria-hidden="true">*</span>
+                            </label>
+                            <input id="subcontractor_type"
+                                   name="subcontractor_type"
+                                   type="text"
+                                   maxlength="160"
+                                   value="{{ form_values.subcontractor_type | default("") }}"
+                                   aria-describedby="subcontractor_type_error"
+                                   aria-invalid="{{ 'true' if errors.subcontractor_type else 'false' }}"
+                                   required />
+                            <p class="field-error" id="subcontractor_type_error">{{ errors.subcontractor_type }}</p>
+                        </div>
+                        <div class="early-access-field">
+                            <label for="company_size">Company size <span aria-hidden="true">*</span></label>
+                            <select id="company_size"
+                                    name="company_size"
+                                    aria-describedby="company_size_error"
+                                    aria-invalid="{{ 'true' if errors.company_size else 'false' }}"
+                                    required>
+                                <option value="">Select company size</option>
+                                {% for option in company_sizes %}
+                                    <option value="{{ option }}"
+                                            {% if form_values.company_size == option %}selected{% endif %}>
+                                        {{ option }} people
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <p class="field-error" id="company_size_error">{{ errors.company_size }}</p>
+                        </div>
+                        <div class="early-access-field early-access-field-full">
+                            <label for="active_projects">
+                                Number of active projects <span aria-hidden="true">*</span>
+                            </label>
+                            <select id="active_projects"
+                                    name="active_projects"
+                                    aria-describedby="active_projects_error"
+                                    aria-invalid="{{ 'true' if errors.active_projects else 'false' }}"
+                                    required>
+                                <option value="">Select active projects</option>
+                                {% for option in active_project_counts %}
+                                    <option value="{{ option }}"
+                                            {% if form_values.active_projects == option %}selected{% endif %}>
+                                        {{ option }} active projects
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <p class="field-error" id="active_projects_error">{{ errors.active_projects }}</p>
+                        </div>
+                    </div>
+                </section>
+                <section class="early-access-form-card"
+                         aria-labelledby="early-access-workflow-heading">
+                    <div class="early-access-form-card-header">
+                        <span class="step-number" aria-hidden="true">02</span>
+                        <div>
+                            <h3 id="early-access-workflow-heading">Your current workflow</h3>
+                            <p>Tell us where delivery coordination needs the most support.</p>
+                        </div>
+                    </div>
+                    <div class="early-access-fields">
+                        <div class="early-access-field early-access-field-full">
+                            <label for="current_tools">
+                                Current tools used <span aria-hidden="true">*</span>
+                            </label>
+                            <textarea id="current_tools" name="current_tools" rows="4" maxlength="2000" aria-describedby="current_tools_error" aria-invalid="{{ 'true' if errors.current_tools else 'false' }}" required>
+{{ form_values.current_tools | default('') }}</textarea>
+                            <p class="field-error" id="current_tools_error">{{ errors.current_tools }}</p>
+                        </div>
+                        <div class="early-access-field early-access-field-full">
+                            <label for="biggest_delivery_challenge">
+                                Biggest delivery challenge <span aria-hidden="true">*</span>
+                            </label>
+                            <textarea id="biggest_delivery_challenge" name="biggest_delivery_challenge" rows="4" maxlength="4000" aria-describedby="biggest_delivery_challenge_error" aria-invalid="{{ 'true' if errors.biggest_delivery_challenge else 'false' }}" required>
+{{ form_values.biggest_delivery_challenge | default('') }}</textarea>
+                            <p class="field-error" id="biggest_delivery_challenge_error">{{ errors.biggest_delivery_challenge }}</p>
+                        </div>
+                    </div>
+                </section>
+                <section class="early-access-form-card"
+                         aria-labelledby="early-access-preferences-heading">
+                    <div class="early-access-form-card-header">
+                        <span class="step-number" aria-hidden="true">03</span>
+                        <div>
+                            <h3 id="early-access-preferences-heading">Early-access preferences</h3>
+                            <p>Choose the kind of involvement that best suits your team.</p>
+                        </div>
+                    </div>
+                    <div class="early-access-fields">
+                        <fieldset class="early-access-field early-access-field-full"
+                                  aria-describedby="interest_level_error"
+                                  aria-invalid="{{ 'true' if errors.interest_level else 'false' }}">
+                            <legend>Interest level <span aria-hidden="true">*</span></legend>
+                            <div class="interest-options">
+                                <label>
+                                    <input type="radio"
+                                           name="interest_level"
+                                           value="early_access"
+                                           {% if form_values.interest_level == "early_access" %}checked{% endif %}
+                                           required />
+                                    Early access
+                                </label>
+                                <label>
+                                    <input type="radio"
+                                           name="interest_level"
+                                           value="pilot_customer"
+                                           {% if form_values.interest_level == "pilot_customer" %}checked{% endif %}
+                                           required />
+                                    Pilot customer
+                                </label>
+                                <label>
+                                    <input type="radio"
+                                           name="interest_level"
+                                           value="design_partner"
+                                           {% if form_values.interest_level == "design_partner" %}checked{% endif %}
+                                           required />
+                                    Design partner
+                                </label>
+                            </div>
+                            <p class="field-error" id="interest_level_error">{{ errors.interest_level }}</p>
+                        </fieldset>
+                        <div class="early-access-field early-access-field-full">
+                            <label for="additional_information">
+                                Additional information <span>Optional</span>
+                            </label>
+                            <textarea id="additional_information" name="additional_information" rows="4" maxlength="4000">
+{{ form_values.additional_information | default('') }}</textarea>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="early-access-form-actions">
+                {% if turnstile_site_key %}
+                    <div class="early-access-turnstile">
+                        <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
+                    </div>
+                {% endif %}
+                <p class="early-access-privacy">
+                    Your information will only be used to review your early-access
+                    application and contact you about Call-Off. Read the
+                    <a href="/privacy">privacy policy</a>.
+                </p>
+                <button type="submit" class="primary-button" data-submit-button>
+                    <span data-submit-label>Apply for Early Access</span>
+                </button>
+            </div>
+        </form>
+    {% endif %}
+</section>
+{% endblock %}
+{% block extra_scripts %}
+    {% if turnstile_site_key %}
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+                async
+                defer></script>
+    {% endif %}
+    <script src="{{ url_for('static', path='js/early-access.js') }}"></script>
 {% endblock %}

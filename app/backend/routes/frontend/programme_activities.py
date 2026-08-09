@@ -22,6 +22,7 @@ from app.backend.services.programme_activity import (
     ProgrammeActivityHasChildrenError,
     ProgrammeActivityParentCycleError,
     ProgrammeActivityParentNotFoundError,
+    ProgrammeActivityWorkPackageNotFoundError,
     build_activity_tree,
     create_activity,
     delete_activity,
@@ -30,6 +31,7 @@ from app.backend.services.programme_activity import (
     list_activities,
     update_activity,
 )
+from app.backend.services.programme_workspace import build_programme_workspace
 from app.backend.services.project import get_project
 from app.backend.services.work_package import list_work_packages
 
@@ -187,7 +189,9 @@ async def create_programme_activity_page(
         "parent_activity_id": str(form.get("parent_activity_id", "")).strip(),
         "planned_start": str(form.get("planned_start", "")).strip(),
         "planned_finish": str(form.get("planned_finish", "")).strip(),
-        "is_milestone": form.get("is_milestone") == "on",
+        "is_milestone": (
+            str(form.get("activity_type", "task")).strip() == "milestone"
+        ),
         "status": str(form.get("status", "not_started")).strip(),
         "notes": str(form.get("notes", "")).strip(),
     }
@@ -270,7 +274,10 @@ async def create_programme_activity_page(
             status_code=409,
         )
 
-    except ProgrammeActivityParentNotFoundError as error:
+    except (
+        ProgrammeActivityParentNotFoundError,
+        ProgrammeActivityWorkPackageNotFoundError,
+    ) as error:
         return templates.TemplateResponse(
             request=request,
             name="programme/programme_activity_new.html",
@@ -440,7 +447,9 @@ async def update_programme_activity_page(
         "parent_activity_id": str(form.get("parent_activity_id", "")).strip(),
         "planned_start": str(form.get("planned_start", "")).strip(),
         "planned_finish": str(form.get("planned_finish", "")).strip(),
-        "is_milestone": form.get("is_milestone") == "on",
+        "is_milestone": (
+            str(form.get("activity_type", "task")).strip() == "milestone"
+        ),
         "status": str(form.get("status", "not_started")).strip(),
         "notes": str(form.get("notes", "")).strip(),
     }
@@ -501,6 +510,7 @@ async def update_programme_activity_page(
         InvalidProgrammeActivityUpdateError,
         ProgrammeActivityParentNotFoundError,
         ProgrammeActivityParentCycleError,
+        ProgrammeActivityWorkPackageNotFoundError,
     ) as error:
         return templates.TemplateResponse(
             request=request,
@@ -578,6 +588,7 @@ async def delete_programme_activity_page(
 
     if activity is None:
         activities = list_activities(database, revision.id, offset=0, limit=200)
+        activity_rows = build_activity_tree(activities)
 
         return templates.TemplateResponse(
             request=request,
@@ -587,7 +598,8 @@ async def delete_programme_activity_page(
                 "page_title": "Programme",
                 "project": project,
                 "revision": revision,
-                "activity_rows": build_activity_tree(activities),
+                "activity_rows": activity_rows,
+                "workspace": build_programme_workspace(activity_rows),
                 "error_message": "Activity was not found.",
             },
             status_code=404,
@@ -598,6 +610,8 @@ async def delete_programme_activity_page(
     except ProgrammeActivityHasChildrenError as error:
         activities = list_activities(database, revision.id, offset=0, limit=200)
 
+        activity_rows = build_activity_tree(activities)
+
         return templates.TemplateResponse(
             request=request,
             name="programme/programme.html",
@@ -606,7 +620,8 @@ async def delete_programme_activity_page(
                 "page_title": "Programme",
                 "project": project,
                 "revision": revision,
-                "activity_rows": build_activity_tree(activities),
+                "activity_rows": activity_rows,
+                "workspace": build_programme_workspace(activity_rows),
                 "error_message": str(error),
             },
             status_code=409,

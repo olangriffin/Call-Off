@@ -9,7 +9,7 @@ endif %} {% endblock %} {% block content %} {% if project and work_package %}
         / {{ work_package.code }}
       </p>
 
-      <h2>{{ work_package.name }}</h2>
+      <h1 class="page-title">{{ work_package.name }}</h1>
 
       <p>
         {{ work_package.package_type|replace("_", " ")|title if
@@ -158,7 +158,7 @@ endif %} {% endblock %} {% block content %} {% if project and work_package %}
 {% else %}
 <section class="panel">
   <div class="empty-state">
-    <h2>Work package not found</h2>
+    <h1 class="page-title">Work package not found</h1>
     <p>The requested work package does not exist or is unavailable.</p>
     {% if project %}
     <a href="/app/projects/{{ project.id }}">Return to project</a>

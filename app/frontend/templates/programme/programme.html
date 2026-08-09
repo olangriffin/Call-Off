@@ -1,108 +1,262 @@
-{% extends "base.html" %} {% block title %} {% if project %} Programme | {{
-project.code }} | Calloff {% else %} Project not found | Calloff {% endif %} {%
-endblock %} {% block content %} {% if project %}
-<section class="panel">
-  <div class="panel-header">
-    <div>
-      <p class="eyebrow">{{ project.code }}</p>
-      <h2>Programme</h2>
-    </div>
+{% extends "base.html" %}
 
-    <a href="/app/projects/{{ project.id }}">Back to project</a>
-  </div>
-
-  <div class="panel-header">
-    <div>
-      <p class="eyebrow">Current revision</p>
-      <h2>{{ revision.revision_code }}</h2>
-    </div>
-
-    <a
-      href="/app/projects/{{ project.id }}/programme/new"
-      class="primary-button"
-    >
-      New activity
-    </a>
-  </div>
-
-  {% if error_message %}
-    <div role="alert">
-      <strong>Unable to complete action</strong>
-      <p>{{ error_message }}</p>
-    </div>
-  {% endif %}
-
-  {% if activity_rows %}
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>Code</th>
-          <th>Activity</th>
-          <th>Type</th>
-          <th>Work package</th>
-          <th>Status</th>
-          <th>Planned start</th>
-          <th>Planned finish</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {% for row in activity_rows %}
-        {% set activity = row.activity %}
-        <tr>
-          <td class="mono">{{ activity.activity_code }}</td>
-          <td style="padding-left: {{ row.depth * 20 }}px;">
-            {% if activity.is_summary %}<strong>{% endif %}
-            {{ activity.name }}
-            {% if activity.is_summary %}</strong>{% endif %}
-            {% if activity.is_milestone %}
-            <small>(milestone)</small> {% endif %}
-          </td>
-          <td>{{ activity.activity_type|title }}</td>
-          <td>
-            {% if activity.work_package %} {{ activity.work_package.code }} {%
-            else %} — {% endif %}
-          </td>
-          <td>{{ activity.status|replace("_", " ")|title }}</td>
-          <td>
-            {% if activity.planned_start %} {{
-            activity.planned_start.strftime("%d %b %Y") }} {% else %} — {% endif
-            %}
-          </td>
-          <td>
-            {% if activity.planned_finish %} {{
-            activity.planned_finish.strftime("%d %b %Y") }} {% else %} — {%
-            endif %}
-          </td>
-          <td>
-            <a href="/app/projects/{{ project.id }}/programme/{{ activity.id }}/edit">Edit</a>
-
-            <form class="inline-form" method="post" action="/app/projects/{{ project.id }}/programme/{{ activity.id }}/delete" data-confirm="Delete this activity?">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
-              <button type="submit" class="ghost-button-sm">Delete</button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+{% block title %}
+  {% if project %}
+    Programme | {{ project.code }} | Calloff
   {% else %}
-  <div class="empty-state">
-    <h3>No activities yet</h3>
-    <p>This programme does not currently contain any activities.</p>
-  </div>
+    Project not found | Calloff
   {% endif %}
-</section>
+{% endblock %}
 
+{% block content %}
+{% if project %}
+  <section class="panel programme-page" data-programme-workspace data-view="combined">
+    <div class="panel-header programme-page-header">
+      <div>
+        <p class="eyebrow"><a href="/app/projects/{{ project.id }}">{{ project.code }}</a> / Programme</p>
+        <h1 class="page-title">Programme</h1>
+        <p class="programme-revision-line">
+          <span class="programme-revision-chip">Revision {{ revision.revision_code }}</span>
+          <span>{{ workspace.activity_count }} activities</span>
+          <span>{{ workspace.date_range_label }}</span>
+        </p>
+      </div>
+
+      <a href="/app/projects/{{ project.id }}/programme/new" class="primary-button">New activity</a>
+    </div>
+
+    {% if error_message %}
+      <div class="form-alert" role="alert">
+        <strong>Unable to complete action</strong>
+        <p>{{ error_message }}</p>
+      </div>
+    {% endif %}
+
+    <div class="programme-summary-grid" aria-label="Programme summary">
+      <article class="programme-summary-item">
+        <span>Activities</span>
+        <strong>{{ workspace.activity_count }}</strong>
+      </article>
+      <article class="programme-summary-item">
+        <span>Complete</span>
+        <strong>{{ workspace.complete_count }}</strong>
+      </article>
+      <article class="programme-summary-item">
+        <span>Milestones</span>
+        <strong>{{ workspace.milestone_count }}</strong>
+      </article>
+    </div>
+
+    {% if workspace.rows %}
+      <div class="programme-toolbar" aria-label="Programme controls">
+        <label class="programme-search">
+          <span class="visually-hidden">Search activities</span>
+          <input type="search" placeholder="Search code or activity" data-programme-search data-smooth-input="false">
+        </label>
+
+        <label>
+          <span>Status</span>
+          <select data-programme-status>
+            <option value="">All statuses</option>
+            <option value="not_started">Not started</option>
+            <option value="in_progress">In progress</option>
+            <option value="complete">Complete</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Work package</span>
+          <select data-programme-package>
+            <option value="">All packages</option>
+            {% for package_id, package_code in workspace.package_options %}
+              <option value="{{ package_id }}">{{ package_code }}</option>
+            {% endfor %}
+            <option value="unassigned">Unassigned</option>
+          </select>
+        </label>
+
+        <button type="button" class="ghost-button-sm" data-programme-clear>Clear filters</button>
+
+        <div class="programme-view-controls" aria-label="Programme view">
+          <button type="button" class="ghost-button-sm" data-programme-view="list" aria-pressed="false">List</button>
+          <button type="button" class="ghost-button-sm" data-programme-view="timeline" aria-pressed="false">Timeline</button>
+        </div>
+
+        {% if workspace.today_left_px is not none %}
+          <button type="button" class="ghost-button-sm programme-today-button" data-programme-today>Today</button>
+        {% endif %}
+      </div>
+
+      <p class="programme-results-summary" data-programme-results aria-live="polite">
+        Showing all {{ workspace.activity_count }} activities.
+      </p>
+
+      <p class="programme-scroll-instruction" id="programme-scroll-instruction">
+        The register scrolls horizontally; use List or Timeline view on smaller screens.
+      </p>
+
+      <div
+        class="table-container programme-table-container"
+        tabindex="0"
+        aria-label="{{ project.code }} programme register and timeline"
+        aria-describedby="programme-scroll-instruction"
+        data-programme-scroll
+      >
+        <table
+          class="programme-table"
+          style="--programme-timeline-width: {{ workspace.timeline_width_px }}px; --programme-week-width: {{ workspace.week_width_px }}px;"
+        >
+          <caption class="visually-hidden">
+            Programme activities for {{ project.code }}, revision {{ revision.revision_code }}.
+          </caption>
+          <thead>
+            <tr>
+              <th class="programme-activity-column" scope="col">Activity</th>
+              <th class="programme-package-column" scope="col">Work package</th>
+              <th class="programme-status-column" scope="col">Status</th>
+              <th class="programme-date-column" scope="col">Start</th>
+              <th class="programme-date-column" scope="col">Finish</th>
+              <th class="programme-duration-column" scope="col">Duration</th>
+              <th class="programme-actions-column" scope="col">Actions</th>
+              <th class="programme-timeline-column" scope="col">
+                <span class="visually-hidden">Timeline</span>
+                <div class="programme-timescale" style="width: {{ workspace.timeline_width_px }}px;" aria-hidden="true">
+                  {% if workspace.today_left_px is not none %}
+                    <span class="programme-today-line" style="left: {{ workspace.today_left_px }}px;" data-today-marker></span>
+                  {% endif %}
+                  {% for tick in workspace.timeline_ticks %}
+                    <span
+                      class="programme-timescale-tick"
+                      style="left: {{ tick.left_px }}px; width: {{ tick.width_px }}px;"
+                    >
+                      {% if tick.month_label %}<strong>{{ tick.month_label }}</strong>{% endif %}
+                      <small>{{ tick.label }}</small>
+                    </span>
+                  {% endfor %}
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in workspace.rows %}
+              <tr
+                class="programme-row{% if row.is_summary %} is-summary{% endif %}"
+                data-programme-row
+                data-search="{{ row.search_text }}"
+                data-status="{{ row.status_key }}"
+                data-package="{{ row.package_filter }}"
+                data-activity-id="{{ row.activity.id }}"
+                data-parent-id="{{ row.activity.parent_activity_id or '' }}"
+              >
+                <th class="programme-activity-column" scope="row">
+                  <div class="programme-activity" style="--activity-depth: {{ row.depth if row.depth < 7 else 6 }};">
+                    <span class="programme-tree-guide" aria-hidden="true"></span>
+                    <span>
+                      <span class="mono programme-activity-code">{{ row.activity.activity_code }}</span>
+                      <strong>{{ row.activity.name }}</strong>
+                      <small>
+                        {% if row.is_summary %}Summary{% elif row.is_milestone %}Milestone{% else %}Task{% endif %}
+                      </small>
+                    </span>
+                  </div>
+                </th>
+                <td class="programme-package-column">
+                  {% if row.activity.work_package %}
+                    <span class="mono" title="{{ row.activity.work_package.name }}">{{ row.activity.work_package.code }}</span>
+                  {% else %}
+                    <span class="programme-muted">Unassigned</span>
+                  {% endif %}
+                </td>
+                <td class="programme-status-column">
+                  <span class="programme-status programme-status-{{ row.status_key }}">{{ row.status_label }}</span>
+                </td>
+                <td class="programme-date-column">
+                  {% if row.start_date %}<time datetime="{{ row.start_date.isoformat() }}">{{ row.start_label }}</time>{% else %}<span class="programme-muted">Not set</span>{% endif %}
+                </td>
+                <td class="programme-date-column">
+                  {% if row.finish_date %}<time datetime="{{ row.finish_date.isoformat() }}">{{ row.finish_label }}</time>{% else %}<span class="programme-muted">Not set</span>{% endif %}
+                </td>
+                <td class="programme-duration-column">{{ row.duration_label }}</td>
+                <td class="programme-actions-column">
+                  <a href="/app/projects/{{ project.id }}/programme/{{ row.activity.id }}/edit">Edit</a>
+                  <form
+                    class="inline-form"
+                    method="post"
+                    action="/app/projects/{{ project.id }}/programme/{{ row.activity.id }}/delete"
+                    data-confirm="Delete this activity?"
+                  >
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+                    <button type="submit" class="programme-delete-button">Delete</button>
+                  </form>
+                </td>
+                <td class="programme-timeline-column">
+                  <span class="visually-hidden">
+                    {% if row.is_unscheduled %}
+                      Dates not set.
+                    {% elif row.is_milestone %}
+                      Milestone on {{ row.finish_label if row.finish_date else row.start_label }}.
+                    {% else %}
+                      Planned {{ row.start_label }} to {{ row.finish_label }}.
+                    {% endif %}
+                  </span>
+                  <div class="programme-timeline" style="width: {{ workspace.timeline_width_px }}px;" aria-hidden="true">
+                    {% if workspace.today_left_px is not none %}
+                      <span class="programme-today-line" style="left: {{ workspace.today_left_px }}px;"></span>
+                    {% endif %}
+                    {% if row.is_unscheduled %}
+                      <span class="programme-unscheduled">Dates not set</span>
+                    {% elif row.is_milestone %}
+                      <span class="programme-milestone" style="left: {{ row.bar_left_px }}px;"></span>
+                    {% else %}
+                      <span
+                        class="programme-bar{% if row.is_summary %} programme-bar-summary{% endif %}"
+                        style="left: {{ row.bar_left_px }}px; width: {{ row.bar_width_px }}px;"
+                      >
+                      </span>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="programme-no-results" data-programme-empty hidden>
+        <strong>No activities match these filters</strong>
+        <p>Clear or change the filters to return to the programme.</p>
+      </div>
+
+      <div class="programme-legend" aria-label="Timeline legend">
+        <span><i class="legend-task" aria-hidden="true"></i>Task</span>
+        <span><i class="legend-summary" aria-hidden="true"></i>Summary</span>
+        <span><i class="legend-milestone" aria-hidden="true"></i>Milestone</span>
+        {% if workspace.today_left_px is not none %}<span><i class="legend-today" aria-hidden="true"></i>Today</span>{% endif %}
+      </div>
+    {% else %}
+      <div class="empty-state programme-empty-state">
+        <p class="eyebrow">Build the delivery sequence</p>
+        <h2>No programme activities yet</h2>
+        <p>Add the first task or milestone to start planning this project’s delivery sequence.</p>
+        <div class="form-actions">
+          <a href="/app/projects/{{ project.id }}/programme/new" class="primary-button">Add first activity</a>
+          <a href="/app/projects/{{ project.id }}" class="ghost-button-sm">Back to project</a>
+        </div>
+      </div>
+    {% endif %}
+  </section>
 {% else %}
-<section class="panel">
-  <div class="empty-state">
-    <h2>Project not found</h2>
-    <p>The requested project does not exist or is unavailable.</p>
-    <a href="/app">Return to dashboard</a>
-  </div>
-</section>
-{% endif %} {% endblock %}
+  <section class="panel">
+    <div class="empty-state">
+      <h1 class="page-title">Project not found</h1>
+      <p>The requested project does not exist or is unavailable.</p>
+      <a href="/app">Return to dashboard</a>
+    </div>
+  </section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', path='js/programme-workspace.js') }}"></script>
+{% endblock %}

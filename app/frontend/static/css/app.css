@@ -17,6 +17,19 @@
   --warning: #e59a13;
   --success: #238636;
   --radius: 2px;
+  --radius-control: 14px;
+  --radius-action: 999px;
+  --radius-card: 16px;
+  --radius-panel: 20px;
+  --card-border: rgba(17, 19, 21, 0.1);
+  --card-gradient: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 255, 255, 0.68) 100%
+  );
+  --card-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 18px 46px rgba(17, 19, 21, 0.07);
 
   --font-heading:
     -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
@@ -1275,6 +1288,810 @@ td.actions-cell {
   padding: 16px;
 }
 
+/* Authenticated application visual system */
+
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 700;
+  transform: translateY(-160%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+body.app-interface {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at 48% 0%,
+      rgba(255, 212, 0, 0.14) 0%,
+      rgba(255, 212, 0, 0) 25%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(17, 19, 21, 0.05) 0%,
+      rgba(247, 248, 245, 0) 34%
+    ),
+    var(--background);
+}
+
+body.app-interface .app-shell-operational {
+  grid-template-columns: 256px minmax(0, 1fr);
+}
+
+body.app-interface .sidebar {
+  padding: 24px 18px 18px;
+  border-right: 1px solid rgba(247, 248, 245, 0.08);
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(255, 212, 0, 0.13) 0%,
+      rgba(255, 212, 0, 0) 30%
+    ),
+    var(--sidebar);
+  box-shadow: 18px 0 54px rgba(17, 19, 21, 0.08);
+}
+
+body.app-interface .sidebar .brand {
+  margin-bottom: 28px;
+  padding-inline: 10px;
+}
+
+body.app-interface .navigation {
+  gap: 6px;
+}
+
+body.app-interface .navigation-link {
+  min-height: 42px;
+  padding: 11px 14px;
+  border-radius: var(--radius-action);
+}
+
+body.app-interface .navigation-link.active {
+  border-color: rgba(255, 212, 0, 0.25);
+  background: rgba(255, 212, 0, 0.1);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+body.app-interface .theme-control {
+  border-color: var(--sidebar-border);
+}
+
+body.app-interface .theme-control-label,
+body.app-interface .sidebar-footer,
+body.app-interface .sidebar-footer small {
+  color: var(--sidebar-muted);
+}
+
+body.app-interface .theme-toggle {
+  border-color: var(--sidebar-border);
+  background: rgba(247, 248, 245, 0.06);
+  color: var(--sidebar-text);
+}
+
+body.app-interface .theme-toggle:hover {
+  background: rgba(247, 248, 245, 0.12);
+}
+
+body.app-interface .sidebar-user {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 12px;
+}
+
+body.app-interface .sidebar-user strong {
+  color: var(--sidebar-text);
+  font-size: 0.82rem;
+}
+
+body.app-interface .main-content {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 36px clamp(24px, 4vw, 64px) 64px;
+}
+
+body.app-interface .page-content {
+  gap: 24px;
+}
+
+body.app-interface .page-title {
+  margin: 4px 0 0;
+  font-size: clamp(1.55rem, 2.5vw, 2.15rem);
+  font-weight: 700;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+}
+
+body.app-interface .eyebrow {
+  color: rgba(17, 19, 21, 0.54);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+body.app-interface .panel {
+  padding: clamp(22px, 2.4vw, 30px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-panel);
+  background: var(--card-gradient);
+  box-shadow: var(--card-shadow);
+}
+
+body.app-interface .panel::before,
+body.app-interface .panel::after {
+  display: none;
+}
+
+body.app-interface .panel-header {
+  margin-bottom: 24px;
+}
+
+body.app-interface .panel-header h2 {
+  font-size: 1.28rem;
+  line-height: 1.15;
+}
+
+body.app-interface .panel-header a:not(.primary-button) {
+  padding-bottom: 2px;
+  border-bottom-width: 2px;
+}
+
+body.app-interface .primary-button,
+body.app-interface .ghost-button-sm {
+  min-height: 42px;
+  padding: 9px 16px;
+  border-radius: var(--radius-action);
+}
+
+body.app-interface .primary-button {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--sidebar-text);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 12px 28px rgba(17, 19, 21, 0.14);
+}
+
+body.app-interface .primary-button:hover {
+  border-color: #1b1e21;
+  background: #1b1e21;
+}
+
+body.app-interface .ghost-button-sm {
+  border-color: rgba(17, 19, 21, 0.14);
+  background: rgba(255, 255, 255, 0.66);
+}
+
+body.app-interface .metric-card,
+body.app-interface .record-card,
+body.app-interface .record-meta div {
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: var(--card-gradient);
+  box-shadow: 0 12px 30px rgba(17, 19, 21, 0.05);
+}
+
+body.app-interface .metric-card {
+  min-height: 126px;
+  padding: 20px;
+}
+
+body.app-interface .metric-card strong {
+  font-size: clamp(1.35rem, 2vw, 1.7rem);
+}
+
+body.app-interface .table-container {
+  border-color: var(--card-border);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 12px 30px rgba(17, 19, 21, 0.05);
+}
+
+body.app-interface th {
+  padding-block: 12px;
+  border-bottom-color: rgba(247, 248, 245, 0.12);
+  background: var(--sidebar);
+  color: rgba(247, 248, 245, 0.76);
+}
+
+body.app-interface tbody tr {
+  background: rgba(255, 255, 255, 0.78);
+}
+
+body.app-interface tbody tr:hover {
+  background: rgba(255, 212, 0, 0.09);
+}
+
+body.app-interface .empty-state {
+  padding: 30px;
+  border-color: rgba(17, 19, 21, 0.16);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.42);
+}
+
+body.app-interface .form-grid {
+  gap: 18px;
+}
+
+body.app-interface .form-field {
+  gap: 8px;
+}
+
+body.app-interface .form-field label {
+  color: rgba(17, 19, 21, 0.72);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+body.app-interface .form-field input,
+body.app-interface .form-field select,
+body.app-interface .form-field textarea,
+body.app-interface .search-input {
+  min-height: 46px;
+  padding: 10px 14px;
+  border-color: rgba(17, 19, 21, 0.14);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.76);
+}
+
+body.app-interface .form-field textarea {
+  min-height: 116px;
+  resize: vertical;
+}
+
+body.app-interface .form-field input:focus,
+body.app-interface .form-field select:focus,
+body.app-interface .form-field textarea:focus,
+body.app-interface .search-input:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(255, 212, 0, 0.2);
+}
+
+body.app-interface .form-alert {
+  border-radius: var(--radius-control);
+}
+
+body.app-interface .badge {
+  padding: 4px 9px;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-action);
+}
+
+body.app-interface .readiness-banner {
+  padding: 18px;
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.52);
+}
+
+body.app-interface .compact-empty-state {
+  padding: 18px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Programme workspace */
+
+body.app-interface .programme-page {
+  gap: 22px;
+  padding-inline: clamp(18px, 2.2vw, 30px);
+}
+
+body.app-interface .programme-page-header {
+  align-items: flex-start;
+}
+
+body.app-interface .programme-revision-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+body.app-interface .programme-revision-chip {
+  padding: 5px 9px;
+  border: 1px solid rgba(17, 19, 21, 0.12);
+  border-radius: var(--radius-action);
+  background: rgba(255, 212, 0, 0.16);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+body.app-interface .programme-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.54);
+}
+
+body.app-interface .programme-summary-item {
+  display: grid;
+  gap: 5px;
+  padding: 16px 18px;
+  border-right: 1px solid var(--card-border);
+}
+
+body.app-interface .programme-summary-item:last-child {
+  border-right: 0;
+}
+
+body.app-interface .programme-summary-item span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+body.app-interface .programme-summary-item strong {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+body.app-interface .programme-toolbar {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.54);
+}
+
+body.app-interface .programme-toolbar label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+body.app-interface .programme-toolbar input,
+body.app-interface .programme-toolbar select {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid rgba(17, 19, 21, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--text);
+  text-transform: none;
+}
+
+body.app-interface .programme-search {
+  flex: 1 1 240px;
+}
+
+body.app-interface .programme-search input {
+  width: 100%;
+}
+
+body.app-interface .programme-view-controls {
+  display: none;
+  gap: 6px;
+}
+
+body.app-interface .programme-view-controls [aria-pressed="true"] {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--sidebar-text);
+}
+
+body.app-interface .programme-today-button {
+  margin-left: auto;
+}
+
+body.app-interface .programme-results-summary,
+body.app-interface .programme-scroll-instruction {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+body.app-interface .programme-scroll-instruction {
+  display: none;
+}
+
+body.app-interface .programme-table-container {
+  max-height: min(68vh, 760px);
+  border-radius: var(--radius-card);
+  outline: none;
+  overscroll-behavior: contain;
+}
+
+body.app-interface .programme-table-container:focus-visible {
+  box-shadow: 0 0 0 4px rgba(255, 212, 0, 0.24);
+}
+
+body.app-interface .programme-table {
+  --programme-activity-width: 300px;
+  --programme-register-width: 970px;
+  width: calc(var(--programme-register-width) + var(--programme-timeline-width));
+  min-width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+body.app-interface .programme-table th,
+body.app-interface .programme-table td {
+  height: 54px;
+  padding: 9px 12px;
+  border-right: 1px solid rgba(17, 19, 21, 0.08);
+  border-bottom: 1px solid rgba(17, 19, 21, 0.08);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+body.app-interface .programme-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  height: 62px;
+  padding-block: 10px;
+  background: var(--sidebar);
+}
+
+body.app-interface .programme-table tbody tr:hover > * {
+  background-color: #fffbea;
+}
+
+body.app-interface .programme-table tbody tr.is-summary > * {
+  background-color: #f6f4e8;
+}
+
+body.app-interface .programme-table tbody tr[hidden] {
+  display: none;
+}
+
+body.app-interface .programme-table tbody tr.is-filter-context > * {
+  color: var(--muted);
+  background-color: #f4f4f0;
+}
+
+body.app-interface .programme-activity-column {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: var(--programme-activity-width);
+  min-width: var(--programme-activity-width);
+  max-width: var(--programme-activity-width);
+}
+
+body.app-interface .programme-table thead .programme-activity-column {
+  z-index: 6;
+}
+
+body.app-interface .programme-table tbody .programme-activity-column {
+  background: #fff;
+  box-shadow: 8px 0 18px rgba(17, 19, 21, 0.05);
+}
+
+body.app-interface .programme-package-column {
+  width: 112px;
+}
+
+body.app-interface .programme-status-column {
+  width: 118px;
+}
+
+body.app-interface .programme-date-column {
+  width: 116px;
+}
+
+body.app-interface .programme-duration-column {
+  width: 88px;
+}
+
+body.app-interface .programme-actions-column {
+  width: 120px;
+}
+
+body.app-interface .programme-timeline-column {
+  width: var(--programme-timeline-width);
+  min-width: var(--programme-timeline-width);
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+body.app-interface .programme-activity {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+  padding-left: calc(var(--activity-depth) * 18px);
+}
+
+body.app-interface .programme-activity > span:last-child {
+  display: grid;
+  min-width: 0;
+}
+
+body.app-interface .programme-activity strong {
+  overflow: hidden;
+  font-size: 0.84rem;
+  text-overflow: ellipsis;
+}
+
+body.app-interface .programme-activity small,
+body.app-interface .programme-activity-code {
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+body.app-interface .programme-activity-code {
+  margin-right: 5px;
+}
+
+body.app-interface .programme-tree-guide {
+  width: 2px;
+  min-width: 2px;
+  border-radius: var(--radius-action);
+  background: rgba(17, 19, 21, 0.12);
+}
+
+body.app-interface .is-summary .programme-tree-guide {
+  background: var(--accent);
+}
+
+body.app-interface .programme-muted {
+  color: var(--muted);
+}
+
+body.app-interface .programme-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-action);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+body.app-interface .programme-status-not_started {
+  color: #5f666b;
+}
+
+body.app-interface .programme-status-in_progress {
+  color: #8a5a00;
+  background: rgba(255, 212, 0, 0.12);
+}
+
+body.app-interface .programme-status-complete {
+  color: var(--success);
+  background: rgba(35, 134, 54, 0.08);
+}
+
+body.app-interface .programme-actions-column {
+  font-size: 0.74rem;
+}
+
+body.app-interface .programme-actions-column .inline-form {
+  margin-left: 2px;
+}
+
+body.app-interface .programme-actions-column > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 4px 6px;
+  font-weight: 700;
+}
+
+body.app-interface .programme-delete-button {
+  min-height: 32px;
+  padding: 4px 6px;
+  border: 0;
+  background: transparent;
+  color: var(--critical);
+  cursor: pointer;
+  font-size: 0.72rem;
+}
+
+body.app-interface .programme-timescale,
+body.app-interface .programme-timeline {
+  position: relative;
+  height: 100%;
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent calc(var(--programme-week-width) - 1px),
+    rgba(17, 19, 21, 0.06) calc(var(--programme-week-width) - 1px),
+    rgba(17, 19, 21, 0.06) var(--programme-week-width)
+  );
+}
+
+body.app-interface .programme-timescale {
+  min-height: 62px;
+}
+
+body.app-interface .programme-timescale-tick {
+  position: absolute;
+  inset-block: 0;
+  display: grid;
+  align-content: center;
+  padding: 8px 10px;
+  border-right: 1px solid rgba(247, 248, 245, 0.13);
+  color: var(--sidebar-text);
+}
+
+body.app-interface .programme-timescale-tick strong {
+  font-size: 0.67rem;
+}
+
+body.app-interface .programme-timescale-tick small {
+  color: var(--sidebar-muted);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+}
+
+body.app-interface .programme-timeline {
+  min-height: 53px;
+  background-color: rgba(255, 255, 255, 0.62);
+}
+
+body.app-interface .programme-bar {
+  position: absolute;
+  top: 50%;
+  height: 18px;
+  overflow: hidden;
+  border: 1px solid #292d30;
+  border-radius: 5px;
+  background: var(--accent);
+  box-shadow: 0 4px 10px rgba(17, 19, 21, 0.16);
+  transform: translateY(-50%);
+}
+
+body.app-interface .programme-bar-summary {
+  height: 10px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: var(--text);
+}
+
+body.app-interface .programme-bar-summary::before,
+body.app-interface .programme-bar-summary::after {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 16px;
+  background: var(--text);
+  content: "";
+}
+
+body.app-interface .programme-bar-summary::before {
+  left: 0;
+}
+
+body.app-interface .programme-bar-summary::after {
+  right: 0;
+}
+
+body.app-interface .programme-milestone {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--text);
+  background: var(--accent);
+  box-shadow: 0 4px 10px rgba(17, 19, 21, 0.16);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+body.app-interface .programme-today-line {
+  position: absolute;
+  inset-block: 0;
+  z-index: 2;
+  width: 3px;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px rgba(17, 19, 21, 0.28);
+  pointer-events: none;
+}
+
+body.app-interface .programme-unscheduled {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  transform: translateY(-50%);
+}
+
+body.app-interface .programme-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+body.app-interface .programme-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+body.app-interface .programme-legend i {
+  display: inline-block;
+}
+
+body.app-interface .legend-task {
+  width: 24px;
+  height: 8px;
+  border-radius: 3px;
+  background: var(--text);
+}
+
+body.app-interface .legend-summary {
+  width: 24px;
+  height: 4px;
+  background: var(--text);
+}
+
+body.app-interface .legend-milestone {
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--text);
+  background: var(--accent);
+  transform: rotate(45deg);
+}
+
+body.app-interface .legend-today {
+  width: 3px;
+  height: 16px;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px rgba(17, 19, 21, 0.28);
+}
+
+body.app-interface .programme-no-results,
+body.app-interface .programme-empty-state {
+  padding: 30px;
+  border: 1px dashed rgba(17, 19, 21, 0.16);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.42);
+  text-align: center;
+}
+
+body.app-interface .programme-no-results p {
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+body.app-interface .programme-empty-state .form-actions {
+  justify-content: center;
+}
+
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
@@ -1301,6 +2118,36 @@ textarea:focus-visible {
 
   .main-content {
     padding-inline: 20px;
+  }
+}
+
+@media (max-width: 1000px) {
+  body.app-interface .programme-view-controls,
+  body.app-interface .programme-scroll-instruction {
+    display: flex;
+  }
+
+  body.app-interface .programme-page[data-view="list"] .programme-table {
+    width: var(--programme-register-width);
+  }
+
+  body.app-interface .programme-page[data-view="list"] .programme-timeline-column {
+    display: none;
+  }
+
+  body.app-interface .programme-page[data-view="timeline"] .programme-table {
+    width: calc(var(--programme-activity-width) + var(--programme-timeline-width));
+  }
+
+  body.app-interface .programme-page[data-view="timeline"]
+    :is(
+      .programme-package-column,
+      .programme-status-column,
+      .programme-date-column,
+      .programme-duration-column,
+      .programme-actions-column
+    ) {
+    display: none;
   }
 }
 
@@ -1363,5 +2210,131 @@ textarea:focus-visible {
 
   .readiness-date {
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 900px) {
+  body.app-interface .app-shell-operational {
+    grid-template-columns: 216px minmax(0, 1fr);
+  }
+
+  body.app-interface .main-content {
+    padding-inline: 24px;
+  }
+}
+
+@media (max-width: 760px) {
+  body.app-interface .app-shell-operational {
+    display: block;
+  }
+
+  body.app-interface .sidebar {
+    position: static;
+    height: auto;
+    padding: 14px 18px;
+    border-right: 0;
+    border-bottom: 1px solid var(--sidebar-border);
+    box-shadow: 0 14px 40px rgba(17, 19, 21, 0.1);
+  }
+
+  body.app-interface .sidebar .brand {
+    margin-bottom: 12px;
+    padding: 0;
+  }
+
+  body.app-interface .navigation {
+    flex-direction: row;
+  }
+
+  body.app-interface .navigation-link {
+    width: auto;
+  }
+
+  body.app-interface .theme-control {
+    margin-top: 14px;
+    padding: 12px 0 0;
+  }
+
+  body.app-interface .sidebar-footer {
+    margin-top: 12px;
+    padding-inline: 0;
+  }
+
+  body.app-interface .main-content {
+    padding: 24px 16px 40px;
+  }
+
+  body.app-interface .panel {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  body.app-interface .panel-header {
+    margin-bottom: 20px;
+  }
+
+  body.app-interface .metric-card {
+    min-height: 108px;
+  }
+
+  body.app-interface .programme-page {
+    padding: 16px;
+  }
+
+  body.app-interface .programme-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.app-interface .programme-summary-item {
+    border-right: 0;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  body.app-interface .programme-summary-item:last-child {
+    border-bottom: 0;
+  }
+
+  body.app-interface .programme-toolbar {
+    align-items: stretch;
+  }
+
+  body.app-interface .programme-toolbar label,
+  body.app-interface .programme-search {
+    flex: 1 1 100%;
+  }
+
+  body.app-interface .programme-view-controls {
+    order: 10;
+    width: 100%;
+  }
+
+  body.app-interface .programme-view-controls button {
+    flex: 1;
+  }
+
+  body.app-interface .programme-today-button {
+    margin-left: 0;
+  }
+
+  body.app-interface .programme-table-container {
+    max-height: 70vh;
+  }
+
+  body.app-interface .programme-table {
+    --programme-activity-width: 240px;
+    --programme-register-width: 822px;
+  }
+
+  body.app-interface .programme-page[data-view="list"] .programme-table {
+    width: var(--programme-register-width);
+  }
+
+  body.app-interface .programme-page[data-view="list"]
+    .programme-duration-column {
+    display: none;
+  }
+
+  body.app-interface .programme-page[data-view="timeline"] .programme-table {
+    width: calc(var(--programme-activity-width) + var(--programme-timeline-width));
   }
 }

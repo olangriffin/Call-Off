@@ -213,7 +213,7 @@ class PublicSiteTestCase(unittest.TestCase):
         status_code, _headers, body = self.request("GET", "/early-access")
         self.assertEqual(status_code, 200)
         match = re.search(
-            r'name="csrf_token" value="([A-Za-z0-9_-]+)"',
+            r'name="csrf_token"\s+value="([A-Za-z0-9_-]+)"',
             body,
         )
         self.assertIsNotNone(match)
@@ -261,6 +261,32 @@ class PublicSiteTestCase(unittest.TestCase):
         self.assertEqual(status_code, 200)
         self.assertIn("Apply for Early Access", body)
         self.assertIn('name="csrf_token"', body)
+        self.assertIn('class="early-access-hero"', body)
+        self.assertIn('class="early-access-section"', body)
+        self.assertIn('class="early-access-form-grid"', body)
+        self.assertIn("early-access-form-card-profile", body)
+        self.assertEqual(body.count('class="early-access-form-card"'), 2)
+        for heading in (
+            "Contact and company",
+            "Your current workflow",
+            "Early-access preferences",
+        ):
+            self.assertIn(heading, body)
+
+        for field_name in (
+            "full_name",
+            "work_email",
+            "company_name",
+            "job_title",
+            "subcontractor_type",
+            "company_size",
+            "active_projects",
+            "current_tools",
+            "biggest_delivery_challenge",
+            "interest_level",
+            "additional_information",
+        ):
+            self.assertIn(f'name="{field_name}"', body)
 
     def test_navigation_contains_responsive_early_access_cta(self) -> None:
         status_code, _headers, body = self.request("GET", "/")
@@ -317,6 +343,8 @@ class PublicSiteTestCase(unittest.TestCase):
         )
         self.assertEqual(success_status, 200)
         self.assertIn("Application received", success_body)
+        self.assertIn('id="early-access-form-heading"', success_body)
+        self.assertIn("early-access-success early-access-form-card", success_body)
 
     def test_required_field_validation_preserves_values(self) -> None:
         status_code, _headers, body = self.request(
@@ -445,7 +473,7 @@ class PublicSiteTestCase(unittest.TestCase):
     def test_pricing_page(self) -> None:
         status_code, _headers, body = self.request("GET", "/pricing")
         self.assertEqual(status_code, 200)
-        self.assertIn("Indicative early-access pricing", body)
+        self.assertIn("Plans for controlled delivery across every project.", body)
         self.assertIn("may change before general availability", body)
         self.assertGreaterEqual(body.count('href="/early-access"'), 5)
 
