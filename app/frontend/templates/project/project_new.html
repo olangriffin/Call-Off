@@ -4,50 +4,52 @@ endblock %} {% block content %}
   <div class="panel-header">
     <div>
       <p class="eyebrow">Projects</p>
-      <h2>Create new project</h2>
+      <h1 class="page-title">Create new project</h1>
     </div>
 
     <a href="/app">Cancel</a>
   </div>
 
-  <form method="post" action="/app/projects/new">
+  <form method="post" action="/app/projects/new" class="form-grid">
     <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
-    <p>
-      <label for="code">Project code</label><br />
+    <div class="form-field">
+      <label for="code">Project code</label>
       <input id="code" name="code" type="text" required />
-    </p>
+    </div>
 
-    <p>
-      <label for="name">Project name</label><br />
+    <div class="form-field">
+      <label for="name">Project name</label>
       <input id="name" name="name" type="text" required />
-    </p>
+    </div>
 
-    <p>
-      <label for="client_name">Client</label><br />
+    <div class="form-field">
+      <label for="client_name">Client</label>
       <input id="client_name" name="client_name" type="text" />
-    </p>
+    </div>
 
-    <p>
-      <label for="status">Status</label><br />
+    <div class="form-field">
+      <label for="status">Status</label>
       <select id="status" name="status">
         <option value="planning">Planning</option>
         <option value="active">Active</option>
         <option value="on_hold">On hold</option>
         <option value="completed">Completed</option>
       </select>
-    </p>
+    </div>
 
-    <p>
-      <label for="planned_start">Planned start</label><br />
+    <div class="form-field">
+      <label for="planned_start">Planned start</label>
       <input id="planned_start" name="planned_start" type="date" />
-    </p>
+    </div>
 
-    <p>
-      <label for="planned_finish">Planned finish</label><br />
+    <div class="form-field">
+      <label for="planned_finish">Planned finish</label>
       <input id="planned_finish" name="planned_finish" type="date" />
-    </p>
+    </div>
 
-    <button type="submit" class="primary-button">Create project</button>
+    <div class="form-actions form-field-full">
+      <button type="submit" class="primary-button">Create project</button>
+    </div>
   </form>
 </section>
 {% endblock %}

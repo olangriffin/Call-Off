@@ -3,17 +3,20 @@
 {% block title %}
   Create account | Call-Off
 {% endblock %}
-
+{% block body_class %}auth-marketing{% endblock %}
+{% block shell_class %}app-shell-auth{% endblock %}
+{% block sidebar %}{% endblock %}
 {% block content %}
-<section class="panel">
+<section class="panel login-panel">
   {% if registration_enabled %}
     <div class="panel-header">
       <div>
-        <p class="eyebrow">Temporary registration</p>
+        <span class="login-mark" aria-hidden="true">
+          {{ inline_svg_asset("favicon.svg") }}
+        </span>
         <h2>Create account</h2>
+        <p>Set up your Call-Off workspace.</p>
       </div>
-
-      <a href="/login">Sign in</a>
     </div>
 
     {% if error_message %}
@@ -23,7 +26,12 @@
       </div>
     {% endif %}
 
-    <form method="post" action="/register">
+    <p class="login-register-link">
+      Already have an account?
+      <a href="/login">Sign in</a>
+    </p>
+
+    <form method="post" action="/register" class="login-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
       <div>
         <label for="name">Full name</label>
@@ -83,19 +91,24 @@
         <button type="submit" class="primary-button">
           Create account
         </button>
-
-        <a href="/login" class="ghost-button-sm">
-          Cancel
-        </a>
       </div>
     </form>
 
   {% else %}
-    <div class="empty-state">
-      <h2>Registration unavailable</h2>
-      <p>New accounts can only be created by invitation.</p>
-      <a href="/login">Return to login</a>
+    <div class="panel-header">
+      <div>
+        <span class="login-mark" aria-hidden="true">
+          {{ inline_svg_asset("favicon.svg") }}
+        </span>
+        <h2>Registration unavailable</h2>
+        <p>New accounts can only be created by invitation.</p>
+      </div>
     </div>
+
+    <p class="login-register-link">
+      Already have an account?
+      <a href="/login">Sign in</a>
+    </p>
   {% endif %}
 </section>
 {% endblock %}

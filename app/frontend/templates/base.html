@@ -26,8 +26,9 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/app.css') }}" />
   </head>
 
-  <body class="{% block body_class %}{% endblock %}">
-    <div class="app-shell {% block shell_class %}{% endblock %}">
+  <body class="{% block body_class %}app-interface{% endblock %}">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div class="app-shell {% block shell_class %}app-shell-operational{% endblock %}">
       {% block sidebar %}
       <aside class="sidebar">
         <a href="/app" class="brand">
@@ -40,8 +41,12 @@
           </span>
         </a>
 
-        <nav class="navigation">
-          <a href="/app" class="navigation-link active">Projects</a>
+        <nav class="navigation" aria-label="Application">
+          <a
+            href="/app"
+            class="navigation-link active"
+            {% if request.url.path == "/app" %}aria-current="page"{% endif %}
+          >Projects</a>
         </nav>
         <div class="theme-control">
           <span class="theme-control-label">Appearance</span>
@@ -59,7 +64,7 @@
 
         <div class="sidebar-footer">
           {% if current_user is defined and current_user %}
-          <div>
+          <div class="sidebar-user">
             <strong>{{ current_user.name }}</strong>
             <small>{{ current_user.email }}</small>
             <small> {{ current_role|replace("_", " ")|title }} </small>
@@ -78,7 +83,7 @@
       </aside>
       {% endblock %}
 
-      <main class="main-content">
+      <main class="main-content" id="main-content">
         <section class="page-content">
           {% block content %}{% endblock %}
         </section>
@@ -87,5 +92,6 @@
     <script src="{{ url_for('static', path='js/theme-toggle.js') }}"></script>
     <script src="{{ url_for('static', path='js/smooth-inputs.js') }}"></script>
     <script src="{{ url_for('static', path='js/confirm-actions.js') }}"></script>
+    {% block scripts %}{% endblock %}
   </body>
 </html>

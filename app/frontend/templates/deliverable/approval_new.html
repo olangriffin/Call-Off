@@ -14,7 +14,7 @@
   <div class="panel-header">
     <div>
       <p class="eyebrow">{{ deliverable.reference }} / {{ revision.revision_code }}</p>
-      <h2>Send revision for approval</h2>
+      <h1 class="page-title">Send revision for approval</h1>
     </div>
 
     <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}">
@@ -119,7 +119,7 @@
 {% else %}
 <section class="panel">
   <div class="empty-state">
-    <h2>Revision not found</h2>
+    <h1 class="page-title">Revision not found</h1>
     <p>The requested revision does not exist or is unavailable.</p>
     <a href="/app">Return to dashboard</a>
   </div>

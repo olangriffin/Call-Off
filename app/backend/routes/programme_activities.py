@@ -27,6 +27,7 @@ from app.backend.services.programme_activity import (
     ProgrammeActivityHasChildrenError,
     ProgrammeActivityParentCycleError,
     ProgrammeActivityParentNotFoundError,
+    ProgrammeActivityWorkPackageNotFoundError,
     create_activity,
     delete_activity,
     get_activity,
@@ -83,7 +84,10 @@ def create_activity_route(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(error),
         ) from error
-    except ProgrammeActivityParentNotFoundError as error:
+    except (
+        ProgrammeActivityParentNotFoundError,
+        ProgrammeActivityWorkPackageNotFoundError,
+    ) as error:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(error),
@@ -168,6 +172,7 @@ def update_activity_route(
         InvalidProgrammeActivityUpdateError,
         ProgrammeActivityParentNotFoundError,
         ProgrammeActivityParentCycleError,
+        ProgrammeActivityWorkPackageNotFoundError,
     ) as error:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,

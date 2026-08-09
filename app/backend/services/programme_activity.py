@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.backend.models.programme.programme_activity import ProgrammeActivity
 from app.backend.models.programme.programme_revision import ProgrammeRevision
+from app.backend.models.package.package import WorkPackage
 from app.backend.schemas.programme_activity import (
     ProgrammeActivityCreate,
     ProgrammeActivityUpdate,
@@ -36,6 +37,28 @@ class ProgrammeActivityParentCycleError(ProgrammeActivityServiceError):
 
 class ProgrammeActivityHasChildrenError(ProgrammeActivityServiceError):
     """Raised when attempting to delete an activity that still has children."""
+
+
+class ProgrammeActivityWorkPackageNotFoundError(ProgrammeActivityServiceError):
+    """Raised when a work package is unavailable to the programme project."""
+
+
+def _validate_work_package_in_project(
+    database: Session,
+    work_package_id: uuid.UUID,
+    project_id: uuid.UUID,
+) -> None:
+    work_package = database.scalar(
+        select(WorkPackage.id).where(
+            WorkPackage.id == work_package_id,
+            WorkPackage.project_id == project_id,
+        )
+    )
+
+    if work_package is None:
+        raise ProgrammeActivityWorkPackageNotFoundError(
+            "Work package was not found in this project."
+        )
 
 
 def _get_parent_in_revision(
@@ -110,6 +133,13 @@ def create_activity(
     revision: ProgrammeRevision,
     activity_data: ProgrammeActivityCreate,
 ) -> ProgrammeActivity:
+    if activity_data.work_package_id is not None:
+        _validate_work_package_in_project(
+            database,
+            activity_data.work_package_id,
+            revision.programme.project_id,
+        )
+
     if activity_data.parent_activity_id is not None:
         _get_parent_in_revision(
             database,
@@ -117,9 +147,12 @@ def create_activity(
             revision.id,
         )
 
+    activity_values = activity_data.model_dump()
+    activity_values["is_milestone"] = activity_data.activity_type == "milestone"
+
     activity = ProgrammeActivity(
         programme_revision_id=revision.id,
-        **activity_data.model_dump(),
+        **activity_values,
     )
 
     database.add(activity)
@@ -197,6 +230,22 @@ def update_activity(
         raise InvalidProgrammeActivityUpdateError(
             "planned_finish cannot be earlier than planned_start."
         )
+
+    if (
+        "work_package_id" in update_values
+        and update_values["work_package_id"] is not None
+    ):
+        _validate_work_package_in_project(
+            database,
+            update_values["work_package_id"],
+            activity.programme_revision.programme.project_id,
+        )
+
+    resulting_activity_type = update_values.get(
+        "activity_type",
+        activity.activity_type,
+    )
+    update_values["is_milestone"] = resulting_activity_type == "milestone"
 
     old_parent_id = activity.parent_activity_id
     new_parent_id_set = "parent_activity_id" in update_values

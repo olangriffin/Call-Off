@@ -6,7 +6,7 @@ block content %} {% if project %}
     <div>
       <p class="eyebrow"><a href="/app">Projects</a> / {{ project.code }}</p>
 
-      <h2>{{ project.name }}</h2>
+      <h1 class="page-title">{{ project.name }}</h1>
 
       <p>{{ project.client_name or "No client recorded" }}</p>
     </div>
@@ -139,7 +139,7 @@ block content %} {% if project %}
 {% else %}
 <section class="panel">
   <div class="empty-state">
-    <h2>Project not found</h2>
+    <h1 class="page-title">Project not found</h1>
     <p>The requested project does not exist or is unavailable.</p>
     <a href="/app">Return to dashboard</a>
   </div>

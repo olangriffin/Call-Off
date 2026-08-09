@@ -14,6 +14,7 @@ from app.backend.services.programme_activity import (
     build_activity_tree,
     list_activities,
 )
+from app.backend.services.programme_workspace import build_programme_workspace
 from app.backend.services.project import get_project
 
 router = APIRouter(
@@ -60,6 +61,7 @@ def programme_page(
     )
 
     activity_rows = build_activity_tree(activities)
+    workspace = build_programme_workspace(activity_rows)
 
     return templates.TemplateResponse(
         request=request,
@@ -70,5 +72,6 @@ def programme_page(
             "project": project,
             "revision": revision,
             "activity_rows": activity_rows,
+            "workspace": workspace,
         },
     )
