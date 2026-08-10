@@ -1,0 +1,44 @@
+<div class="site-nav-menu site-nav-menu-account">
+  <button
+    type="button"
+    class="site-nav-menu-toggle"
+    aria-expanded="false"
+    aria-controls="site-nav-menu-panel"
+    aria-label="Open account menu"
+    data-closed-label="Open account menu"
+    data-open-label="Close account menu"
+  >
+    <span class="site-nav-account-avatar" aria-hidden="true">{{ (current_user.name or "?")[:1]|upper }}</span>
+    <span class="site-nav-account-identity">
+      <span class="site-nav-account-name">{{ current_user.name }}</span>
+      <span class="site-nav-account-org">{{ company_name }}</span>
+    </span>
+  </button>
+
+  <div
+    class="site-nav-menu-panel"
+    id="site-nav-menu-panel"
+    aria-label="Account"
+  >
+    <div class="site-nav-account-summary">
+      <strong>{{ current_user.name }}</strong>
+      <small>{{ company_name }} · {{ current_role|replace("_", " ")|title }}</small>
+    </div>
+
+    <button
+      type="button"
+      class="site-nav-account-item"
+      id="theme-toggle"
+      aria-label="Switch to dark mode"
+      aria-pressed="false"
+    >
+      <span class="site-nav-account-icon" aria-hidden="true">{{ inline_svg_asset("theme.svg") }}</span>
+      <span>Appearance</span>
+    </button>
+
+    <form method="post" action="/logout">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+      <button type="submit" class="site-nav-account-item">Sign out</button>
+    </form>
+  </div>
+</div>

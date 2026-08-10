@@ -11,6 +11,11 @@
 
     <title>{% block title %}Call-Off{% endblock %}</title>
 
+    <!-- Applies the theme before first paint - see core/theme-init.js.
+         Must be an external file, not an inline script: the CSP's
+         script-src has no 'unsafe-inline'. -->
+    <script src="{{ url_for('static', path='js/core/theme-init.js') }}"></script>
+
     <link
       rel="icon"
       type="image/svg+xml"
@@ -32,80 +37,17 @@
   <body class="marketing">
     <a class="skip-link" href="#main-content">Skip to main content</a>
 
-    <header class="marketing-nav">
-      <a href="/" class="brand" aria-label="Call-Off home">
-        <span class="brand-logo">
-          {{ inline_svg_asset("calloff-logo-horizontal-dark.svg") }}
-        </span>
-      </a>
-
-      <nav class="marketing-nav-links" aria-label="Primary">
-        <a href="/#problem">Why Call-Off</a>
-        <a href="/#features">Features</a>
-        <a href="/#how-it-works">How it works</a>
-        <a href="/pricing">Pricing</a>
-      </nav>
-
-      <div class="marketing-nav-actions">
-        <div class="theme-control">
-          <button
-            type="button"
-            class="theme-toggle"
-            id="theme-toggle"
-            aria-label="Switch to dark mode"
-            aria-pressed="false"
-          >
-            {{ inline_svg_asset("theme.svg") }}
-          </button>
-        </div>
-
-        <div class="marketing-nav-menu">
-          <button
-            type="button"
-            class="marketing-nav-menu-toggle"
-            aria-expanded="false"
-            aria-controls="marketing-nav-menu-panel"
-            aria-label="Open navigation actions"
-          >
-            <span class="marketing-nav-menu-line"></span>
-            <span class="marketing-nav-menu-line"></span>
-            <span class="marketing-nav-menu-line"></span>
-          </button>
-
-          <div
-            class="marketing-nav-menu-panel"
-            id="marketing-nav-menu-panel"
-            aria-label="Navigation actions"
-          >
-            <a href="/login" class="ghost-button">Log in</a>
-            <a href="/early-access" class="primary-button">Early Access</a>
-          </div>
-        </div>
-      </div>
-    </header>
+    {% include "partials/nav.html" %}
 
     <main class="marketing-main" id="main-content">
       {% block content %}{% endblock %}
     </main>
 
-    <footer class="marketing-footer">
-      <div class="marketing-footer-brand">
-        <span class="brand-icon">{{ inline_svg_asset("favicon.svg") }}</span>
-        <strong>Call-Off</strong>
-      </div>
-      <nav class="marketing-footer-links" aria-label="Footer">
-        <a href="/privacy">Privacy</a>
-        <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
-      </nav>
-      <small>
-        &copy; {{ current_year | default(2026) }} Call-Off. Subcontractor
-        delivery control.
-      </small>
-    </footer>
+    {% include "partials/marketing/footer.html" %}
 
-    <script src="{{ url_for('static', path='js/theme-toggle.js') }}"></script>
-    <script src="{{ url_for('static', path='js/marketing-nav-menu.js') }}"></script>
-    <script src="{{ url_for('static', path='js/smooth-inputs.js') }}"></script>
+    <script src="{{ url_for('static', path='js/core/theme-toggle.js') }}"></script>
+    <script src="{{ url_for('static', path='js/core/nav-menu.js') }}"></script>
+    <script src="{{ url_for('static', path='js/core/smooth-inputs.js') }}"></script>
     {% block extra_scripts %}{% endblock %}
   </body>
 </html>

@@ -1,0 +1,307 @@
+.early-access-hero {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(28px, 5vh, 64px) 24px 54px;
+  text-align: center;
+}
+
+.early-access-hero h1 {
+  max-width: 760px;
+  margin: 16px auto 0;
+  font-size: clamp(2.35rem, 5vw, 4.25rem);
+  line-height: 0.98;
+  letter-spacing: 0;
+}
+
+.early-access-hero p {
+  max-width: 640px;
+  margin: 22px auto 0;
+  color: rgba(var(--ink-rgb), 0.62);
+  font-size: 1.08rem;
+  line-height: 1.6;
+}
+
+.early-access-section {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 54px 24px 96px;
+}
+
+.early-access-section > .section-header {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.early-access-section > .section-header h2 {
+  font-size: clamp(1.85rem, 3vw, 2.55rem);
+  line-height: 1.06;
+}
+
+.early-access-form {
+  display: grid;
+  gap: 24px;
+}
+
+.early-access-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.early-access-form-card {
+  display: grid;
+  align-content: start;
+  gap: 22px;
+  padding: 28px;
+  border: 1px solid rgba(var(--ink-rgb), 0.1);
+  border-radius: 20px;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.58) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 18px 46px rgba(var(--ink-rgb), 0.06);
+}
+
+:root[data-theme="dark"] .early-access-form-card {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+}
+
+.early-access-form-card-profile {
+  grid-column: 1 / -1;
+}
+
+.early-access-form-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.early-access-form-card-header .step-number {
+  width: 38px;
+  height: 38px;
+}
+
+.early-access-form-card-header h3 {
+  margin: 2px 0 6px;
+  font-size: 1.08rem;
+  line-height: 1.16;
+}
+
+.early-access-form-card-header p {
+  margin: 0;
+  color: rgba(var(--ink-rgb), 0.62);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.early-access-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.early-access-form-card-profile .early-access-fields + .early-access-fields {
+  margin-top: -6px;
+}
+
+.early-access-form-actions {
+  display: grid;
+  gap: 16px;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.early-access-field {
+  display: grid;
+  gap: 7px;
+}
+
+fieldset.early-access-field {
+  padding: 0;
+  border: 0;
+  margin: 0;
+}
+
+.early-access-field-full,
+.early-access-form .primary-button,
+.early-access-privacy,
+.early-access-error-summary,
+.early-access-turnstile {
+  grid-column: 1 / -1;
+}
+
+.early-access-field label,
+.early-access-field legend {
+  color: rgba(var(--ink-rgb), 0.72);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.early-access-field label span:last-child {
+  color: rgba(var(--ink-rgb), 0.48);
+  font-weight: 600;
+}
+
+.early-access-field input,
+.early-access-field select,
+.early-access-field textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid rgba(var(--ink-rgb), 0.14);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text);
+  outline: none;
+}
+
+:root[data-theme="dark"] .early-access-field input,
+:root[data-theme="dark"] .early-access-field select,
+:root[data-theme="dark"] .early-access-field textarea {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.early-access-field textarea {
+  min-height: 118px;
+  padding-top: 13px;
+  resize: vertical;
+}
+
+.early-access-field input:focus,
+.early-access-field select:focus,
+.early-access-field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(255, 212, 0, 0.2);
+}
+
+.early-access-field input[aria-invalid="true"],
+.early-access-field select[aria-invalid="true"],
+.early-access-field textarea[aria-invalid="true"] {
+  border-color: rgba(217, 45, 32, 0.72);
+}
+
+.field-error {
+  margin: 0;
+  color: var(--critical);
+  font-size: 0.78rem;
+}
+
+.field-error:empty {
+  display: none;
+}
+
+.interest-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.interest-options label {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 9px;
+  padding: 0 14px;
+  border: 1px solid rgba(var(--ink-rgb), 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+:root[data-theme="dark"] .interest-options label {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.interest-options input {
+  width: 16px;
+  min-height: 16px;
+  accent-color: var(--accent);
+}
+
+.early-access-privacy {
+  margin: 4px 0 0;
+  color: rgba(var(--ink-rgb), 0.56);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.early-access-privacy a {
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+.early-access-turnstile {
+  min-height: 65px;
+}
+
+.early-access-form .primary-button {
+  min-height: 48px;
+  border-color: var(--text);
+  border-radius: 999px;
+  background: var(--text);
+  color: var(--background);
+  font-size: 0.92rem;
+}
+
+.early-access-form .primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.64;
+}
+
+.early-access-error-summary {
+  max-width: 880px;
+  margin: 0 auto 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(217, 45, 32, 0.28);
+  border-radius: 16px;
+  background: rgba(217, 45, 32, 0.08);
+}
+
+.early-access-error-summary p {
+  margin: 6px 0 0;
+  color: rgba(var(--ink-rgb), 0.66);
+}
+
+.early-access-success {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 58px 24px;
+  text-align: center;
+}
+
+.early-access-success h2 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+}
+
+.early-access-success p {
+  max-width: 540px;
+  margin: 0;
+  color: rgba(var(--ink-rgb), 0.64);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.early-access-honeypot {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+

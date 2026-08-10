@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import uuid
 
 from sqlalchemy import func, select
@@ -128,6 +129,38 @@ def _recalculate_is_summary(
         activity.is_summary = has_children
 
 
+_AUTO_ACTIVITY_CODE_PATTERN = re.compile(r"^A-(\d{5})$")
+_AUTO_ACTIVITY_CODE_STEP = 10
+_AUTO_ACTIVITY_CODE_MAX_ATTEMPTS = 5
+
+
+def _generate_next_activity_code(database: Session, revision_id: uuid.UUID) -> str:
+    """Produce the next zero-padded auto code (A-00010, A-00020, ...).
+
+    Zero-padded so codes stay in the right order under the plain string sort
+    `list_activities` uses — "A-00020" sorts before "A-00100" the way you'd
+    expect, unlike "A-20" vs "A-100". Continues on from the highest
+    auto-generated code already in the revision; hand-entered codes that
+    don't match the A-NNNNN shape are left alone and just don't collide.
+    """
+
+    existing_codes = database.scalars(
+        select(ProgrammeActivity.activity_code).where(
+            ProgrammeActivity.programme_revision_id == revision_id
+        )
+    ).all()
+
+    highest = 0
+
+    for code in existing_codes:
+        match = _AUTO_ACTIVITY_CODE_PATTERN.match(code)
+
+        if match:
+            highest = max(highest, int(match.group(1)))
+
+    return f"A-{highest + _AUTO_ACTIVITY_CODE_STEP:05d}"
+
+
 def create_activity(
     database: Session,
     revision: ProgrammeRevision,
@@ -150,22 +183,35 @@ def create_activity(
     activity_values = activity_data.model_dump()
     activity_values["is_milestone"] = activity_data.activity_type == "milestone"
 
-    activity = ProgrammeActivity(
-        programme_revision_id=revision.id,
-        **activity_values,
-    )
+    auto_generate_code = activity_values["activity_code"] is None
+    max_attempts = _AUTO_ACTIVITY_CODE_MAX_ATTEMPTS if auto_generate_code else 1
+    activity: ProgrammeActivity | None = None
 
-    database.add(activity)
+    for attempt in range(1, max_attempts + 1):
+        if auto_generate_code:
+            activity_values["activity_code"] = _generate_next_activity_code(
+                database,
+                revision.id,
+            )
 
-    try:
-        database.commit()
-    except IntegrityError as error:
-        database.rollback()
+        activity = ProgrammeActivity(
+            programme_revision_id=revision.id,
+            **activity_values,
+        )
 
-        raise ProgrammeActivityCodeConflictError(
-            f"Activity code '{activity_data.activity_code}' "
-            "already exists for this programme."
-        ) from error
+        database.add(activity)
+
+        try:
+            database.commit()
+            break
+        except IntegrityError as error:
+            database.rollback()
+
+            if not auto_generate_code or attempt == max_attempts:
+                raise ProgrammeActivityCodeConflictError(
+                    f"Activity code '{activity_values['activity_code']}' "
+                    "already exists for this programme."
+                ) from error
 
     _recalculate_is_summary(database, activity_data.parent_activity_id)
     database.commit()

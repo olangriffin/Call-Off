@@ -51,7 +51,7 @@ class AuthTemplateTestCase(unittest.TestCase):
         self.assertIn('<form method="post" action="/register" class="login-form">', body)
         self.assertIn('name="csrf_token"', body)
         self.assertIn('href="/login"', body)
-        self.assertNotIn('<aside class="sidebar">', body)
+        self.assertNotIn('<header class="site-nav">', body)
 
         for field_name in ("name", "email", "password", "confirm_password"):
             self.assertIn(f'name="{field_name}"', body)

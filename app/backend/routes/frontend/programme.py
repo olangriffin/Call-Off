@@ -16,6 +16,7 @@ from app.backend.services.programme_activity import (
 )
 from app.backend.services.programme_workspace import build_programme_workspace
 from app.backend.services.project import get_project
+from app.backend.services.work_package import list_work_packages
 
 router = APIRouter(
     include_in_schema=False,
@@ -63,6 +64,13 @@ def programme_page(
     activity_rows = build_activity_tree(activities)
     workspace = build_programme_workspace(activity_rows)
 
+    work_packages = list_work_packages(
+        database,
+        project_id,
+        offset=0,
+        limit=100,
+    )
+
     return templates.TemplateResponse(
         request=request,
         name="programme/programme.html",
@@ -73,5 +81,6 @@ def programme_page(
             "revision": revision,
             "activity_rows": activity_rows,
             "workspace": workspace,
+            "work_packages": work_packages,
         },
     )

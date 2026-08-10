@@ -4,8 +4,6 @@ block content %} {% if project %}
 <section class="panel">
   <div class="panel-header">
     <div>
-      <p class="eyebrow"><a href="/app">Projects</a> / {{ project.code }}</p>
-
       <h1 class="page-title">{{ project.name }}</h1>
 
       <p>{{ project.client_name or "No client recorded" }}</p>
@@ -16,7 +14,6 @@ block content %} {% if project %}
     <article class="metric-card">
       <span>Status</span>
       <strong>{{ project.status|title }}</strong>
-      <small>Current project stage</small>
     </article>
 
     <article class="metric-card">
@@ -25,7 +22,6 @@ block content %} {% if project %}
         {% if project.planned_start %} {{ project.planned_start.strftime("%d %b
         %Y") }} {% else %} — {% endif %}
       </strong>
-      <small>Planned commencement</small>
     </article>
 
     <article class="metric-card">
@@ -34,7 +30,6 @@ block content %} {% if project %}
         {% if project.planned_finish %} {{ project.planned_finish.strftime("%d
         %b %Y") }} {% else %} — {% endif %}
       </strong>
-      <small>Planned completion</small>
     </article>
   </div>
 </section>

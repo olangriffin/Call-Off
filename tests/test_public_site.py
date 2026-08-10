@@ -291,13 +291,13 @@ class PublicSiteTestCase(unittest.TestCase):
     def test_navigation_contains_responsive_early_access_cta(self) -> None:
         status_code, _headers, body = self.request("GET", "/")
         self.assertEqual(status_code, 200)
-        self.assertIn('class="marketing-nav-menu-panel"', body)
+        self.assertIn('class="site-nav-menu-panel"', body)
         self.assertIn('href="/early-access" class="primary-button"', body)
 
     def test_login_uses_app_shell_without_marketing_nav(self) -> None:
         status_code, _headers, body = self.request("GET", "/login")
         self.assertEqual(status_code, 200)
-        self.assertNotIn('class="marketing-nav"', body)
+        self.assertNotIn('class="site-nav"', body)
         self.assertNotIn('href="/register"', body)
         self.assertIn("Call-Off", body)
 

@@ -1,0 +1,243 @@
+/* Register toolbar */
+
+.register-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-input {
+  padding: 7px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  font-size: 0.82rem;
+  font-family: var(--font-body);
+  background: var(--background);
+  color: var(--text);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.ghost-button-sm {
+  padding: 7px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ghost-button-sm:hover {
+  border-color: var(--accent);
+}
+
+.inline-form {
+  display: inline;
+}
+
+/* Forms */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field-full {
+  grid-column: 1 / -1;
+}
+
+.form-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.form-field-hint {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.form-alert {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(217, 45, 32, 0.35);
+  border-radius: var(--radius);
+  background: rgba(217, 45, 32, 0.08);
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-alert {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(166, 41, 31, 0.35);
+  border-radius: var(--radius);
+  background: rgba(166, 41, 31, 0.08);
+}
+
+.form-alert p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+/* Package readiness */
+
+.readiness-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: var(--background);
+}
+
+.readiness-banner p:last-child {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.readiness-ready {
+  border-left-color: var(--success);
+}
+
+.readiness-critical {
+  border-left-color: var(--critical);
+}
+
+.readiness-at_risk,
+.readiness-approaching {
+  border-left-color: var(--warning);
+}
+
+.readiness-in_progress,
+.readiness-setup_required {
+  border-left-color: var(--muted);
+}
+
+.readiness-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.readiness-date {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.readiness-date span {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.readiness-date strong {
+  font-family: var(--font-mono);
+}
+
+/* Revision and approval records */
+
+.record-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.record-card {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+}
+
+.record-card-header,
+.record-subsection-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.record-card-header h3,
+.record-subsection-header h4 {
+  margin: 2px 0 0;
+}
+
+.record-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.record-meta div {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.record-meta dt {
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.record-meta dd {
+  margin: 5px 0 0;
+}
+
+.record-subsection {
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.record-subsection-header {
+  margin-bottom: 10px;
+}
+
+.record-subsection-header a {
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--accent);
+}
+
+.compact-empty-state {
+  padding: 16px;
+}
+

@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class ProgrammeActivityBase(BaseModel):
@@ -33,7 +33,25 @@ class ProgrammeActivityBase(BaseModel):
 
 
 class ProgrammeActivityCreate(ProgrammeActivityBase):
-    pass
+    # Overrides the base's required activity_code: leaving it blank asks the
+    # service layer to auto-generate the next one, rather than forcing every
+    # caller to invent a code up front.
+    activity_code: str | None = Field(
+        default=None,
+        max_length=100,
+        description=(
+            "Leave blank to auto-generate the next available code "
+            "(A-00010, A-00020, ...)."
+        ),
+    )
+
+    @field_validator("activity_code", mode="before")
+    @classmethod
+    def _blank_code_means_auto_generate(cls, value: object) -> object:
+        if isinstance(value, str) and not value.strip():
+            return None
+
+        return value
 
 
 class ProgrammeActivityUpdate(BaseModel):
