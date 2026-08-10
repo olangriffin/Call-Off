@@ -1,0 +1,29 @@
+{# Shared thead for the programme table. Needs `workspace` in context. #}
+<thead>
+  <tr>
+    <th class="programme-activity-column" scope="col">Activity</th>
+    <th class="programme-package-column" scope="col">Work package</th>
+    <th class="programme-status-column" scope="col">Status</th>
+    <th class="programme-date-column" scope="col">Start</th>
+    <th class="programme-date-column" scope="col">Finish</th>
+    <th class="programme-duration-column" scope="col">Duration</th>
+    <th class="programme-actions-column" scope="col">Actions</th>
+    <th class="programme-timeline-column" scope="col">
+      <span class="visually-hidden">Timeline</span>
+      <div class="programme-timescale" style="width: {{ workspace.timeline_width_px }}px;" aria-hidden="true">
+        {% if workspace.today_left_px is not none %}
+          <span class="programme-today-line" style="left: {{ workspace.today_left_px }}px;" data-today-marker></span>
+        {% endif %}
+        {% for tick in workspace.timeline_ticks %}
+          <span
+            class="programme-timescale-tick"
+            style="left: {{ tick.left_px }}px; width: {{ tick.width_px }}px;"
+          >
+            {% if tick.month_label %}<strong>{{ tick.month_label }}</strong>{% endif %}
+            <small>{{ tick.label }}</small>
+          </span>
+        {% endfor %}
+      </div>
+    </th>
+  </tr>
+</thead>

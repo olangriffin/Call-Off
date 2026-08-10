@@ -3,7 +3,7 @@
 
   if (!body.classList.contains("marketing")) return;
 
-  const nav = document.querySelector(".marketing-nav");
+  const nav = document.querySelector(".site-nav");
   const bottomFadeDistance = 180;
 
   function updateScrollFade() {

@@ -1,0 +1,26 @@
+{# Shared top navigation for both the marketing site and the authenticated
+   app. Mode is chosen from the authenticated user context, never the URL -
+   the URL only ever decides which link/page is "active" within a mode. #}
+{% set nav_is_app = current_user is defined and current_user %}
+
+<header class="site-nav">
+  <a href="{{ '/app' if nav_is_app else '/' }}" class="brand" aria-label="Call-Off home">
+    <span class="brand-logo">
+      {{ inline_svg_asset("calloff-logo-horizontal-dark.svg") }}
+    </span>
+  </a>
+
+  {% if nav_is_app %}
+    {% include "partials/nav/app_links.html" %}
+  {% else %}
+    {% include "partials/nav/marketing_links.html" %}
+  {% endif %}
+
+  <div class="site-nav-actions">
+    {% if nav_is_app %}
+      {% include "partials/nav/app_actions.html" %}
+    {% else %}
+      {% include "partials/nav/marketing_actions.html" %}
+    {% endif %}
+  </div>
+</header>

@@ -1,0 +1,639 @@
+/* Programme workspace */
+
+body.app-interface .programme-page {
+  gap: 22px;
+  padding-inline: clamp(18px, 2.2vw, 30px);
+}
+
+body.app-interface .programme-page-header {
+  align-items: flex-start;
+}
+
+body.app-interface .programme-revision-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+body.app-interface .programme-revision-chip {
+  padding: 5px 9px;
+  border: 1px solid rgba(var(--ink-rgb), 0.12);
+  border-radius: var(--radius-action);
+  background: rgba(255, 212, 0, 0.16);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+body.app-interface .programme-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.54);
+}
+
+:root[data-theme="dark"] body.app-interface .programme-summary-grid {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body.app-interface .programme-summary-item {
+  display: grid;
+  gap: 5px;
+  padding: 16px 18px;
+  border-right: 1px solid var(--card-border);
+}
+
+body.app-interface .programme-summary-item:last-child {
+  border-right: 0;
+}
+
+body.app-interface .programme-summary-item span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+body.app-interface .programme-summary-item strong {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+body.app-interface .programme-toolbar {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.54);
+}
+
+:root[data-theme="dark"] body.app-interface .programme-toolbar {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body.app-interface .programme-toolbar label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+body.app-interface .programme-toolbar input,
+body.app-interface .programme-toolbar select {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid rgba(var(--ink-rgb), 0.14);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--text);
+  text-transform: none;
+}
+
+:root[data-theme="dark"] body.app-interface .programme-toolbar input,
+:root[data-theme="dark"] body.app-interface .programme-toolbar select {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body.app-interface .programme-search {
+  flex: 1 1 240px;
+}
+
+body.app-interface .programme-search input {
+  width: 100%;
+}
+
+body.app-interface .programme-view-controls {
+  display: none;
+  gap: 6px;
+}
+
+body.app-interface .programme-view-controls [aria-pressed="true"] {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--background);
+}
+
+body.app-interface .programme-today-button {
+  margin-left: auto;
+}
+
+body.app-interface .programme-results-summary,
+body.app-interface .programme-scroll-instruction {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+body.app-interface .programme-scroll-instruction {
+  display: none;
+}
+
+body.app-interface .programme-table-container {
+  max-height: min(68vh, 760px);
+  border-radius: var(--radius-card);
+  outline: none;
+  overscroll-behavior: contain;
+}
+
+body.app-interface .programme-table-container:focus-visible {
+  box-shadow: 0 0 0 4px rgba(255, 212, 0, 0.24);
+}
+
+body.app-interface .programme-table {
+  --programme-activity-width: 300px;
+  --programme-register-width: 970px;
+  width: calc(var(--programme-register-width) + var(--programme-timeline-width));
+  min-width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+body.app-interface .programme-table th,
+body.app-interface .programme-table td {
+  height: 54px;
+  padding: 9px 12px;
+  border-right: 1px solid rgba(var(--ink-rgb), 0.08);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.08);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+body.app-interface .programme-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  height: 62px;
+  padding-block: 10px;
+  background: var(--sidebar);
+}
+
+body.app-interface .programme-table tbody tr:hover > * {
+  background-color: #fffbea;
+}
+
+:root[data-theme="dark"] body.app-interface .programme-table tbody tr:hover > * {
+  background-color: rgba(255, 212, 0, 0.06);
+}
+
+body.app-interface .programme-table tbody tr.is-summary > * {
+  background-color: #f6f4e8;
+}
+
+:root[data-theme="dark"] body.app-interface .programme-table tbody tr.is-summary > * {
+  background-color: rgba(255, 212, 0, 0.1);
+}
+
+body.app-interface .programme-table tbody tr[hidden] {
+  display: none;
+}
+
+body.app-interface .programme-table tbody tr.is-filter-context > * {
+  color: var(--muted);
+  background-color: #f4f4f0;
+}
+
+:root[data-theme="dark"] body.app-interface .programme-table tbody tr.is-filter-context > * {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+body.app-interface .programme-activity-column {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: var(--programme-activity-width);
+  min-width: var(--programme-activity-width);
+  max-width: var(--programme-activity-width);
+}
+
+body.app-interface .programme-table thead .programme-activity-column {
+  z-index: 6;
+}
+
+body.app-interface .programme-table tbody .programme-activity-column {
+  background: var(--surface);
+  box-shadow: 8px 0 18px rgba(var(--ink-rgb), 0.05);
+}
+
+body.app-interface .programme-package-column {
+  width: 112px;
+}
+
+body.app-interface .programme-status-column {
+  width: 118px;
+}
+
+body.app-interface .programme-date-column {
+  width: 116px;
+}
+
+body.app-interface .programme-duration-column {
+  width: 88px;
+}
+
+body.app-interface .programme-actions-column {
+  width: 120px;
+}
+
+body.app-interface .programme-timeline-column {
+  width: var(--programme-timeline-width);
+  min-width: var(--programme-timeline-width);
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+body.app-interface .programme-activity {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+  padding-left: calc(var(--activity-depth) * 18px);
+}
+
+body.app-interface .programme-activity > span:last-child {
+  display: grid;
+  min-width: 0;
+}
+
+body.app-interface .programme-activity strong {
+  overflow: hidden;
+  font-size: 0.84rem;
+  text-overflow: ellipsis;
+}
+
+body.app-interface .programme-activity small,
+body.app-interface .programme-activity-code {
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+body.app-interface .programme-activity-code {
+  margin-right: 5px;
+}
+
+body.app-interface .programme-tree-guide {
+  width: 2px;
+  min-width: 2px;
+  border-radius: var(--radius-action);
+  background: rgba(var(--ink-rgb), 0.12);
+}
+
+body.app-interface .is-summary .programme-tree-guide {
+  background: var(--accent);
+}
+
+body.app-interface .programme-muted {
+  color: var(--muted);
+}
+
+body.app-interface .programme-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-action);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+body.app-interface .programme-status-not_started {
+  color: #5f666b;
+}
+
+:root[data-theme="dark"] body.app-interface .programme-status-not_started {
+  color: #a4abb0;
+}
+
+body.app-interface .programme-status-in_progress {
+  color: #8a5a00;
+  background: rgba(255, 212, 0, 0.12);
+}
+
+:root[data-theme="dark"] body.app-interface .programme-status-in_progress {
+  color: #e7b65e;
+}
+
+body.app-interface .programme-status-complete {
+  color: var(--success);
+  background: rgba(35, 134, 54, 0.08);
+}
+
+body.app-interface .programme-actions-column {
+  font-size: 0.74rem;
+}
+
+body.app-interface .programme-actions-column .inline-form {
+  margin-left: 2px;
+}
+
+body.app-interface .programme-actions-column > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 4px 6px;
+  font-weight: 700;
+}
+
+body.app-interface .programme-delete-button {
+  min-height: 32px;
+  padding: 4px 6px;
+  border: 0;
+  background: transparent;
+  color: var(--critical);
+  cursor: pointer;
+  font-size: 0.72rem;
+}
+
+body.app-interface .programme-timescale,
+body.app-interface .programme-timeline {
+  position: relative;
+  height: 100%;
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent calc(var(--programme-week-width) - 1px),
+    rgba(var(--ink-rgb), 0.06) calc(var(--programme-week-width) - 1px),
+    rgba(var(--ink-rgb), 0.06) var(--programme-week-width)
+  );
+}
+
+body.app-interface .programme-timescale {
+  min-height: 62px;
+}
+
+body.app-interface .programme-timescale-tick {
+  position: absolute;
+  inset-block: 0;
+  display: grid;
+  align-content: center;
+  padding: 8px 10px;
+  border-right: 1px solid rgba(247, 248, 245, 0.13);
+  color: var(--sidebar-text);
+}
+
+body.app-interface .programme-timescale-tick strong {
+  font-size: 0.67rem;
+}
+
+body.app-interface .programme-timescale-tick small {
+  color: var(--sidebar-muted);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+}
+
+body.app-interface .programme-timeline {
+  min-height: 53px;
+  background-color: rgba(255, 255, 255, 0.62);
+}
+
+:root[data-theme="dark"] body.app-interface .programme-timeline {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+body.app-interface .programme-bar {
+  position: absolute;
+  top: 50%;
+  height: 18px;
+  overflow: hidden;
+  border: 1px solid #292d30;
+  border-radius: 5px;
+  background: var(--accent);
+  box-shadow: 0 4px 10px rgba(17, 19, 21, 0.16);
+  transform: translateY(-50%);
+}
+
+body.app-interface .programme-bar-summary {
+  height: 10px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: var(--text);
+}
+
+body.app-interface .programme-bar-summary::before,
+body.app-interface .programme-bar-summary::after {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 16px;
+  background: var(--text);
+  content: "";
+}
+
+body.app-interface .programme-bar-summary::before {
+  left: 0;
+}
+
+body.app-interface .programme-bar-summary::after {
+  right: 0;
+}
+
+body.app-interface .programme-milestone {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--text);
+  background: var(--accent);
+  box-shadow: 0 4px 10px rgba(17, 19, 21, 0.16);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+body.app-interface .programme-today-line {
+  position: absolute;
+  inset-block: 0;
+  z-index: 2;
+  width: 3px;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px rgba(17, 19, 21, 0.28);
+  pointer-events: none;
+}
+
+body.app-interface .programme-unscheduled {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  transform: translateY(-50%);
+}
+
+body.app-interface .programme-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+body.app-interface .programme-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+body.app-interface .programme-legend i {
+  display: inline-block;
+}
+
+body.app-interface .legend-task {
+  width: 24px;
+  height: 8px;
+  border-radius: 3px;
+  background: var(--text);
+}
+
+body.app-interface .legend-summary {
+  width: 24px;
+  height: 4px;
+  background: var(--text);
+}
+
+body.app-interface .legend-milestone {
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--text);
+  background: var(--accent);
+  transform: rotate(45deg);
+}
+
+body.app-interface .legend-today {
+  width: 3px;
+  height: 16px;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px rgba(17, 19, 21, 0.28);
+}
+
+body.app-interface .programme-add-row td {
+  height: auto;
+  padding: 8px 10px;
+  vertical-align: top;
+  background: rgba(255, 212, 0, 0.07);
+  white-space: normal;
+}
+
+body.app-interface .programme-edit-row td {
+  background: rgba(41, 121, 255, 0.06);
+}
+
+body.app-interface .programme-add-row input,
+body.app-interface .programme-add-row select {
+  width: 100%;
+  min-height: 32px;
+  padding: 5px 8px;
+  border: 1px solid rgba(var(--ink-rgb), 0.18);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.76rem;
+}
+
+body.app-interface .programme-add-activity-fields {
+  display: grid;
+  gap: 6px;
+}
+
+body.app-interface .programme-add-save,
+body.app-interface .programme-add-cancel {
+  min-height: 30px;
+  padding: 4px 10px;
+  border-radius: var(--radius-action);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+body.app-interface .programme-add-save {
+  border: 1px solid #292d30;
+  background: var(--accent);
+  color: var(--text);
+}
+
+body.app-interface .programme-add-cancel {
+  margin-top: 4px;
+  border: 1px solid rgba(var(--ink-rgb), 0.16);
+  background: transparent;
+  color: var(--muted);
+}
+
+body.app-interface .programme-timeline-placeholder {
+  min-height: 53px;
+  background-color: rgba(255, 255, 255, 0.3);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(var(--ink-rgb), 0.05),
+    rgba(var(--ink-rgb), 0.05) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+:root[data-theme="dark"] body.app-interface .programme-timeline-placeholder {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+body.app-interface .programme-add-error-row td {
+  height: auto;
+  padding: 0 10px 10px;
+  white-space: normal;
+}
+
+body.app-interface .form-alert-inline {
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid rgba(217, 45, 32, 0.35);
+  border-radius: var(--radius-action);
+  background: rgba(217, 45, 32, 0.08);
+  color: var(--critical);
+  font-size: 0.78rem;
+}
+
+body.app-interface .programme-no-results,
+body.app-interface .programme-empty-state {
+  padding: 30px;
+  border: 1px dashed rgba(var(--ink-rgb), 0.16);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.42);
+  text-align: center;
+}
+
+:root[data-theme="dark"] body.app-interface .programme-no-results,
+:root[data-theme="dark"] body.app-interface .programme-empty-state {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+body.app-interface .programme-no-results p {
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+body.app-interface .programme-empty-state .form-actions {
+  justify-content: center;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--accent);
+}
+

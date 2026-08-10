@@ -1,0 +1,67 @@
+{# Inline "add activity" row: one input per table column, submitted via
+   fetch to the programme activities JSON API. Fields are linked to the
+   detached #programme-add-form via the form="" attribute so they can live
+   directly in their own table cells instead of a form wrapping the <tr>
+   (which HTML doesn't allow). Needs `work_packages` in context. #}
+<tr class="programme-add-row" data-programme-add-row hidden>
+  <td class="programme-activity-column">
+    <div class="programme-add-activity-fields">
+      <input
+        type="text"
+        name="activity_code"
+        form="programme-add-form"
+        maxlength="100"
+        placeholder="Code (auto)"
+        aria-label="Activity code (leave blank to auto-generate)"
+        data-programme-add-first-field
+      >
+      <input
+        type="text"
+        name="name"
+        form="programme-add-form"
+        maxlength="250"
+        placeholder="Activity name"
+        aria-label="Activity name"
+        required
+      >
+      <select name="activity_type" form="programme-add-form" aria-label="Activity type">
+        <option value="task" selected>Task</option>
+        <option value="milestone">Milestone</option>
+      </select>
+    </div>
+  </td>
+  <td class="programme-package-column">
+    <select name="work_package_id" form="programme-add-form" aria-label="Work package">
+      <option value="">— None —</option>
+      {% for work_package in work_packages %}
+        <option value="{{ work_package.id }}">{{ work_package.code }}</option>
+      {% endfor %}
+    </select>
+  </td>
+  <td class="programme-status-column">
+    <select name="status" form="programme-add-form" aria-label="Status">
+      <option value="not_started" selected>Not started</option>
+      <option value="in_progress">In progress</option>
+      <option value="complete">Complete</option>
+    </select>
+  </td>
+  <td class="programme-date-column">
+    <input type="date" name="planned_start" form="programme-add-form" aria-label="Planned start">
+  </td>
+  <td class="programme-date-column">
+    <input type="date" name="planned_finish" form="programme-add-form" aria-label="Planned finish">
+  </td>
+  <td class="programme-duration-column programme-muted">—</td>
+  <td class="programme-actions-column">
+    <button type="submit" form="programme-add-form" class="programme-add-save" data-programme-add-save>Save</button>
+    <button type="button" class="programme-add-cancel" data-programme-add-cancel>Cancel</button>
+  </td>
+  <td class="programme-timeline-column">
+    <div class="programme-timeline programme-timeline-placeholder" aria-hidden="true"></div>
+  </td>
+</tr>
+<tr class="programme-add-error-row" data-programme-add-error-row hidden>
+  <td colspan="8">
+    <p class="form-alert-inline" data-programme-add-error role="alert"></p>
+  </td>
+</tr>

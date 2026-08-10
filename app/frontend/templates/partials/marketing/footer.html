@@ -1,0 +1,14 @@
+<footer class="marketing-footer">
+  <div class="marketing-footer-brand">
+    <span class="brand-icon">{{ inline_svg_asset("favicon.svg") }}</span>
+    <strong>Call-Off</strong>
+  </div>
+  <nav class="marketing-footer-links" aria-label="Footer">
+    <a href="/privacy">Privacy</a>
+    <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+  </nav>
+  <small>
+    &copy; {{ current_year | default(2026) }} Call-Off. Subcontractor
+    delivery control.
+  </small>
+</footer>

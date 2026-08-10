@@ -10,7 +10,7 @@
 
 {% block content %}
 {% if project %}
-  <section class="panel programme-page" data-programme-workspace data-view="combined">
+  <section class="panel programme-page" data-programme-workspace data-view="combined" data-project-id="{{ project.id }}">
     <div class="panel-header programme-page-header">
       <div>
         <p class="eyebrow"><a href="/app/projects/{{ project.id }}">{{ project.code }}</a> / Programme</p>
@@ -22,7 +22,7 @@
         </p>
       </div>
 
-      <a href="/app/projects/{{ project.id }}/programme/new" class="primary-button">New activity</a>
+      <a href="/app/projects/{{ project.id }}/programme/new" class="primary-button" data-programme-add-trigger>New activity</a>
     </div>
 
     {% if error_message %}
@@ -94,51 +94,41 @@
       <p class="programme-scroll-instruction" id="programme-scroll-instruction">
         The register scrolls horizontally; use List or Timeline view on smaller screens.
       </p>
+    {% else %}
+      <div class="empty-state programme-empty-state" data-programme-empty-panel>
+        <p class="eyebrow">Build the delivery sequence</p>
+        <h2>No programme activities yet</h2>
+        <p>Add the first task or milestone to start planning this project’s delivery sequence.</p>
+        <div class="form-actions">
+          <a href="/app/projects/{{ project.id }}/programme/new" class="primary-button" data-programme-add-trigger>Add first activity</a>
+          <a href="/app/projects/{{ project.id }}" class="ghost-button-sm">Back to project</a>
+        </div>
+      </div>
+    {% endif %}
 
-      <div
-        class="table-container programme-table-container"
-        tabindex="0"
-        aria-label="{{ project.code }} programme register and timeline"
-        aria-describedby="programme-scroll-instruction"
-        data-programme-scroll
+    <form id="programme-add-form" data-programme-add-form novalidate hidden></form>
+    <form id="programme-edit-form" data-programme-edit-form novalidate hidden></form>
+    {% include "partials/programme/activity_edit_row_template.html" %}
+
+    <div
+      class="table-container programme-table-container"
+      tabindex="0"
+      aria-label="{{ project.code }} programme register and timeline"
+      {% if workspace.rows %}aria-describedby="programme-scroll-instruction"{% endif %}
+      data-programme-scroll
+      {% if not workspace.rows %}hidden data-programme-table-hidden{% endif %}
+    >
+      <table
+        class="programme-table"
+        style="--programme-timeline-width: {{ workspace.timeline_width_px }}px; --programme-week-width: {{ workspace.week_width_px }}px;"
       >
-        <table
-          class="programme-table"
-          style="--programme-timeline-width: {{ workspace.timeline_width_px }}px; --programme-week-width: {{ workspace.week_width_px }}px;"
-        >
-          <caption class="visually-hidden">
-            Programme activities for {{ project.code }}, revision {{ revision.revision_code }}.
-          </caption>
-          <thead>
-            <tr>
-              <th class="programme-activity-column" scope="col">Activity</th>
-              <th class="programme-package-column" scope="col">Work package</th>
-              <th class="programme-status-column" scope="col">Status</th>
-              <th class="programme-date-column" scope="col">Start</th>
-              <th class="programme-date-column" scope="col">Finish</th>
-              <th class="programme-duration-column" scope="col">Duration</th>
-              <th class="programme-actions-column" scope="col">Actions</th>
-              <th class="programme-timeline-column" scope="col">
-                <span class="visually-hidden">Timeline</span>
-                <div class="programme-timescale" style="width: {{ workspace.timeline_width_px }}px;" aria-hidden="true">
-                  {% if workspace.today_left_px is not none %}
-                    <span class="programme-today-line" style="left: {{ workspace.today_left_px }}px;" data-today-marker></span>
-                  {% endif %}
-                  {% for tick in workspace.timeline_ticks %}
-                    <span
-                      class="programme-timescale-tick"
-                      style="left: {{ tick.left_px }}px; width: {{ tick.width_px }}px;"
-                    >
-                      {% if tick.month_label %}<strong>{{ tick.month_label }}</strong>{% endif %}
-                      <small>{{ tick.label }}</small>
-                    </span>
-                  {% endfor %}
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in workspace.rows %}
+        <caption class="visually-hidden">
+          Programme activities for {{ project.code }}, revision {{ revision.revision_code }}.
+        </caption>
+        {% include "partials/programme/table_head.html" %}
+        <tbody>
+          {% include "partials/programme/activity_add_row.html" %}
+          {% for row in workspace.rows %}
               <tr
                 class="programme-row{% if row.is_summary %} is-summary{% endif %}"
                 data-programme-row
@@ -147,6 +137,13 @@
                 data-package="{{ row.package_filter }}"
                 data-activity-id="{{ row.activity.id }}"
                 data-parent-id="{{ row.activity.parent_activity_id or '' }}"
+                data-edit-code="{{ row.activity.activity_code }}"
+                data-edit-name="{{ row.activity.name }}"
+                data-edit-type="{{ row.activity.activity_type }}"
+                data-edit-work-package-id="{{ row.activity.work_package_id or '' }}"
+                data-edit-status="{{ row.activity.status }}"
+                data-edit-start="{{ row.start_date.isoformat() if row.start_date else '' }}"
+                data-edit-finish="{{ row.finish_date.isoformat() if row.finish_date else '' }}"
               >
                 <th class="programme-activity-column" scope="row">
                   <div class="programme-activity" style="--activity-depth: {{ row.depth if row.depth < 7 else 6 }};">
@@ -178,7 +175,7 @@
                 </td>
                 <td class="programme-duration-column">{{ row.duration_label }}</td>
                 <td class="programme-actions-column">
-                  <a href="/app/projects/{{ project.id }}/programme/{{ row.activity.id }}/edit">Edit</a>
+                  <a href="/app/projects/{{ project.id }}/programme/{{ row.activity.id }}/edit" data-programme-edit-trigger>Edit</a>
                   <form
                     class="inline-form"
                     method="post"
@@ -222,6 +219,7 @@
         </table>
       </div>
 
+    {% if workspace.rows %}
       <div class="programme-no-results" data-programme-empty hidden>
         <strong>No activities match these filters</strong>
         <p>Clear or change the filters to return to the programme.</p>
@@ -232,16 +230,6 @@
         <span><i class="legend-summary" aria-hidden="true"></i>Summary</span>
         <span><i class="legend-milestone" aria-hidden="true"></i>Milestone</span>
         {% if workspace.today_left_px is not none %}<span><i class="legend-today" aria-hidden="true"></i>Today</span>{% endif %}
-      </div>
-    {% else %}
-      <div class="empty-state programme-empty-state">
-        <p class="eyebrow">Build the delivery sequence</p>
-        <h2>No programme activities yet</h2>
-        <p>Add the first task or milestone to start planning this project’s delivery sequence.</p>
-        <div class="form-actions">
-          <a href="/app/projects/{{ project.id }}/programme/new" class="primary-button">Add first activity</a>
-          <a href="/app/projects/{{ project.id }}" class="ghost-button-sm">Back to project</a>
-        </div>
       </div>
     {% endif %}
   </section>
@@ -258,5 +246,5 @@
 
 {% block scripts %}
   {{ super() }}
-  <script src="{{ url_for('static', path='js/programme-workspace.js') }}"></script>
+  <script src="{{ url_for('static', path='js/programme/workspace.js') }}"></script>
 {% endblock %}

@@ -4,13 +4,6 @@
 
   if (!toggle) return;
 
-  const storedTheme = localStorage.getItem("calloff-theme");
-  const systemPrefersDark = window.matchMedia(
-    "(prefers-color-scheme: dark)",
-  ).matches;
-
-  const initialTheme = storedTheme || (systemPrefersDark ? "dark" : "light");
-
   function applyTheme(theme) {
     const isDark = theme === "dark";
 
@@ -22,7 +15,10 @@
     );
   }
 
-  applyTheme(initialTheme);
+  // core/theme-init.js (loaded in <head>, before first paint) has already
+  // set root.dataset.theme - this just syncs this page's toggle button to
+  // match it.
+  applyTheme(root.dataset.theme === "dark" ? "dark" : "light");
 
   toggle.addEventListener("click", () => {
     const nextTheme = root.dataset.theme === "dark" ? "light" : "dark";

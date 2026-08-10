@@ -1,0 +1,123 @@
+.marketing-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px 28px;
+  padding: 28px 48px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.marketing-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.marketing-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.marketing-footer a {
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.marketing-footer a:hover {
+  color: var(--accent-hover);
+}
+
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 700;
+  transform: translateY(-160%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.pricing-kicker,
+.error-code {
+  color: rgba(var(--ink-rgb), 0.58);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.legal-page {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+}
+
+.legal-page header {
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+.legal-page h1 {
+  margin: 0 0 16px;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  line-height: 1;
+}
+
+.legal-page header p,
+.legal-page section p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.legal-page section {
+  padding-top: 30px;
+}
+
+.legal-page h2 {
+  margin: 0 0 10px;
+  font-size: 1.3rem;
+}
+
+.legal-page a {
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+.error-page {
+  display: grid;
+  min-height: calc(100vh - 210px);
+  align-content: center;
+  justify-items: center;
+  padding: 70px 24px 96px;
+  text-align: center;
+}
+
+.error-page h1 {
+  margin: 8px 0 14px;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 1;
+}
+
+.error-page > p:not(.error-code) {
+  max-width: 540px;
+  margin: 0 0 28px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+

@@ -30,8 +30,8 @@
     <form method="post" action="/app/projects/{{ project.id }}/programme/new" class="form-grid">
       <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
       <div class="form-field">
-        <label for="activity_code">Activity code</label>
-        <input id="activity_code" name="activity_code" type="text" maxlength="100" value="{{ form_values.activity_code if form_values else '' }}" required>
+        <label for="activity_code">Activity code <span class="form-field-hint">(optional — auto-generated if left blank)</span></label>
+        <input id="activity_code" name="activity_code" type="text" maxlength="100" value="{{ form_values.activity_code if form_values else '' }}">
       </div>
 
       <div class="form-field">

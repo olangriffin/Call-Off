@@ -1,0 +1,71 @@
+{# <template> holding the inline "edit activity" row + its error row. Cloned
+   by JS into place next to the display row being edited, then pre-filled
+   from that row's data-edit-* attributes. Fields point at the detached
+   #programme-edit-form via form="", same technique as the add row — only
+   one edit session (or the add row) is ever open at a time, so a single
+   shared form is enough. Needs `work_packages` in context. #}
+<template data-programme-edit-row-template>
+  <tr class="programme-add-row programme-edit-row" data-programme-edit-row>
+    <td class="programme-activity-column">
+      <div class="programme-add-activity-fields">
+        <input
+          type="text"
+          name="activity_code"
+          form="programme-edit-form"
+          maxlength="100"
+          placeholder="Code"
+          aria-label="Activity code"
+          data-programme-edit-first-field
+          required
+        >
+        <input
+          type="text"
+          name="name"
+          form="programme-edit-form"
+          maxlength="250"
+          placeholder="Activity name"
+          aria-label="Activity name"
+          required
+        >
+        <select name="activity_type" form="programme-edit-form" aria-label="Activity type">
+          <option value="task">Task</option>
+          <option value="milestone">Milestone</option>
+        </select>
+      </div>
+    </td>
+    <td class="programme-package-column">
+      <select name="work_package_id" form="programme-edit-form" aria-label="Work package">
+        <option value="">— None —</option>
+        {% for work_package in work_packages %}
+          <option value="{{ work_package.id }}">{{ work_package.code }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td class="programme-status-column">
+      <select name="status" form="programme-edit-form" aria-label="Status">
+        <option value="not_started">Not started</option>
+        <option value="in_progress">In progress</option>
+        <option value="complete">Complete</option>
+      </select>
+    </td>
+    <td class="programme-date-column">
+      <input type="date" name="planned_start" form="programme-edit-form" aria-label="Planned start">
+    </td>
+    <td class="programme-date-column">
+      <input type="date" name="planned_finish" form="programme-edit-form" aria-label="Planned finish">
+    </td>
+    <td class="programme-duration-column programme-muted">—</td>
+    <td class="programme-actions-column">
+      <button type="submit" form="programme-edit-form" class="programme-add-save" data-programme-edit-save>Save</button>
+      <button type="button" class="programme-add-cancel" data-programme-edit-cancel>Cancel</button>
+    </td>
+    <td class="programme-timeline-column">
+      <div class="programme-timeline programme-timeline-placeholder" aria-hidden="true"></div>
+    </td>
+  </tr>
+  <tr class="programme-add-error-row" data-programme-edit-error-row hidden>
+    <td colspan="8">
+      <p class="form-alert-inline" data-programme-edit-error role="alert"></p>
+    </td>
+  </tr>
+</template>

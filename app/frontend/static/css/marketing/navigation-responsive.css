@@ -1,0 +1,41 @@
+@media (max-width: 1050px) {
+  .site-nav-menu-marketing .site-nav-menu-toggle {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .site-nav-menu-marketing .site-nav-menu-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    display: grid;
+    min-width: 210px;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid var(--nav-border);
+    border-radius: 16px;
+    background: var(--nav-surface);
+    box-shadow: var(--nav-panel-shadow);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-4px);
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease,
+      visibility 180ms ease;
+  }
+
+  .site-nav-menu-marketing.is-open .site-nav-menu-panel {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .site-nav-menu-marketing .site-nav-menu-panel .ghost-button,
+  .site-nav-menu-marketing .site-nav-menu-panel .primary-button {
+    width: 100%;
+    min-height: 42px;
+  }
+}

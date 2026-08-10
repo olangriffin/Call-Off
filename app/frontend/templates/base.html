@@ -10,6 +10,11 @@
 
     <title>{% block title %} {{ page_title }} | Call-Off {% endblock %}</title>
 
+    <!-- Applies the theme before first paint - see core/theme-init.js.
+         Must be an external file, not an inline script: the CSP's
+         script-src has no 'unsafe-inline'. -->
+    <script src="{{ url_for('static', path='js/core/theme-init.js') }}"></script>
+
     <link
       rel="icon"
       type="image/svg+xml"
@@ -28,70 +33,21 @@
 
   <body class="{% block body_class %}app-interface{% endblock %}">
     <a class="skip-link" href="#main-content">Skip to main content</a>
+    {% block nav %}
+    {% include "partials/nav.html" %}
+    {% endblock %}
+
     <div class="app-shell {% block shell_class %}app-shell-operational{% endblock %}">
-      {% block sidebar %}
-      <aside class="sidebar">
-        <a href="/app" class="brand">
-          <span class="brand-logo"
-            >{{ inline_svg_asset("calloff-logo-horizontal-dark.svg") }}</span
-          >
-
-          <span class="brand-text">
-            <small class="brand-tagline">Construction control</small>
-          </span>
-        </a>
-
-        <nav class="navigation" aria-label="Application">
-          <a
-            href="/app"
-            class="navigation-link active"
-            {% if request.url.path == "/app" %}aria-current="page"{% endif %}
-          >Projects</a>
-        </nav>
-        <div class="theme-control">
-          <span class="theme-control-label">Appearance</span>
-
-          <button
-            type="button"
-            class="theme-toggle"
-            id="theme-toggle"
-            aria-label="Switch to dark mode"
-            aria-pressed="false"
-          >
-            {{ inline_svg_asset("theme.svg") }}
-          </button>
-        </div>
-
-        <div class="sidebar-footer">
-          {% if current_user is defined and current_user %}
-          <div class="sidebar-user">
-            <strong>{{ current_user.name }}</strong>
-            <small>{{ current_user.email }}</small>
-            <small> {{ current_role|replace("_", " ")|title }} </small>
-          </div>
-
-          <small>{{ company_name }}</small>
-
-          <form method="post" action="/logout">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
-            <button type="submit" class="navigation-link">Sign out</button>
-          </form>
-          {% else %}
-          <small>{{ company_name }}</small>
-          {% endif %}
-        </div>
-      </aside>
-      {% endblock %}
-
       <main class="main-content" id="main-content">
         <section class="page-content">
           {% block content %}{% endblock %}
         </section>
       </main>
     </div>
-    <script src="{{ url_for('static', path='js/theme-toggle.js') }}"></script>
-    <script src="{{ url_for('static', path='js/smooth-inputs.js') }}"></script>
-    <script src="{{ url_for('static', path='js/confirm-actions.js') }}"></script>
+    <script src="{{ url_for('static', path='js/core/theme-toggle.js') }}"></script>
+    <script src="{{ url_for('static', path='js/core/nav-menu.js') }}"></script>
+    <script src="{{ url_for('static', path='js/core/smooth-inputs.js') }}"></script>
+    <script src="{{ url_for('static', path='js/core/confirm-actions.js') }}"></script>
     {% block scripts %}{% endblock %}
   </body>
 </html>

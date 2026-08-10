@@ -74,9 +74,15 @@ class AppTemplateTestCase(unittest.TestCase):
             'id="main-content"',
             'aria-label="Application"',
             'aria-current="page"',
-            'class="sidebar-user"',
+            "site-nav-menu-account",
+            'class="site-nav-account-name"',
         ):
             self.assertIn(expected, body)
+
+        # No sidebar left to remove: the nav is a single shared component,
+        # and it must not fall back to the marketing nav on an authenticated
+        # page just because the URL is nested under /app.
+        self.assertNotIn('class="site-nav-links" aria-label="Primary"', body)
 
         nested_request = Request(
             {
@@ -90,9 +96,19 @@ class AppTemplateTestCase(unittest.TestCase):
         nested_response = self.templates.TemplateResponse(
             request=nested_request,
             name="base.html",
-            context={"page_title": "Project", "company_name": "Call-Off"},
+            context={
+                "page_title": "Project",
+                "company_name": "Call-Off",
+                "current_role": "owner",
+                "current_user": SimpleNamespace(
+                    name="Alex Builder",
+                    email="alex@example.com",
+                ),
+            },
         )
-        self.assertNotIn('aria-current="page"', nested_response.body.decode("utf-8"))
+        nested_body = nested_response.body.decode("utf-8")
+        self.assertIn("site-nav-menu-account", nested_body)
+        self.assertNotIn('aria-current="page"', nested_body)
 
     def test_authenticated_pages_use_shared_shell_and_page_title(self) -> None:
         for template_name in AUTHENTICATED_TEMPLATES:
@@ -134,11 +150,16 @@ class AppTemplateTestCase(unittest.TestCase):
                 self.assertIn('class="form-actions form-field-full"', source)
 
     def test_operational_styles_are_scoped_to_authenticated_pages(self) -> None:
-        source = Path("app/frontend/static/css/app.css").read_text()
+        # app.css is just the @import manifest; the actual rules live in the
+        # split files it pulls in under css/app/.
+        app_css_dir = Path("app/frontend/static/css/app")
+        source = Path("app/frontend/static/css/app.css").read_text() + "".join(
+            path.read_text() for path in sorted(app_css_dir.glob("*.css"))
+        )
 
         for expected in (
             "body.app-interface",
-            ".app-shell-operational",
+            ".site-nav-menu-account",
             "--radius-panel",
             "body.app-interface .panel",
             "body.app-interface .form-field input",
@@ -154,7 +175,13 @@ class AppTemplateTestCase(unittest.TestCase):
                 self.assertIn("app-shell-auth", source)
 
     def test_programme_uses_operational_register_and_timeline(self) -> None:
-        source = (self.template_root / "programme/programme.html").read_text()
+        # programme.html pulls its thead/add-row/edit-row markup in from
+        # partials/programme/, so check the page's whole template graph
+        # rather than just the one file.
+        partials_dir = self.template_root / "partials/programme"
+        source = (self.template_root / "programme/programme.html").read_text() + "".join(
+            path.read_text() for path in sorted(partials_dir.glob("*.html"))
+        )
 
         for expected in (
             "data-programme-workspace",
@@ -171,9 +198,7 @@ class AppTemplateTestCase(unittest.TestCase):
 
         self.assertEqual(source.count("data-today-marker"), 1)
 
-        javascript = Path(
-            "app/frontend/static/js/programme-workspace.js"
-        ).read_text()
+        javascript = Path("app/frontend/static/js/programme/workspace.js").read_text()
         for expected in (
             'matchMedia("(prefers-reduced-motion: reduce)")',
             "todayButton.disabled = matchCount === 0",
@@ -249,7 +274,7 @@ class AppTemplateTestCase(unittest.TestCase):
         self.assertIn("programme-bar", body)
         self.assertIn("Release package", body)
         self.assertIn("Dates not set", body)
-        self.assertIn("programme-workspace.js", body)
+        self.assertIn("programme/workspace.js", body)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,215 @@
+:root {
+  --background: #f7f8f5;
+  --surface: #ffffff;
+  --sidebar: #111315;
+  --charcoal: #24282c;
+  --sidebar-text: #f7f8f5;
+  --sidebar-muted: #a7adb1;
+  --sidebar-border: #34393d;
+  --text: #111315;
+  --muted: #686f74;
+  --border: #d8dcda;
+  --border-dark: rgba(247, 248, 245, 0.12);
+  --accent: #FFD400;
+  --accent-hover: #FFD400;
+  --accent-text: #111315;
+  --critical: #d92d20;
+  --warning: #e59a13;
+  --success: #238636;
+  --radius: 2px;
+  --radius-control: 14px;
+  --radius-action: 999px;
+  --radius-card: 16px;
+  --radius-panel: 20px;
+
+  /* Shared top navigation (marketing + authenticated app). --site-nav-*
+     stay fixed-dark - they're reused by other permanently-dark chrome
+     (donut, gantt legend, table headers, CTA band, the featured pricing
+     card) that must NOT flip with the toggle. The --nav-* tokens below are
+     for the nav bar itself and are theme-reactive too, but deliberately
+     INVERTED from the page canvas - light theme gets a dark bar, dark
+     theme gets a light bar - so the nav always contrasts against the
+     page instead of blending into it. See the dark override block
+     further down for the light-bar values. */
+  --site-nav-surface: #111315;
+  --site-nav-links-height: 42px;
+  --site-nav-corner-size: 20px;
+
+  --nav-surface: #111315;
+  --nav-surface-hover: #1c2023;
+  --nav-scrim-1: rgba(17, 19, 21, 0.68);
+  --nav-scrim-2: rgba(17, 19, 21, 0.28);
+  --nav-fade-2: rgba(17, 19, 21, 0.18);
+  --nav-fade-3: rgba(17, 19, 21, 0.08);
+  --nav-text: rgba(247, 248, 245, 0.72);
+  --nav-text-strong: #f7f8f5;
+  --nav-text-muted: #a7adb1;
+  --nav-border: rgba(247, 248, 245, 0.14);
+  --nav-hover: rgba(247, 248, 245, 0.08);
+  --nav-active: rgba(247, 248, 245, 0.1);
+  --nav-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 12px 36px rgba(0, 0, 0, 0.12);
+  --nav-panel-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+
+  --card-border: rgba(17, 19, 21, 0.1);
+  --card-gradient: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 255, 255, 0.68) 100%
+  );
+  --card-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 18px 46px rgba(17, 19, 21, 0.07);
+
+  /* Raw triplets (not colors) for building translucent ink/paper overlays
+     with rgba(var(--ink-rgb), alpha) - see the dark-theme override below.
+     Most one-off "ink on canvas" borders, shadows and muted text across the
+     app and marketing pages are built from --ink-rgb so they flip direction
+     automatically in dark mode instead of staying dark-on-dark. --paper-rgb
+     covers the inverse (light glass highlights) and intentionally does not
+     change between themes - a faint white sheen reads fine on either
+     surface. */
+  --ink-rgb: 17, 19, 21;
+  --paper-rgb: 255, 255, 255;
+
+  --font-heading:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Helvetica Neue", "Segoe UI", sans-serif;
+  --font-body:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue",
+    "Segoe UI", sans-serif;
+  --font-mono:
+    "SFMono-Regular", "SF Mono", ui-monospace, Menlo, Monaco, "IBM Plex Mono",
+    monospace;
+}
+
+/* Dark theme: the "canvas" tokens flip - page background, surfaces, body
+   text, the ink triplet used to derive borders/shadows/muted text
+   throughout the app and marketing pages, and the nav bar. --sidebar*,
+   --site-nav-surface and --charcoal are deliberately left alone: a couple
+   of permanently-dark chrome elements (donut, gantt legend, table headers,
+   CTA band, the featured pricing card) stay dark in both themes and don't
+   participate in the toggle - only the actual --nav-* tokens do. */
+:root[data-theme="dark"] {
+  --background: #131517;
+  --surface: #1a1d20;
+  --text: #f2f3f1;
+  --muted: #9aa0a4;
+  --border: #2c3033;
+  --border-dark: rgba(247, 248, 245, 0.16);
+
+  --nav-surface: #ffffff;
+  --nav-surface-hover: #f3f4f6;
+  --nav-scrim-1: rgba(255, 255, 255, 0.86);
+  --nav-scrim-2: rgba(255, 255, 255, 0.4);
+  --nav-fade-2: rgba(255, 255, 255, 0.26);
+  --nav-fade-3: rgba(255, 255, 255, 0.12);
+  --nav-text: rgba(17, 19, 21, 0.78);
+  --nav-text-strong: #111315;
+  --nav-text-muted: rgba(17, 19, 21, 0.56);
+  --nav-border: rgba(17, 19, 21, 0.12);
+  --nav-hover: rgba(17, 19, 21, 0.06);
+  --nav-active: rgba(17, 19, 21, 0.08);
+  --nav-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 12px 36px rgba(17, 19, 21, 0.1);
+  --nav-panel-shadow: 0 16px 40px rgba(17, 19, 21, 0.14);
+
+  --card-border: rgba(247, 248, 245, 0.1);
+  --card-gradient: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  --card-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 18px 46px rgba(0, 0, 0, 0.5);
+
+  --ink-rgb: 247, 248, 245;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--background);
+}
+
+h1,
+h2,
+h3,
+.brand strong {
+  font-family: var(--font-heading);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.smooth-input-shell {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.smooth-input-shell .smooth-caret-input {
+  caret-color: transparent;
+}
+
+.smooth-input-mirror {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  color: transparent;
+  pointer-events: none;
+  white-space: pre;
+}
+
+.smooth-input-mirror span {
+  display: inline-block;
+  min-width: 1px;
+}
+
+.smooth-input-caret {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  z-index: 2;
+  width: 2px;
+  height: 62%;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px rgba(17, 19, 21, 0.1);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 120ms ease,
+    transform 90ms ease-out;
+  will-change: transform;
+}
+
+

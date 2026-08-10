@@ -1,0 +1,165 @@
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .main-content {
+    padding-inline: 20px;
+  }
+}
+
+@media (max-width: 1000px) {
+  body.app-interface .programme-view-controls,
+  body.app-interface .programme-scroll-instruction {
+    display: flex;
+  }
+
+  body.app-interface .programme-page[data-view="list"] .programme-table {
+    width: var(--programme-register-width);
+  }
+
+  body.app-interface .programme-page[data-view="list"] .programme-timeline-column {
+    display: none;
+  }
+
+  body.app-interface .programme-page[data-view="timeline"] .programme-table {
+    width: calc(var(--programme-activity-width) + var(--programme-timeline-width));
+  }
+
+  body.app-interface .programme-page[data-view="timeline"]
+    :is(
+      .programme-package-column,
+      .programme-status-column,
+      .programme-date-column,
+      .programme-duration-column,
+      .programme-actions-column
+    ) {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .main-content {
+    padding: 18px 14px 32px;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+
+  .panel-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .panel-header .primary-button {
+    align-self: flex-start;
+  }
+
+  .metric-grid,
+  .form-grid,
+  .record-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .readiness-banner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .readiness-date {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 900px) {
+  body.app-interface .main-content {
+    padding-inline: 24px;
+  }
+}
+
+@media (max-width: 760px) {
+  body.app-interface .main-content {
+    padding: 24px 16px 40px;
+  }
+
+  body.app-interface .panel {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  body.app-interface .panel-header {
+    margin-bottom: 20px;
+  }
+
+  body.app-interface .metric-card {
+    min-height: 108px;
+  }
+
+  body.app-interface .programme-page {
+    padding: 16px;
+  }
+
+  body.app-interface .programme-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.app-interface .programme-summary-item {
+    border-right: 0;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  body.app-interface .programme-summary-item:last-child {
+    border-bottom: 0;
+  }
+
+  body.app-interface .programme-toolbar {
+    align-items: stretch;
+  }
+
+  body.app-interface .programme-toolbar label,
+  body.app-interface .programme-search {
+    flex: 1 1 100%;
+  }
+
+  body.app-interface .programme-view-controls {
+    order: 10;
+    width: 100%;
+  }
+
+  body.app-interface .programme-view-controls button {
+    flex: 1;
+  }
+
+  body.app-interface .programme-today-button {
+    margin-left: 0;
+  }
+
+  body.app-interface .programme-table-container {
+    max-height: 70vh;
+  }
+
+  body.app-interface .programme-table {
+    --programme-activity-width: 240px;
+    --programme-register-width: 822px;
+  }
+
+  body.app-interface .programme-page[data-view="list"] .programme-table {
+    width: var(--programme-register-width);
+  }
+
+  body.app-interface .programme-page[data-view="list"]
+    .programme-duration-column {
+    display: none;
+  }
+
+  body.app-interface .programme-page[data-view="timeline"] .programme-table {
+    width: calc(var(--programme-activity-width) + var(--programme-timeline-width));
+  }
+}

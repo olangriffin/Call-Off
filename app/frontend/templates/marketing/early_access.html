@@ -31,7 +31,6 @@ access to Call-Off and help shape a subcontractor delivery platform.
     {% else %}
         <div class="section-header">
             <h2 id="early-access-form-heading">Tell us about your team</h2>
-            <p>Required fields are marked with <span aria-hidden="true">*</span>.</p>
         </div>
         {% if errors %}
             <div class="early-access-error-summary" role="alert" tabindex="-1">
@@ -57,10 +56,9 @@ access to Call-Off and help shape a subcontractor delivery platform.
                 <section class="early-access-form-card early-access-form-card-profile"
                          aria-labelledby="early-access-details-heading">
                     <div class="early-access-form-card-header">
-                        <span class="step-number" aria-hidden="true">01</span>
                         <div>
                             <h3 id="early-access-details-heading">Contact and company</h3>
-                            <p>Tell us who you are and where you work.</p>
+                            
                         </div>
                     </div>
                     <div class="early-access-fields">
@@ -174,10 +172,8 @@ access to Call-Off and help shape a subcontractor delivery platform.
                 <section class="early-access-form-card"
                          aria-labelledby="early-access-workflow-heading">
                     <div class="early-access-form-card-header">
-                        <span class="step-number" aria-hidden="true">02</span>
                         <div>
                             <h3 id="early-access-workflow-heading">Your current workflow</h3>
-                            <p>Tell us where delivery coordination needs the most support.</p>
                         </div>
                     </div>
                     <div class="early-access-fields">
@@ -202,10 +198,8 @@ access to Call-Off and help shape a subcontractor delivery platform.
                 <section class="early-access-form-card"
                          aria-labelledby="early-access-preferences-heading">
                     <div class="early-access-form-card-header">
-                        <span class="step-number" aria-hidden="true">03</span>
                         <div>
                             <h3 id="early-access-preferences-heading">Early-access preferences</h3>
-                            <p>Choose the kind of involvement that best suits your team.</p>
                         </div>
                     </div>
                     <div class="early-access-fields">
@@ -276,5 +270,5 @@ access to Call-Off and help shape a subcontractor delivery platform.
                 async
                 defer></script>
     {% endif %}
-    <script src="{{ url_for('static', path='js/early-access.js') }}"></script>
+    <script src="{{ url_for('static', path='js/marketing/early-access.js') }}"></script>
 {% endblock %}

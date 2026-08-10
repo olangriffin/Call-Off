@@ -3,9 +3,7 @@ block content %}
 <section class="panel">
   <div class="panel-header">
     <div>
-      <p class="eyebrow">Portfolio</p>
       <h1 class="page-title">Projects</h1>
-      <p>View and manage projects for {{ company_name }}.</p>
     </div>
 
     {% if can_create_projects %}
@@ -72,9 +70,9 @@ block content %}
     </p>
 
     {% if can_create_projects %}
-      <a href="/app/projects/new" class="primary-button">
-        Create first project
-      </a>
+    <a href="/app/projects/new" class="primary-button">
+      Create first project
+    </a>
     {% endif %}
   </div>
   {% endif %}
