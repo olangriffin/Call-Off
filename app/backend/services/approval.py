@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import date
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -19,6 +20,23 @@ class ApprovalServiceError(Exception):
 
 class InvalidApprovalUpdateError(ApprovalServiceError):
     """Raised when an approval update is invalid."""
+
+
+def validate_approval_response(
+    status: str,
+    response_received_date: date | None,
+) -> None:
+    """Validate the paired response state submitted by the response form."""
+
+    is_pending = status.strip().lower() == "pending"
+    if is_pending and response_received_date is not None:
+        raise InvalidApprovalUpdateError(
+            "A pending approval cannot have a response received date."
+        )
+    if not is_pending and response_received_date is None:
+        raise InvalidApprovalUpdateError(
+            "A response received date is required when recording an outcome."
+        )
 
 
 def create_approval(

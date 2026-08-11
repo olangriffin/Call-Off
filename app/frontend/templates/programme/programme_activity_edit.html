@@ -1,114 +1,128 @@
 {% extends "base.html" %}
-
+{% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
 {% block title %}
-  {% if project %}
-    Edit activity | {{ project.code }} | Calloff
-  {% else %}
-    Project not found | Calloff
-  {% endif %}
-{% endblock %}
-
-{% block content %}
-{% if project and activity %}
-  <section class="panel">
-    <div class="panel-header">
-      <div>
-        <p class="eyebrow">{{ project.code }}</p>
-        <h1 class="page-title">Edit activity</h1>
-      </div>
-
-      <a href="/app/projects/{{ project.id }}/programme">Back to programme</a>
-    </div>
-
-    {% if error_message %}
-      <div class="form-alert" role="alert">
-        <strong>Unable to update activity</strong>
-        <p>{{ error_message }}</p>
-      </div>
+    {% if project %}
+        Edit activity | {{ project.code }} | Calloff
+    {% else %}
+        Project not found | Calloff
     {% endif %}
-
-    <form method="post" action="/app/projects/{{ project.id }}/programme/{{ activity.id }}/edit" class="form-grid">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
-      <div class="form-field">
-        <label for="activity_code">Activity code</label>
-        <input id="activity_code" name="activity_code" type="text" maxlength="100" value="{{ form_values.activity_code }}" required>
-      </div>
-
-      <div class="form-field">
-        <label for="name">Activity name</label>
-        <input id="name" name="name" type="text" maxlength="250" value="{{ form_values.name }}" required>
-      </div>
-
-      <div class="form-field">
-        <label for="activity_type">Type</label>
-        <select id="activity_type" name="activity_type" required>
-          <option value="task" {% if form_values.activity_type == "task" %}selected{% endif %}>Task</option>
-          <option value="milestone" {% if form_values.activity_type == "milestone" %}selected{% endif %}>Milestone</option>
-        </select>
-      </div>
-
-      <div class="form-field">
-        <label for="work_package_id">Linked work package</label>
-        <select id="work_package_id" name="work_package_id">
-          <option value="">— None —</option>
-          {% for work_package in work_packages %}
-          <option value="{{ work_package.id }}" {% if form_values.work_package_id == work_package.id|string %}selected{% endif %}>{{ work_package.code }} — {{ work_package.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div class="form-field">
-        <label for="parent_activity_id">Parent activity</label>
-        <select id="parent_activity_id" name="parent_activity_id">
-          <option value="">— None (top level) —</option>
-          {% for option in parent_options %}
-          <option value="{{ option.id }}" {% if form_values.parent_activity_id == option.id|string %}selected{% endif %}>{{ option.label }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div class="form-field">
-        <label for="status">Status</label>
-        <select id="status" name="status" required>
-          <option value="not_started" {% if form_values.status == "not_started" %}selected{% endif %}>Not started</option>
-          <option value="in_progress" {% if form_values.status == "in_progress" %}selected{% endif %}>In progress</option>
-          <option value="complete" {% if form_values.status == "complete" %}selected{% endif %}>Complete</option>
-        </select>
-      </div>
-
-      <div class="form-field">
-        <label for="planned_start">Planned start</label>
-        <input id="planned_start" name="planned_start" type="date" value="{{ form_values.planned_start }}">
-      </div>
-
-      <div class="form-field">
-        <label for="planned_finish">Planned finish</label>
-        <input id="planned_finish" name="planned_finish" type="date" value="{{ form_values.planned_finish }}">
-      </div>
-
-      <div class="form-field form-field-full">
-        <label for="notes">Notes</label>
-        <textarea id="notes" name="notes" rows="4">{{ form_values.notes }}</textarea>
-      </div>
-
-      <div class="form-actions form-field-full">
-        <button type="submit" class="primary-button">Save changes</button>
-        <a href="/app/projects/{{ project.id }}/programme" class="ghost-button-sm">Cancel</a>
-      </div>
-    </form>
-  </section>
-
-{% else %}
-  <section class="panel">
-    <div class="empty-state">
-      <h1 class="page-title">Activity not found</h1>
-      <p>The requested activity does not exist or is unavailable.</p>
-      {% if project %}
-      <a href="/app/projects/{{ project.id }}/programme">Return to programme</a>
-      {% else %}
-      <a href="/app">Return to dashboard</a>
-      {% endif %}
-    </div>
-  </section>
-{% endif %}
+{% endblock %}
+{% block content %}
+    {% if project and activity %}
+        {{ breadcrumbs(project=project, current_label="Edit programme activity") }}
+        {{ project_workspace_nav(project, "programme") }}
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">{{ project.code }}</p>
+                    <h1 class="page-title">Edit activity</h1>
+                </div>
+                <a href="/app/projects/{{ project.id }}/programme">Back to programme</a>
+            </div>
+            {% if error_message %}
+                <div class="form-alert" role="alert">
+                    <strong>Unable to update activity</strong>
+                    <p>{{ error_message }}</p>
+                </div>
+            {% endif %}
+            <form method="post"
+                  action="/app/projects/{{ project.id }}/programme/{{ activity.id }}/edit"
+                  class="form-grid">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+                <div class="form-field">
+                    <label for="activity_code">Activity code</label>
+                    <input id="activity_code"
+                           name="activity_code"
+                           type="text"
+                           maxlength="100"
+                           value="{{ form_values.activity_code }}"
+                           required>
+                </div>
+                <div class="form-field">
+                    <label for="name">Activity name</label>
+                    <input id="name"
+                           name="name"
+                           type="text"
+                           maxlength="250"
+                           value="{{ form_values.name }}"
+                           required>
+                </div>
+                <div class="form-field">
+                    <label for="activity_type">Type</label>
+                    <select id="activity_type" name="activity_type" required>
+                        <option value="task"
+                                {% if form_values.activity_type == "task" %}selected{% endif %}>Task</option>
+                        <option value="milestone"
+                                {% if form_values.activity_type == "milestone" %}selected{% endif %}>Milestone</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="work_package_id">Linked work package</label>
+                    <select id="work_package_id" name="work_package_id">
+                        <option value="">— None —</option>
+                        {% for work_package in work_packages %}
+                            <option value="{{ work_package.id }}"
+                                    {% if form_values.work_package_id == work_package.id|string %}selected{% endif %}>{{ work_package.code }} — {{ work_package.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="parent_activity_id">Parent activity</label>
+                    <select id="parent_activity_id" name="parent_activity_id">
+                        <option value="">— None (top level) —</option>
+                        {% for option in parent_options %}
+                            <option value="{{ option.id }}"
+                                    {% if form_values.parent_activity_id == option.id|string %}selected{% endif %}>{{ option.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="status">Status</label>
+                    <select id="status" name="status" required>
+                        <option value="not_started"
+                                {% if form_values.status == "not_started" %}selected{% endif %}>Not started</option>
+                        <option value="in_progress"
+                                {% if form_values.status == "in_progress" %}selected{% endif %}>In progress</option>
+                        <option value="complete"
+                                {% if form_values.status == "complete" %}selected{% endif %}>Complete</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="planned_start">Planned start</label>
+                    <input id="planned_start"
+                           name="planned_start"
+                           type="date"
+                           value="{{ form_values.planned_start }}">
+                </div>
+                <div class="form-field">
+                    <label for="planned_finish">Planned finish</label>
+                    <input id="planned_finish"
+                           name="planned_finish"
+                           type="date"
+                           value="{{ form_values.planned_finish }}">
+                </div>
+                <div class="form-field form-field-full">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" name="notes" rows="4">{{ form_values.notes }}</textarea>
+                </div>
+                <div class="form-actions form-field-full">
+                    <button type="submit" class="primary-button">Save changes</button>
+                    <a href="/app/projects/{{ project.id }}/programme"
+                       class="ghost-button-sm">Cancel</a>
+                </div>
+            </form>
+        </section>
+    {% else %}
+        <section class="panel">
+            <div class="empty-state">
+                <h1 class="page-title">Activity not found</h1>
+                <p>The requested activity does not exist or is unavailable.</p>
+                {% if project %}
+                    <a href="/app/projects/{{ project.id }}/programme">Return to programme</a>
+                {% else %}
+                    <a href="/app">Return to dashboard</a>
+                {% endif %}
+            </div>
+        </section>
+    {% endif %}
 {% endblock %}

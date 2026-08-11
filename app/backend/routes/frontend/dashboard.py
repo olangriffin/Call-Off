@@ -7,6 +7,7 @@ from app.backend.routes.frontend.common import (
     authenticated_template_context,
     templates,
 )
+from app.backend.services.dashboard import get_dashboard_overview
 from app.backend.services.project import list_projects
 
 router = APIRouter(
@@ -29,19 +30,19 @@ def dashboard(
         offset=0,
         limit=100,
     )
-
-    active_project_count = sum(
-        1 for project in projects if project.status.lower() == "active"
-    )
+    overview = get_dashboard_overview(database, access.organization_id)
 
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
         context={
             **authenticated_template_context(access),
-            "page_title": "Projects",
+            "page_title": "Dashboard",
             "projects": projects,
-            "project_count": len(projects),
-            "active_project_count": active_project_count,
+            "overview": overview,
+            # Preserve the existing flat names while the dashboard template
+            # migrates to the focused overview contract.
+            "project_count": overview.project_count,
+            "active_project_count": overview.active_project_count,
         },
     )

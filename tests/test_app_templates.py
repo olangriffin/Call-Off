@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import unittest
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -25,6 +25,7 @@ AUTHENTICATED_TEMPLATES = (
     "deliverable/deliverable_new.html",
     "deliverable/deliverable_revision_new.html",
     "deliverable/approval_new.html",
+    "deliverable/approval_response.html",
 )
 
 NORMALIZED_FORM_TEMPLATES = (
@@ -108,7 +109,8 @@ class AppTemplateTestCase(unittest.TestCase):
         )
         nested_body = nested_response.body.decode("utf-8")
         self.assertIn("site-nav-menu-account", nested_body)
-        self.assertNotIn('aria-current="page"', nested_body)
+        self.assertIn('aria-current="page">Dashboard</a>', nested_body)
+        self.assertNotIn(">Settings</a>", nested_body)
 
     def test_authenticated_pages_use_shared_shell_and_page_title(self) -> None:
         for template_name in AUTHENTICATED_TEMPLATES:
@@ -148,6 +150,184 @@ class AppTemplateTestCase(unittest.TestCase):
                 self.assertIn('class="form-grid"', source)
                 self.assertIn('class="form-field', source)
                 self.assertIn('class="form-actions form-field-full"', source)
+
+    def test_package_deliverables_render_from_prepared_rows(self) -> None:
+        request = Request(
+            {
+                "type": "http",
+                "method": "GET",
+                "path": "/app/projects/project-1/work-packages/package-1",
+                "headers": [],
+                "router": self.application.router,
+            }
+        )
+        deliverable = SimpleNamespace(
+            id="deliverable-1",
+            reference="D-001",
+            name="Coordination drawings",
+            deliverable_type="drawing",
+            status="in_progress",
+            planned_issue_date=date(2026, 8, 12),
+            required_approval_date=date(2026, 8, 20),
+        )
+        latest_revision = SimpleNamespace(revision_code="P02")
+        latest_approval = SimpleNamespace(
+            status="pending",
+            response_due_date=date(2026, 8, 18),
+        )
+        readiness = SimpleNamespace(
+            key="attention",
+            css_class="badge-warning",
+            label="Attention needed",
+            completion_percentage=25,
+            description="Approval work remains outstanding.",
+            complete_deliverables=0,
+            total_deliverables=1,
+            overdue_issue_count=0,
+            overdue_approval_count=0,
+            pending_approval_count=1,
+        )
+
+        response = self.templates.TemplateResponse(
+            request=request,
+            name="package/work_package_detail.html",
+            context={
+                "project": SimpleNamespace(id="project-1", code="P100"),
+                "work_package": SimpleNamespace(
+                    id="package-1",
+                    code="WP01",
+                    name="External envelope",
+                    package_type="subcontract",
+                    status="active",
+                    required_on_site_date=date(2026, 9, 1),
+                ),
+                "deliverable_rows": [
+                    {
+                        "deliverable": deliverable,
+                        "latest_revision": latest_revision,
+                        "latest_approval": latest_approval,
+                    }
+                ],
+                "readiness": readiness,
+                "page_title": "External envelope",
+                "company_name": "Call-Off",
+            },
+        )
+        body = response.body.decode("utf-8")
+
+        self.assertIn("Coordination drawings", body)
+        self.assertIn("Revision P02", body)
+        self.assertIn("Due 18 Aug 2026", body)
+        source = (self.template_root / "package/work_package_detail.html").read_text()
+        self.assertNotIn("sort(attribute='created_at'", source)
+
+    def test_approval_response_preserves_unrecognised_current_status(self) -> None:
+        request = Request(
+            {
+                "type": "http",
+                "method": "GET",
+                "path": "/app/projects/project-1/work-packages/package-1/deliverables/deliverable-1/revisions/revision-1/approvals/approval-1/respond",
+                "headers": [],
+                "router": self.application.router,
+            }
+        )
+        response = self.templates.TemplateResponse(
+            request=request,
+            name="deliverable/approval_response.html",
+            context={
+                "project": SimpleNamespace(id="project-1", code="P100"),
+                "work_package": SimpleNamespace(id="package-1", code="WP01"),
+                "deliverable": SimpleNamespace(
+                    id="deliverable-1", reference="D-001"
+                ),
+                "revision": SimpleNamespace(id="revision-1", revision_code="P02"),
+                "approval": SimpleNamespace(
+                    id="approval-1",
+                    approval_stage="client_approval",
+                    reviewer_name="Design team",
+                    submitted_date=date(2026, 8, 1),
+                    response_due_date=date(2026, 8, 10),
+                    response_received_date=date(2026, 8, 9),
+                    status="status_b",
+                    comments="Accepted subject to notes",
+                ),
+                "form_values": {
+                    "status": "status_b",
+                    "response_received_date": "2026-08-09",
+                    "comments": "Accepted subject to notes",
+                },
+                "page_title": "Record approval response",
+                "company_name": "Call-Off",
+            },
+        )
+        body = response.body.decode("utf-8")
+
+        self.assertIn(
+            '<option value="status_b" selected>Status B (current recorded status)</option>',
+            body,
+        )
+        self.assertIn('aria-describedby="response-received-date-help"', body)
+        self.assertIn("Required for any outcome other than Pending", body)
+
+    def test_non_pending_approval_without_response_date_is_explicit(self) -> None:
+        request = Request(
+            {
+                "type": "http",
+                "method": "GET",
+                "path": "/app/projects/project-1/work-packages/package-1/deliverables/deliverable-1",
+                "headers": [],
+                "router": self.application.router,
+            }
+        )
+        approval = SimpleNamespace(
+            id="approval-1",
+            approval_stage="client_approval",
+            reviewer_name="Design team",
+            submitted_date=date(2026, 8, 1),
+            response_due_date=date(2026, 8, 10),
+            response_received_date=None,
+            status="approved",
+            created_at=datetime(2026, 8, 1, tzinfo=timezone.utc),
+        )
+        revision = SimpleNamespace(
+            id="revision-1",
+            revision_code="P02",
+            status="issued",
+            issue_purpose="For construction",
+            issue_date=date(2026, 8, 1),
+            notes=None,
+            approvals=[approval],
+        )
+        response = self.templates.TemplateResponse(
+            request=request,
+            name="deliverable/deliverable_detail.html",
+            context={
+                "project": SimpleNamespace(id="project-1", code="P100"),
+                "work_package": SimpleNamespace(id="package-1", code="WP01"),
+                "deliverable": SimpleNamespace(
+                    id="deliverable-1",
+                    reference="D-001",
+                    name="Coordination drawings",
+                    deliverable_type="drawing",
+                    status="in_progress",
+                    planned_issue_date=date(2026, 8, 1),
+                    required_approval_date=date(2026, 8, 10),
+                    description=None,
+                    created_at=datetime(2026, 7, 1, tzinfo=timezone.utc),
+                    updated_at=datetime(2026, 8, 1, tzinfo=timezone.utc),
+                ),
+                "current_revision": revision,
+                "current_approval": approval,
+                "historical_revisions": [],
+                "page_title": "Coordination drawings",
+                "company_name": "Call-Off",
+            },
+        )
+        body = response.body.decode("utf-8")
+
+        self.assertIn("Response date missing", body)
+        self.assertIn("Complete response record", body)
+        self.assertNotIn("Response due 10 Aug 2026", body)
 
     def test_operational_styles_are_scoped_to_authenticated_pages(self) -> None:
         # app.css is just the @import manifest; the actual rules live in the

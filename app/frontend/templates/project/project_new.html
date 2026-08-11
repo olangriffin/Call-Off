@@ -1,55 +1,80 @@
-{% extends "base.html" %} {% block title %} New project | Calloff {%
-endblock %} {% block content %}
-<section class="panel">
-  <div class="panel-header">
-    <div>
-      <p class="eyebrow">Projects</p>
-      <h1 class="page-title">Create new project</h1>
-    </div>
-
-    <a href="/app">Cancel</a>
-  </div>
-
-  <form method="post" action="/app/projects/new" class="form-grid">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
-    <div class="form-field">
-      <label for="code">Project code</label>
-      <input id="code" name="code" type="text" required />
-    </div>
-
-    <div class="form-field">
-      <label for="name">Project name</label>
-      <input id="name" name="name" type="text" required />
-    </div>
-
-    <div class="form-field">
-      <label for="client_name">Client</label>
-      <input id="client_name" name="client_name" type="text" />
-    </div>
-
-    <div class="form-field">
-      <label for="status">Status</label>
-      <select id="status" name="status">
-        <option value="planning">Planning</option>
-        <option value="active">Active</option>
-        <option value="on_hold">On hold</option>
-        <option value="completed">Completed</option>
-      </select>
-    </div>
-
-    <div class="form-field">
-      <label for="planned_start">Planned start</label>
-      <input id="planned_start" name="planned_start" type="date" />
-    </div>
-
-    <div class="form-field">
-      <label for="planned_finish">Planned finish</label>
-      <input id="planned_finish" name="planned_finish" type="date" />
-    </div>
-
-    <div class="form-actions form-field-full">
-      <button type="submit" class="primary-button">Create project</button>
-    </div>
-  </form>
-</section>
+{% extends "base.html" %} {% from "partials/app_context.html" import breadcrumbs %} {% block title %} New project | Calloff {%
+    endblock %} {% block content %}
+    <section class="panel">
+        {{ breadcrumbs(current_label="New project") }}
+        <div class="panel-header">
+            <div>
+                <p class="eyebrow">Projects</p>
+                <h1 class="page-title">Create new project</h1>
+            </div>
+            <a href="/app">Back to dashboard</a>
+        </div>
+        {% if error_message %}
+            <div class="form-alert" role="alert">
+                <strong>Unable to create project</strong>
+                <p>{{ error_message }}</p>
+            </div>
+        {% endif %}
+        <form method="post" action="/app/projects/new" class="form-grid">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+            <div class="form-field">
+                <label for="code">Project code</label>
+                <input id="code"
+                       name="code"
+                       type="text"
+                       maxlength="50"
+                       value="{{ form_values.code if form_values else '' }}"
+                       required />
+            </div>
+            <div class="form-field">
+                <label for="name">Project name</label>
+                <input id="name"
+                       name="name"
+                       type="text"
+                       maxlength="200"
+                       value="{{ form_values.name if form_values else '' }}"
+                       required />
+            </div>
+            <div class="form-field">
+                <label for="client_name">Client</label>
+                <input id="client_name"
+                       name="client_name"
+                       type="text"
+                       maxlength="200"
+                       value="{{ form_values.client_name if form_values else '' }}" />
+            </div>
+            <div class="form-field">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    {% set selected_status = form_values.status if form_values else 'planning' %}
+                    <option value="planning"
+                            {% if selected_status == 'planning' %} selected{% endif %}>Planning</option>
+                    <option value="active"
+                            {% if selected_status == 'active' %} selected{% endif %}>Active</option>
+                    <option value="on_hold"
+                            {% if selected_status == 'on_hold' %} selected{% endif %}>On hold</option>
+                    <option value="completed"
+                            {% if selected_status == 'completed' %} selected{% endif %}>Completed</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="planned_start">Planned start</label>
+                <input id="planned_start"
+                       name="planned_start"
+                       type="date"
+                       value="{{ form_values.planned_start if form_values else '' }}" />
+            </div>
+            <div class="form-field">
+                <label for="planned_finish">Planned finish</label>
+                <input id="planned_finish"
+                       name="planned_finish"
+                       type="date"
+                       value="{{ form_values.planned_finish if form_values else '' }}" />
+            </div>
+            <div class="form-actions form-field-full">
+                <button type="submit" class="primary-button">Create project</button>
+                <a href="/app" class="ghost-button-sm">Cancel</a>
+            </div>
+        </form>
+    </section>
 {% endblock %}

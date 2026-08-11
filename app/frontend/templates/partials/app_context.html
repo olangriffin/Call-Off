@@ -1,0 +1,32 @@
+{% macro breadcrumbs(project=none, work_package=none, deliverable=none, revision=none, current_label=none) -%}
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <ol>
+            <li><a href="/app">Dashboard</a></li>
+            {% if project %}
+                <li><a href="/app/projects/{{ project.id }}">{{ project.code }}</a></li>
+            {% endif %}
+            {% if work_package and project %}
+                <li><a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}">{{ work_package.code }}</a></li>
+            {% endif %}
+            {% if deliverable and work_package and project %}
+                <li><a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}">{{ deliverable.reference }}</a></li>
+            {% endif %}
+            {% if revision %}
+                <li><span>{{ revision.revision_code }}</span></li>
+            {% endif %}
+            {% if current_label %}
+                <li><span aria-current="page">{{ current_label }}</span></li>
+            {% endif %}
+        </ol>
+    </nav>
+{%- endmacro %}
+{% macro project_workspace_nav(project, active_area='overview') -%}
+    <nav class="workspace-nav" aria-label="{{ project.code }} workspace">
+        <a href="/app/projects/{{ project.id }}"
+           {% if active_area == 'overview' %} aria-current="page"{% endif %}>Overview</a>
+        <a href="/app/projects/{{ project.id }}#work-packages"
+           {% if active_area == 'packages' %} aria-current="page"{% endif %}>Packages</a>
+        <a href="/app/projects/{{ project.id }}/programme"
+           {% if active_area == 'programme' %} aria-current="page"{% endif %}>Programme</a>
+    </nav>
+{%- endmacro %}

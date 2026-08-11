@@ -44,6 +44,31 @@
 }
 
 @media (max-width: 760px) {
+  body.app-interface .site-nav {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 8px;
+    min-height: 64px;
+    padding: 0 16px 12px;
+  }
+
+  body.app-interface .site-nav .brand-logo {
+    width: min(128px, 32vw);
+  }
+
+  body.app-interface .site-nav-links a {
+    padding-inline: 10px;
+    font-size: 0.78rem;
+  }
+
+  body.app-interface .site-nav-account-identity {
+    display: none;
+  }
+
+  body.app-interface .site-nav-menu-account .site-nav-menu-toggle {
+    gap: 0;
+    padding: 0 5px;
+  }
+
   .main-content {
     padding: 18px 14px 32px;
   }
@@ -60,6 +85,36 @@
 
   .panel-header .primary-button {
     align-self: flex-start;
+  }
+
+  body.app-interface .dashboard-hero,
+  body.app-interface .attention-item,
+  body.app-interface .approval-summary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.app-interface .dashboard-hero .primary-button,
+  body.app-interface .attention-item-action .ghost-button-sm {
+    align-self: flex-start;
+  }
+
+  body.app-interface .attention-item-action {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  body.app-interface .workspace-nav {
+    margin-inline: -2px;
+  }
+
+  body.app-interface .form-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.app-interface .form-actions :is(.primary-button, .ghost-button-sm) {
+    width: 100%;
   }
 
   .metric-grid,

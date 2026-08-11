@@ -17,6 +17,8 @@ from app.backend.services.deliverable import (
 )
 from app.backend.services.package_readiness import (
     calculate_package_readiness,
+    latest_approval,
+    latest_revision,
 )
 from app.backend.services.project import get_project
 from app.backend.services.work_package import (
@@ -199,6 +201,7 @@ def work_package_detail_page(
                 "project": None,
                 "work_package": None,
                 "deliverables": [],
+                "deliverable_rows": [],
             },
             status_code=404,
         )
@@ -219,6 +222,7 @@ def work_package_detail_page(
                 "project": project,
                 "work_package": None,
                 "deliverables": [],
+                "deliverable_rows": [],
             },
             status_code=404,
         )
@@ -227,8 +231,21 @@ def work_package_detail_page(
         database,
         work_package_id,
         offset=0,
-        limit=100,
+        limit=None,
     )
+
+    deliverable_rows = []
+    for deliverable in deliverables:
+        revision = latest_revision(deliverable)
+        deliverable_rows.append(
+            {
+                "deliverable": deliverable,
+                "latest_revision": revision,
+                "latest_approval": (
+                    latest_approval(revision) if revision is not None else None
+                ),
+            }
+        )
 
     readiness = calculate_package_readiness(
         deliverables,
@@ -244,6 +261,7 @@ def work_package_detail_page(
             "project": project,
             "work_package": work_package,
             "deliverables": deliverables,
+            "deliverable_rows": deliverable_rows,
             "readiness": readiness,
         },
     )

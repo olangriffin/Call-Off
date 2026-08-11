@@ -79,7 +79,7 @@ def list_deliverables_with_review_history(
     work_package_id: uuid.UUID,
     *,
     offset: int = 0,
-    limit: int = 100,
+    limit: int | None = 100,
 ) -> list[Deliverable]:
     statement = (
         select(Deliverable)
@@ -91,8 +91,10 @@ def list_deliverables_with_review_history(
         .where(Deliverable.work_package_id == work_package_id)
         .order_by(Deliverable.reference)
         .offset(offset)
-        .limit(limit)
     )
+
+    if limit is not None:
+        statement = statement.limit(limit)
 
     return list(database.scalars(statement).all())
 

@@ -14,8 +14,6 @@ _COMPLETE_STATUSES = {
     "closed",
     "complete",
     "completed",
-    "status_a",
-    "status_b",
 }
 
 
@@ -49,7 +47,7 @@ def _normalise_status(value: str | None) -> str:
     return value.strip().lower().replace("-", "_").replace(" ", "_")
 
 
-def _latest_revision(
+def latest_revision(
     deliverable: Deliverable,
 ) -> DeliverableRevision | None:
     if not deliverable.revisions:
@@ -64,7 +62,7 @@ def _latest_revision(
     )
 
 
-def _latest_approval(
+def latest_approval(
     revision: DeliverableRevision,
 ) -> Approval | None:
     if not revision.approvals:
@@ -85,11 +83,11 @@ def _is_deliverable_complete(deliverable: Deliverable) -> bool:
     if _normalise_status(deliverable.status) in _COMPLETE_STATUSES:
         return True
 
-    revision = _latest_revision(deliverable)
+    revision = latest_revision(deliverable)
     if revision is None:
         return False
 
-    approval = _latest_approval(revision)
+    approval = latest_approval(revision)
     if approval is None:
         return False
 
@@ -131,12 +129,12 @@ def calculate_package_readiness(
         ):
             overdue_approval_count += 1
 
-        revision = _latest_revision(deliverable)
+        revision = latest_revision(deliverable)
         if revision is None:
             missing_revision_count += 1
             continue
 
-        approval = _latest_approval(revision)
+        approval = latest_approval(revision)
         if approval is None or _normalise_status(approval.status) not in _COMPLETE_STATUSES:
             pending_approval_count += 1
 

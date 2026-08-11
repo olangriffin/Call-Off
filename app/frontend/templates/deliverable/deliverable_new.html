@@ -1,119 +1,101 @@
 {% extends "base.html" %}
-
+{% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
 {% block title %}
-  {% if work_package %}
-    New deliverable | {{ work_package.code }} | Calloff
-  {% else %}
-    Work package not found | Calloff
-  {% endif %}
+    {% if work_package %}
+        New deliverable | {{ work_package.code }} | Calloff
+    {% else %}
+        Work package not found | Calloff
+    {% endif %}
 {% endblock %}
-
 {% block content %}
-{% if project and work_package %}
-<section class="panel">
-  <div class="panel-header">
-    <div>
-      <p class="eyebrow">{{ project.code }} / {{ work_package.code }}</p>
-      <h1 class="page-title">New deliverable</h1>
-    </div>
-
-    <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}">
-      Back to package
-    </a>
-  </div>
-
-  {% if error_message %}
-  <div class="form-alert" role="alert">
-    <strong>Unable to create deliverable</strong>
-    <p>{{ error_message }}</p>
-  </div>
-  {% endif %}
-
-  <form
-    method="post"
-    action="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/new"
-    class="form-grid"
-  >
-    <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
-    <div class="form-field">
-      <label for="reference">Reference</label>
-      <input
-        id="reference"
-        name="reference"
-        type="text"
-        maxlength="150"
-        value="{{ form_values.reference if form_values else '' }}"
-        required
-      >
-    </div>
-
-    <div class="form-field">
-      <label for="name">Deliverable name</label>
-      <input
-        id="name"
-        name="name"
-        type="text"
-        maxlength="250"
-        value="{{ form_values.name if form_values else '' }}"
-        required
-      >
-    </div>
-
-    <div class="form-field">
-      <label for="deliverable_type">Type</label>
-      <select id="deliverable_type" name="deliverable_type" required>
-        {% set selected_type = form_values.deliverable_type if form_values else '' %}
-        <option value="technical_submittal" {% if selected_type == "technical_submittal" %}selected{% endif %}>Technical submittal</option>
-        <option value="drawing" {% if selected_type == "drawing" %}selected{% endif %}>Drawing</option>
-        <option value="calculation" {% if selected_type == "calculation" %}selected{% endif %}>Calculation</option>
-        <option value="sample" {% if selected_type == "sample" %}selected{% endif %}>Sample</option>
-        <option value="call_off" {% if selected_type == "call_off" %}selected{% endif %}>Call-off</option>
-        <option value="rfi" {% if selected_type == "rfi" %}selected{% endif %}>RFI</option>
-        <option value="other" {% if selected_type == "other" %}selected{% endif %}>Other</option>
-      </select>
-    </div>
-
-    <div class="form-field">
-      <label for="planned_issue_date">Planned issue date</label>
-      <input
-        id="planned_issue_date"
-        name="planned_issue_date"
-        type="date"
-        value="{{ form_values.planned_issue_date if form_values else '' }}"
-      >
-    </div>
-
-    <div class="form-field">
-      <label for="required_approval_date">Required approval date</label>
-      <input
-        id="required_approval_date"
-        name="required_approval_date"
-        type="date"
-        value="{{ form_values.required_approval_date if form_values else '' }}"
-      >
-    </div>
-
-    <div class="form-field form-field-full">
-      <label for="description">Description</label>
-      <textarea id="description" name="description" rows="4">{{ form_values.description if form_values else '' }}</textarea>
-    </div>
-
-    <div class="form-actions form-field-full">
-      <button type="submit" class="primary-button">Add deliverable</button>
-      <a
-        href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}"
-        class="ghost-button-sm"
-      >Cancel</a>
-    </div>
-  </form>
-</section>
-{% else %}
-<section class="panel">
-  <div class="empty-state">
-    <h1 class="page-title">Work package not found</h1>
-    <p>The requested work package does not exist or is unavailable.</p>
-    <a href="/app">Return to dashboard</a>
-  </div>
-</section>
-{% endif %}
+    {% if project and work_package %}
+        {{ breadcrumbs(project=project, work_package=work_package, current_label="New deliverable") }}
+        {{ project_workspace_nav(project, "packages") }}
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">{{ project.code }} / {{ work_package.code }}</p>
+                    <h1 class="page-title">New deliverable</h1>
+                </div>
+                <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}">Back to package</a>
+            </div>
+            {% if error_message %}
+                <div class="form-alert" role="alert">
+                    <strong>Unable to create deliverable</strong>
+                    <p>{{ error_message }}</p>
+                </div>
+            {% endif %}
+            <form method="post"
+                  action="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/new"
+                  class="form-grid">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+                <div class="form-field">
+                    <label for="reference">Reference</label>
+                    <input id="reference"
+                           name="reference"
+                           type="text"
+                           maxlength="150"
+                           value="{{ form_values.reference if form_values else '' }}"
+                           required>
+                </div>
+                <div class="form-field">
+                    <label for="name">Deliverable name</label>
+                    <input id="name"
+                           name="name"
+                           type="text"
+                           maxlength="250"
+                           value="{{ form_values.name if form_values else '' }}"
+                           required>
+                </div>
+                <div class="form-field">
+                    <label for="deliverable_type">Type</label>
+                    <select id="deliverable_type" name="deliverable_type" required>
+                        {% set selected_type = form_values.deliverable_type if form_values else '' %}
+                        <option value="technical_submittal"
+                                {% if selected_type == "technical_submittal" %}selected{% endif %}>Technical submittal</option>
+                        <option value="drawing"
+                                {% if selected_type == "drawing" %}selected{% endif %}>Drawing</option>
+                        <option value="calculation"
+                                {% if selected_type == "calculation" %}selected{% endif %}>Calculation</option>
+                        <option value="sample" {% if selected_type == "sample" %}selected{% endif %}>Sample</option>
+                        <option value="call_off"
+                                {% if selected_type == "call_off" %}selected{% endif %}>Call-off</option>
+                        <option value="rfi" {% if selected_type == "rfi" %}selected{% endif %}>RFI</option>
+                        <option value="other" {% if selected_type == "other" %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="planned_issue_date">Planned issue date</label>
+                    <input id="planned_issue_date"
+                           name="planned_issue_date"
+                           type="date"
+                           value="{{ form_values.planned_issue_date if form_values else '' }}">
+                </div>
+                <div class="form-field">
+                    <label for="required_approval_date">Required approval date</label>
+                    <input id="required_approval_date"
+                           name="required_approval_date"
+                           type="date"
+                           value="{{ form_values.required_approval_date if form_values else '' }}">
+                </div>
+                <div class="form-field form-field-full">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="4">{{ form_values.description if form_values else '' }}</textarea>
+                </div>
+                <div class="form-actions form-field-full">
+                    <button type="submit" class="primary-button">Add deliverable</button>
+                    <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}"
+                       class="ghost-button-sm">Cancel</a>
+                </div>
+            </form>
+        </section>
+    {% else %}
+        <section class="panel">
+            <div class="empty-state">
+                <h1 class="page-title">Work package not found</h1>
+                <p>The requested work package does not exist or is unavailable.</p>
+                <a href="/app">Return to dashboard</a>
+            </div>
+        </section>
+    {% endif %}
 {% endblock %}

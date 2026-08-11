@@ -58,15 +58,17 @@ def list_work_packages(
     project_id: uuid.UUID,
     *,
     offset: int = 0,
-    limit: int = 100,
+    limit: int | None = 100,
 ) -> list[WorkPackage]:
     statement = (
         select(WorkPackage)
         .where(WorkPackage.project_id == project_id)
         .order_by(WorkPackage.code)
         .offset(offset)
-        .limit(limit)
     )
+
+    if limit is not None:
+        statement = statement.limit(limit)
 
     return list(database.scalars(statement).all())
 

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
+{% block title %}{% if approval %}Record approval response | {{ revision.revision_code }} | Call-Off{% else %}Approval not found | Call-Off{% endif %}{% endblock %}
+{% block content %}
+    {% if project and work_package and deliverable and revision and approval %}
+        {{ breadcrumbs(project=project, work_package=work_package, deliverable=deliverable, revision=revision, current_label="Approval response") }}
+        {{ project_workspace_nav(project, "packages") }}
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">{{ approval.approval_stage|replace('_', ' ') |title }} · {{ approval.reviewer_name or "Reviewer not recorded" }}</p>
+                    <h1 class="page-title">Record approval response</h1>
+                    <p>Update the outcome and response date for revision {{ revision.revision_code }}.</p>
+                </div>
+                <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}">Back to deliverable</a>
+            </div>
+            {% if error_message %}<div class="form-alert" role="alert"><strong>Unable to update approval response</strong><p>{{ error_message }}</p></div>{% endif %}
+            <dl class="record-meta approval-request-meta">
+                <div><dt>Submitted</dt><dd>{% if approval.submitted_date %}{{ approval.submitted_date.strftime("%d %b %Y") }}{% else %}<span class="missing-value">Not set</span>{% endif %}</dd></div>
+                <div><dt>Response due</dt><dd>{% if approval.response_due_date %}{{ approval.response_due_date.strftime("%d %b %Y") }}{% else %}<span class="missing-value">Not set</span>{% endif %}</dd></div>
+                <div>
+                    <dt>Current status</dt>
+                    <dd>
+                        {{ approval.status|replace('_', ' ') |title }}
+                    </dd>
+                </div>
+            </dl>
+            <form method="post"
+                  action="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/{{ revision.id }}/approvals/{{ approval.id }}/respond"
+                  class="form-grid">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
+                {% set selected_status = form_values.status if form_values else approval.status %}
+                {% set known_statuses = ["pending", "approved", "accepted_with_comments", "rejected", "revise_and_resubmit"] %}
+                <div class="form-field">
+                    <label for="status">Response outcome</label>
+                    <select id="status" name="status" required>
+                        {% if selected_status not in known_statuses %}
+                            <option value="{{ selected_status }}" selected>{{ selected_status|replace('_', ' ') |title }} (current recorded status)</option>
+                        {% endif %}
+                        <option value="pending"
+                                {% if selected_status == "pending" %} selected{% endif %}>Pending</option>
+                        <option value="approved"
+                                {% if selected_status == "approved" %} selected{% endif %}>Approved</option>
+                        <option value="accepted_with_comments"
+                                {% if selected_status == "accepted_with_comments" %} selected{% endif %}>Accepted with comments</option>
+                        <option value="rejected"
+                                {% if selected_status == "rejected" %} selected{% endif %}>Rejected</option>
+                        <option value="revise_and_resubmit"
+                                {% if selected_status == "revise_and_resubmit" %} selected{% endif %}>Revise and resubmit</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="response_received_date">Response received date</label>
+                    <input id="response_received_date"
+                           name="response_received_date"
+                           type="date"
+                           aria-describedby="response-received-date-help"
+                           value="{{ form_values.response_received_date if form_values else (approval.response_received_date.isoformat() if approval.response_received_date else '') }}">
+                    <small id="response-received-date-help">Required for any outcome other than Pending. Leave blank while the outcome is Pending.</small>
+                </div>
+                <div class="form-field form-field-full">
+                    <label for="comments">Response comments</label>
+                    <textarea id="comments" name="comments" rows="5">{{ form_values.comments if form_values else (approval.comments or '') }}</textarea>
+                </div>
+                <div class="form-actions form-field-full">
+                    <button type="submit" class="primary-button">Save response</button>
+                    <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}"
+                       class="ghost-button-sm">Cancel</a>
+                </div>
+            </form>
+        </section>
+    {% else %}
+        <section class="panel">
+            <div class="empty-state">
+                <h1 class="page-title">Approval not found</h1>
+                <p>The requested approval does not exist or is unavailable.</p>
+                <a href="/app">Return to dashboard</a>
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}

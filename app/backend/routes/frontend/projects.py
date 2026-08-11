@@ -163,7 +163,7 @@ def project_detail_page(
         database,
         project_id,
         offset=0,
-        limit=100,
+        limit=None,
     )
 
     return templates.TemplateResponse(

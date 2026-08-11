@@ -1,185 +1,238 @@
 {% extends "base.html" %}
-
-{% block title %}
-  {% if deliverable %}
-    {{ deliverable.reference }} | Calloff
-  {% else %}
-    Deliverable not found | Calloff
-  {% endif %}
-{% endblock %}
-
+{% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
+{% block title %}{% if deliverable %}{{ deliverable.reference }} | Call-Off{% else %}Deliverable not found | Call-Off{% endif %}{% endblock %}
 {% block content %}
-{% if project and work_package and deliverable %}
-<section class="panel">
-  <div class="panel-header">
-    <div>
-      <p class="eyebrow">
-        <a href="/app/projects/{{ project.id }}">
-          {{ project.code }}
-        </a>
-        /
-        <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}">
-          Package {{ work_package.code }}
-        </a>
-        /
-        {{ deliverable.reference }}
-      </p>
-
-      <h1 class="page-title">{{ deliverable.name }}</h1>
-
-      <p>
-        {{ deliverable.deliverable_type|replace("_", " ")|title }}
-      </p>
-    </div>
-  </div>
-
-  <div class="metric-grid">
-    <article class="metric-card">
-      <span>Status</span>
-      <strong>{{ deliverable.status|replace("_", " ")|title }}</strong>
-      <small>Current deliverable status</small>
-    </article>
-
-    <article class="metric-card">
-      <span>Planned issue</span>
-      <strong>
-        {% if deliverable.planned_issue_date %}
-          {{ deliverable.planned_issue_date.strftime("%d %b %Y") }}
-        {% else %}—{% endif %}
-      </strong>
-      <small>Target issue date</small>
-    </article>
-
-    <article class="metric-card">
-      <span>Required approval</span>
-      <strong>
-        {% if deliverable.required_approval_date %}
-          {{ deliverable.required_approval_date.strftime("%d %b %Y") }}
-        {% else %}—{% endif %}
-      </strong>
-      <small>Approval needed by</small>
-    </article>
-  </div>
-</section>
-
-<section class="panel">
-  <div class="panel-header">
-    <div>
-      <h2>Details</h2>
-    </div>
-  </div>
-
-  <div class="table-container">
-    <table>
-      <tbody>
-        <tr><th>Description</th><td>{{ deliverable.description or "—" }}</td></tr>
-        <tr><th>Created</th><td>{{ deliverable.created_at.strftime("%d %b %Y %H:%M") }}</td></tr>
-        <tr><th>Last updated</th><td>{{ deliverable.updated_at.strftime("%d %b %Y %H:%M") }}</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<section class="panel">
-  <div class="panel-header">
-    <div>
-      <p class="eyebrow">Controlled record</p>
-      <h2>Revision and approval history</h2>
-    </div>
-
-    {% if revisions %}
-  <a
-    href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/new"
-    class="primary-button"
-  >
-    Add revision
-  </a>
-  {% endif %}
-  </div>
-
-  {% if revisions %}
-  <div class="record-stack">
-    {% for revision in revisions %}
-    <article class="record-card">
-      <div class="record-card-header">
-        <div>
-          <p class="eyebrow">Revision</p>
-          <h3>{{ revision.revision_code }}</h3>
-        </div>
-        <span class="badge badge-muted">{{ revision.status|replace("_", " ")|title }}</span>
-      </div>
-
-      <dl class="record-meta">
-        <div><dt>Issue purpose</dt><dd>{{ revision.issue_purpose or "—" }}</dd></div>
-        <div><dt>Issue date</dt><dd>{% if revision.issue_date %}{{ revision.issue_date.strftime("%d %b %Y") }}{% else %}—{% endif %}</dd></div>
-        <div><dt>Notes</dt><dd>{{ revision.notes or "—" }}</dd></div>
-      </dl>
-
-      <div class="record-subsection">
-        <div class="record-subsection-header">
-          <h4>Approvals</h4>
-          <a
-            href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/{{ revision.id }}/approvals/new"
-          >Issue for approval</a>
-        </div>
-
-        {% if revision.approvals %}
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Stage</th>
-                <th>Reviewer</th>
-                <th>Status</th>
-                <th>Submitted</th>
-                <th>Due</th>
-                <th>Received</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for approval in revision.approvals|sort(attribute='created_at', reverse=true) %}
-              <tr>
-                <td>{{ approval.approval_stage|replace("_", " ")|title }}</td>
-                <td>{{ approval.reviewer_name or "—" }}</td>
-                <td>{{ approval.status|replace("_", " ")|title }}</td>
-                <td>{% if approval.submitted_date %}{{ approval.submitted_date.strftime("%d %b %Y") }}{% else %}—{% endif %}</td>
-                <td>{% if approval.response_due_date %}{{ approval.response_due_date.strftime("%d %b %Y") }}{% else %}—{% endif %}</td>
-                <td>{% if approval.response_received_date %}{{ approval.response_received_date.strftime("%d %b %Y") }}{% else %}—{% endif %}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        {% else %}
-        <div class="empty-state compact-empty-state">
-          <p>No approval record has been created for this revision.</p>
-          <a
-            href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/{{ revision.id }}/approvals/new"
-          >Record approval</a>
-        </div>
+    {% if project and work_package and deliverable %}
+        {{ breadcrumbs(project=project, work_package=work_package, deliverable=deliverable, current_label="Deliverable overview") }}
+        {{ project_workspace_nav(project, "packages") }}
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">{{ deliverable.reference }} · {{ work_package.code }}</p>
+                    <h1 class="page-title">{{ deliverable.name }}</h1>
+                    <p>{{ deliverable.deliverable_type|replace('_', ' ') |title }} · {{ deliverable.status|replace('_', ' ') |title }}</p>
+                </div>
+                <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/new"
+                   class="primary-button">Add revision</a>
+            </div>
+            <div class="metric-grid">
+                <article class="metric-card"><span>Status</span><strong>{{ deliverable.status|replace('_', ' ') |title }}</strong><small>Current deliverable state</small></article>
+                <article class="metric-card"><span>Planned issue</span><strong>{% if deliverable.planned_issue_date %}<time datetime="{{ deliverable.planned_issue_date.isoformat() }}">{{ deliverable.planned_issue_date.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}</strong><small>Target issue date</small></article>
+                <article class="metric-card"><span>Required approval</span><strong>{% if deliverable.required_approval_date %}<time datetime="{{ deliverable.required_approval_date.isoformat() }}">{{ deliverable.required_approval_date.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}</strong><small>Approval needed by</small></article>
+            </div>
+        </section>
+        <section class="panel current-record" aria-labelledby="current-revision-title">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Current operational state</p>
+                    <h2 id="current-revision-title">Current revision</h2>
+                    <p>The latest issued revision and its most recent approval record.</p>
+                </div>
+                {% if current_revision %}
+                    <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/{{ current_revision.id }}/approvals/new"
+                       class="primary-button">Send for approval</a>
+                {% endif %}
+            </div>
+            {% if current_revision %}
+                <article class="record-card record-card-current">
+                    <div class="record-card-header">
+                        <div>
+                            <p class="eyebrow">Latest revision</p>
+                            <h3>{{ current_revision.revision_code }}</h3>
+                        </div>
+                        <span class="badge badge-muted">{{ current_revision.status|replace('_', ' ') |title }}</span>
+                    </div>
+                    <dl class="record-meta">
+                        <div>
+                            <dt>Issue purpose</dt>
+                            <dd>
+                                {{ current_revision.issue_purpose or "Not recorded" }}
+                            </dd>
+                        </div>
+                        <div><dt>Issue date</dt><dd>{% if current_revision.issue_date %}<time datetime="{{ current_revision.issue_date.isoformat() }}">{{ current_revision.issue_date.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}</dd></div>
+                        <div>
+                            <dt>Notes</dt>
+                            <dd>
+                                {{ current_revision.notes or "None" }}
+                            </dd>
+                        </div>
+                    </dl>
+                    {% if current_approval %}
+                        <div class="approval-summary">
+                            <div>
+                                <span class="badge badge-muted">{{ current_approval.status|replace('_', ' ') |title }}</span>
+                                <strong>{{ current_approval.approval_stage|replace('_', ' ') |title }}</strong>
+                                <span>{{ current_approval.reviewer_name or "Reviewer not recorded" }}</span>
+                            </div>
+                            <div>
+                                <span>{% if current_approval.response_received_date %}Received {{ current_approval.response_received_date.strftime("%d %b %Y") }}{% elif current_approval.status != "pending" %}<span class="missing-value">Response date missing</span>{% elif current_approval.response_due_date %}Response due {{ current_approval.response_due_date.strftime("%d %b %Y") }}{% else %}Response due date not set{% endif %}</span>
+                                <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/{{ current_revision.id }}/approvals/{{ current_approval.id }}/respond"
+                                   class="ghost-button-sm">{% if current_approval.response_received_date %}View or update response{% elif current_approval.status != "pending" %}Complete response record{% else %}Record response{% endif %}</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="empty-state compact-empty-state">
+                            <h3>Not yet sent for approval</h3>
+                            <p>Create an approval record when this revision is submitted to a reviewer.</p>
+                        </div>
+                    {% endif %}
+                    {% if current_revision.approvals %}
+                        <div class="record-subsection approval-history">
+                            <div class="record-subsection-header">
+                                <h4>Approval history for this revision</h4>
+                            </div>
+                            <div class="table-container"
+                                 tabindex="0"
+                                 aria-label="Approvals for current revision {{ current_revision.revision_code }}">
+                                <table>
+                                    <caption class="visually-hidden">Approval records for current revision {{ current_revision.revision_code }}</caption>
+                                    <thead>
+                                        <tr>
+                                            <th>Stage</th>
+                                            <th>Reviewer</th>
+                                            <th>Status</th>
+                                            <th>Submitted</th>
+                                            <th>Due</th>
+                                            <th>Received</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for approval in current_revision.approvals|sort(attribute='created_at', reverse=true) %}
+                                            <tr>
+                                                <td>{{ approval.approval_stage|replace('_', ' ') |title }}</td>
+                                                <td>{{ approval.reviewer_name or "Not recorded" }}</td>
+                                                <td>{{ approval.status|replace('_', ' ') |title }}{% if current_approval and approval.id == current_approval.id %}<small class="table-secondary">Latest</small>{% endif %}</td>
+                                                <td>{% if approval.submitted_date %}{{ approval.submitted_date.strftime("%d %b %Y") }}{% else %}—{% endif %}</td>
+                                                <td>{% if approval.response_due_date %}{{ approval.response_due_date.strftime("%d %b %Y") }}{% else %}—{% endif %}</td>
+                                                <td>{% if approval.response_received_date %}{{ approval.response_received_date.strftime("%d %b %Y") }}{% else %}—{% endif %}</td>
+                                                <td><a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/{{ current_revision.id }}/approvals/{{ approval.id }}/respond">View or update response</a></td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endif %}
+                </article>
+            {% else %}
+                <div class="empty-state">
+                    <h3>No revision issued</h3>
+                    <p>Create the first revision to establish the current controlled record and start the approval workflow.</p>
+                    <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/new"
+                       class="primary-button">Create first revision</a>
+                </div>
+            {% endif %}
+        </section>
+        {% if historical_revisions %}
+            <section class="panel" aria-labelledby="history-title">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Audit trail</p>
+                        <h2 id="history-title">Revision history</h2>
+                        <p>Earlier revisions are shown for reference and cannot be re-issued for approval here.</p>
+                    </div>
+                </div>
+                <div class="record-stack">
+                    {% for revision in historical_revisions %}
+                        <article class="record-card record-card-historical">
+                            <div class="record-card-header">
+                                <div>
+                                    <p class="eyebrow">Historical revision</p>
+                                    <h3>{{ revision.revision_code }}</h3>
+                                </div>
+                                <span class="badge badge-muted">{{ revision.status|replace('_', ' ') |title }}</span>
+                            </div>
+                            <dl class="record-meta">
+                                <div>
+                                    <dt>Issue purpose</dt>
+                                    <dd>
+                                        {{ revision.issue_purpose or "Not recorded" }}
+                                    </dd>
+                                </div>
+                                <div><dt>Issue date</dt><dd>{% if revision.issue_date %}{{ revision.issue_date.strftime("%d %b %Y") }}{% else %}<span class="missing-value">Not set</span>{% endif %}</dd></div>
+                                <div>
+                                    <dt>Notes</dt>
+                                    <dd>
+                                        {{ revision.notes or "None" }}
+                                    </dd>
+                                </div>
+                            </dl>
+                            <div class="record-subsection">
+                                <div class="record-subsection-header">
+                                    <h4>Approval records</h4>
+                                </div>
+                                {% if revision.approvals %}
+                                    <div class="table-container"
+                                         tabindex="0"
+                                         aria-label="Approvals for revision {{ revision.revision_code }}">
+                                        <table>
+                                            <caption class="visually-hidden">Approval records for revision {{ revision.revision_code }}</caption>
+                                            <thead>
+                                                <tr>
+                                                    <th>Stage</th>
+                                                    <th>Reviewer</th>
+                                                    <th>Status</th>
+                                                    <th>Submitted</th>
+                                                    <th>Due</th>
+                                                    <th>Received</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for approval in revision.approvals|sort(attribute='created_at', reverse=true) %}
+                                                    <tr>
+                                                        <td>{{ approval.approval_stage|replace('_', ' ') |title }}</td>
+                                                        <td>{{ approval.reviewer_name or "Not recorded" }}</td>
+                                                        <td>{{ approval.status|replace('_', ' ') |title }}</td>
+                                                        <td>{% if approval.submitted_date %}{{ approval.submitted_date.strftime("%d %b %Y") }}{% else %}—{% endif %}</td><td>{% if approval.response_due_date %}{{ approval.response_due_date.strftime("%d %b %Y") }}{% else %}—{% endif %}</td><td>{% if approval.response_received_date %}{{ approval.response_received_date.strftime("%d %b %Y") }}{% else %}—{% endif %}</td>
+                                                        <td><a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/{{ revision.id }}/approvals/{{ approval.id }}/respond">View or update response</a></td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}<p class="missing-value">No approval was recorded for this historical revision.</p>{% endif %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
         {% endif %}
-      </div>
-    </article>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="empty-state">
-    <h3>No revisions</h3>
-    <p>Create the first revision to begin the controlled approval history.</p>
-    <a
-      href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/new"
-      class="primary-button"
-    >Create first revision</a>
-  </div>
-  {% endif %}
-</section>
-{% else %}
-<section class="panel">
-  <div class="empty-state">
-    <h1 class="page-title">Deliverable not found</h1>
-    <p>The requested deliverable does not exist or is unavailable.</p>
-    <a href="/app">Return to dashboard</a>
-  </div>
-</section>
-{% endif %}
+        <section class="panel" aria-labelledby="details-title">
+            <div class="panel-header">
+                <div>
+                    <h2 id="details-title">Record details</h2>
+                </div>
+            </div>
+            <dl class="record-meta record-meta-details">
+                <div>
+                    <dt>Description</dt>
+                    <dd>
+                        {{ deliverable.description or "Not recorded" }}
+                    </dd>
+                </div>
+                <div>
+                    <dt>Created</dt>
+                    <dd>
+                        {{ deliverable.created_at.strftime("%d %b %Y %H:%M") }}
+                    </dd>
+                </div>
+                <div>
+                    <dt>Last updated</dt>
+                    <dd>
+                        {{ deliverable.updated_at.strftime("%d %b %Y %H:%M") }}
+                    </dd>
+                </div>
+            </dl>
+        </section>
+    {% else %}
+        <section class="panel">
+            <div class="empty-state">
+                <h1 class="page-title">Deliverable not found</h1>
+                <p>The requested deliverable does not exist or is unavailable.</p>
+                <a href="/app">Return to dashboard</a>
+            </div>
+        </section>
+    {% endif %}
 {% endblock %}
