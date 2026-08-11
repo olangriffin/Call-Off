@@ -13,10 +13,16 @@ from app.backend.routes.frontend.common import (
     authenticated_template_context,
     templates,
 )
-from app.backend.schemas.approval import ApprovalCreate
+from app.backend.schemas.approval import ApprovalCreate, ApprovalUpdate
 from app.backend.schemas.deliverable import DeliverableCreate
 from app.backend.schemas.deliverable_revision import DeliverableRevisionCreate
-from app.backend.services.approval import create_approval
+from app.backend.services.approval import (
+    InvalidApprovalUpdateError,
+    create_approval,
+    get_approval,
+    update_approval,
+    validate_approval_response,
+)
 from app.backend.services.deliverable import (
     DeliverableReferenceConflictError,
     create_deliverable,
@@ -27,6 +33,10 @@ from app.backend.services.deliverable_revision import (
     RevisionCodeConflictError,
     create_deliverable_revision,
     get_deliverable_revision,
+)
+from app.backend.services.package_readiness import (
+    latest_approval,
+    latest_revision,
 )
 from app.backend.services.project import get_project
 from app.backend.services.work_package import get_work_package
@@ -47,6 +57,7 @@ def _not_found_context(
     work_package=None,
     deliverable=None,
     revision=None,
+    approval=None,
 ) -> dict[str, object]:
     return {
         **authenticated_template_context(access),
@@ -55,6 +66,7 @@ def _not_found_context(
         "work_package": work_package,
         "deliverable": deliverable,
         "revision": revision,
+        "approval": approval,
         "form_values": {},
     }
 
@@ -265,6 +277,12 @@ def deliverable_detail_page(
         ),
         reverse=True,
     )
+    current_revision = latest_revision(deliverable)
+    current_approval = (
+        latest_approval(current_revision)
+        if current_revision is not None
+        else None
+    )
 
     return templates.TemplateResponse(
         request=request,
@@ -276,6 +294,9 @@ def deliverable_detail_page(
             "work_package": work_package,
             "deliverable": deliverable,
             "revisions": revisions,
+            "current_revision": current_revision,
+            "current_approval": current_approval,
+            "historical_revisions": revisions[1:],
         },
     )
 
@@ -435,6 +456,215 @@ async def create_revision_page(
     )
 
 
+def _approval_response_context(
+    access: FrontendOrganisationAccess,
+    *,
+    project,
+    work_package,
+    deliverable,
+    revision,
+    approval,
+    form_values: dict[str, object],
+    error_message: str | None = None,
+) -> dict[str, object]:
+    context = {
+        **authenticated_template_context(access),
+        "page_title": "Record approval response",
+        "project": project,
+        "work_package": work_package,
+        "deliverable": deliverable,
+        "revision": revision,
+        "approval": approval,
+        "form_values": form_values,
+    }
+    if error_message is not None:
+        context["error_message"] = error_message
+    return context
+
+
+def _resolve_approval_hierarchy(
+    database: DatabaseSession,
+    access: FrontendOrganisationAccess,
+    project_id: uuid.UUID,
+    work_package_id: uuid.UUID,
+    deliverable_id: uuid.UUID,
+    revision_id: uuid.UUID,
+    approval_id: uuid.UUID,
+):
+    project, work_package = _resolve_project_and_package(
+        database,
+        access,
+        project_id,
+        work_package_id,
+    )
+    deliverable = None
+    revision = None
+    approval = None
+    if work_package is not None:
+        deliverable = get_deliverable(database, deliverable_id, work_package_id)
+    if deliverable is not None:
+        revision = get_deliverable_revision(database, revision_id, deliverable_id)
+    if revision is not None:
+        approval = get_approval(database, approval_id, revision_id)
+    return project, work_package, deliverable, revision, approval
+
+
+@router.get(
+    "/app/projects/{project_id}/work-packages/{work_package_id}"
+    "/deliverables/{deliverable_id}/revisions/{revision_id}"
+    "/approvals/{approval_id}/respond",
+    response_class=HTMLResponse,
+)
+def approval_response_page(
+    request: Request,
+    project_id: uuid.UUID,
+    work_package_id: uuid.UUID,
+    deliverable_id: uuid.UUID,
+    revision_id: uuid.UUID,
+    approval_id: uuid.UUID,
+    database: DatabaseSession,
+    access: FrontendOrganisationAccess,
+) -> HTMLResponse:
+    project, work_package, deliverable, revision, approval = (
+        _resolve_approval_hierarchy(
+            database,
+            access,
+            project_id,
+            work_package_id,
+            deliverable_id,
+            revision_id,
+            approval_id,
+        )
+    )
+    if approval is None:
+        return templates.TemplateResponse(
+            request=request,
+            name="deliverable/approval_response.html",
+            context=_approval_response_context(
+                access,
+                project=project,
+                work_package=work_package,
+                deliverable=deliverable,
+                revision=revision,
+                approval=approval,
+                form_values={},
+            ),
+            status_code=404,
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="deliverable/approval_response.html",
+        context=_approval_response_context(
+            access,
+            project=project,
+            work_package=work_package,
+            deliverable=deliverable,
+            revision=revision,
+            approval=approval,
+            form_values={
+                "status": approval.status,
+                "response_received_date": approval.response_received_date or "",
+                "comments": approval.comments or "",
+            },
+        ),
+    )
+
+
+@router.post(
+    "/app/projects/{project_id}/work-packages/{work_package_id}"
+    "/deliverables/{deliverable_id}/revisions/{revision_id}"
+    "/approvals/{approval_id}/respond",
+    response_class=HTMLResponse,
+)
+async def update_approval_response_page(
+    request: Request,
+    project_id: uuid.UUID,
+    work_package_id: uuid.UUID,
+    deliverable_id: uuid.UUID,
+    revision_id: uuid.UUID,
+    approval_id: uuid.UUID,
+    database: DatabaseSession,
+    access: FrontendOrganisationAccess,
+):
+    project, work_package, deliverable, revision, approval = (
+        _resolve_approval_hierarchy(
+            database,
+            access,
+            project_id,
+            work_package_id,
+            deliverable_id,
+            revision_id,
+            approval_id,
+        )
+    )
+    if approval is None:
+        return templates.TemplateResponse(
+            request=request,
+            name="deliverable/approval_response.html",
+            context=_approval_response_context(
+                access,
+                project=project,
+                work_package=work_package,
+                deliverable=deliverable,
+                revision=revision,
+                approval=approval,
+                form_values={},
+            ),
+            status_code=404,
+        )
+
+    form = await verified_form(request)
+    form_values = {
+        "status": _form_string(form, "status"),
+        "response_received_date": _form_string(
+            form, "response_received_date"
+        ),
+        "comments": _form_string(form, "comments"),
+    }
+    values = {
+        "status": form_values["status"],
+        "response_received_date": form_values["response_received_date"] or None,
+        "comments": form_values["comments"] or None,
+    }
+
+    try:
+        approval_data = ApprovalUpdate.model_validate(values)
+        validate_approval_response(
+            approval_data.status or "",
+            approval_data.response_received_date,
+        )
+        update_approval(database, approval, approval_data)
+    except (ValidationError, InvalidApprovalUpdateError) as error:
+        if isinstance(error, ValidationError):
+            error_message = error.errors()[0]["msg"]
+        else:
+            error_message = str(error)
+        return templates.TemplateResponse(
+            request=request,
+            name="deliverable/approval_response.html",
+            context=_approval_response_context(
+                access,
+                project=project,
+                work_package=work_package,
+                deliverable=deliverable,
+                revision=revision,
+                approval=approval,
+                form_values=form_values,
+                error_message=error_message,
+            ),
+            status_code=422,
+        )
+
+    return RedirectResponse(
+        url=(
+            f"/app/projects/{project.id}/work-packages/{work_package.id}"
+            f"/deliverables/{deliverable.id}"
+        ),
+        status_code=303,
+    )
+
+
 @router.get(
     "/app/projects/{project_id}/work-packages/{work_package_id}"
     "/deliverables/{deliverable_id}/revisions/{revision_id}/approvals/new",
@@ -487,7 +717,7 @@ def new_approval_page(
         name="deliverable/approval_new.html",
         context={
             **authenticated_template_context(access),
-            "page_title": "Record approval",
+            "page_title": "Send for approval",
             "project": project,
             "work_package": work_package,
             "deliverable": deliverable,

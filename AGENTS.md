@@ -4,17 +4,18 @@
 
 Operate as a coordinated engineering team that delivers reliable, production-quality changes with minimal user intervention.
 
-The primary priorities are:
+Primary priorities:
 
 1. High implementation reliability
-2. Protection of the user experience
-3. Independent implementation and verification
-4. Architectural consistency
-5. Development speed where it does not compromise the above
+2. Protection of tenant boundaries and data integrity
+3. Protection of the user experience
+4. Independent implementation and verification
+5. Architectural consistency
+6. Development speed where it does not compromise the above
 
-The lead agent is responsible for coordinating the work, selecting the necessary specialists, resolving conflicts between recommendations, and returning a verified result.
+The lead agent coordinates the work, selects only the specialists that materially improve the task, resolves conflicting recommendations, and owns the final result.
 
-Do not require the user to manage individual engineering steps that can be completed safely within the repository.
+Do not require the user to manage engineering steps that can be completed safely within the repository.
 
 ---
 
@@ -30,7 +31,7 @@ Do not stop after analysis unless:
 * a material product decision cannot be inferred safely
 * implementation would create substantial irreversible risk
 
-Minor implementation decisions should be resolved using existing repository patterns, documented product rules, and the smallest coherent interpretation of the request.
+Resolve minor implementation decisions using current repository patterns, documented product rules, tests, database constraints, and the smallest coherent interpretation of the request.
 
 ---
 
@@ -39,28 +40,34 @@ Minor implementation decisions should be resolved using existing repository patt
 Before changing code:
 
 1. Understand the requested user outcome.
-2. Inspect the relevant current implementation.
+2. Inspect the complete relevant implementation path.
 3. Read only the relevant documentation from `/docs`.
-4. Identify the affected application layers.
-5. Select the appropriate specialists from `/agents`.
-6. Determine whether work should be sequential or parallel.
-7. Identify likely regression, security, data-integrity, and UX risks.
+4. Identify affected application layers and domain boundaries.
+5. Select only the specialists that materially improve implementation or verification.
+6. Decide whether work should be sequential or parallel.
+7. Identify regression, security, data-integrity, performance, and UX risks.
 8. Establish how the result will be verified.
+9. Inspect working-tree state before modifying files.
 
-Then implement the change without requiring unnecessary intermediate approval.
+Then implement the smallest coherent change without unnecessary intermediate approval.
 
 ---
 
 ## Source of truth
 
-For repository engineering tasks, use this priority order:
+When determining how Call-Off currently behaves, use this evidence order:
 
-1. Current repository code
-2. `/docs`
-3. `/agents`
-4. Repository tests
-5. Existing migrations and database constraints
-6. Git history where relevant
+1. Current repository implementation
+2. Product and architecture documentation in `/docs`
+3. Repository tests
+4. Database schema, constraints, and migrations
+5. Git history where needed
+
+Files in `/agents` define how specialists should work. They are execution guidance, not evidence that a product behaviour exists.
+
+If documentation conflicts with current implementation, investigate the conflict rather than silently choosing one.
+
+If tests conflict with documented intended behaviour, determine whether the implementation, test, or documentation is stale before changing anything.
 
 Do not inspect:
 
@@ -72,10 +79,6 @@ Do not inspect:
 * external project context
 
 unless explicitly requested by the user.
-
-If documentation conflicts with current implementation, investigate the conflict rather than silently choosing one.
-
-If two repository documents conflict, flag the conflict and use the most clearly authoritative product or architectural rule.
 
 ---
 
@@ -91,40 +94,65 @@ Read only documentation relevant to the task.
 
 Do not repeatedly rediscover information already documented.
 
-When an implementation establishes a durable architectural or product rule, update the appropriate documentation as part of the same task when within scope.
+When implementation establishes a durable architectural or product rule, update the appropriate documentation within the same task when it is in scope.
+
+---
+
+## Call-Off application boundaries
+
+Primary operational hierarchy:
+
+> Organisation → Project → Work Package → Deliverable → Deliverable Revision → Approval
+
+Programme data is project-scoped.
+
+Application structure:
+
+> FastAPI routes/dependencies → schemas/services/models → PostgreSQL
+
+Authenticated server-rendered interface:
+
+> `app/backend/routes/frontend/` → Jinja context → `app/frontend/templates/` → `app/frontend/static/`
+
+A user-facing feature may therefore span Python frontend routes, backend services, templates, CSS, JavaScript, and tests.
+
+Do not treat template changes as the complete frontend when the rendered data or workflow is controlled by Python routes or services.
 
 ---
 
 ## Specialist roles
 
-Use specialist instructions where they materially improve implementation or verification.
+Use specialists where they materially improve implementation or verification.
 
 * Architecture and cross-system design → `/agents/architect.md`
 * Backend, API, services, database → `/agents/backend.md`
-* Frontend, templates, CSS, JavaScript → `/agents/frontend.md`
+* Server-rendered frontend, templates, CSS, JavaScript → `/agents/frontend.md`
 * Testing and regression verification → `/agents/qa.md`
 * Authentication, authorisation and tenant security → `/agents/security.md`
-* User experience and workflow usability → `/agents/ux.md`
+* User experience and construction workflow usability → `/agents/ux.md`
 
-The lead agent remains responsible for the final decision.
+The lead agent remains responsible for final decisions.
 
-Subagent recommendations are inputs, not automatically authoritative decisions.
+Specialist recommendations are inputs, not automatically authoritative decisions.
 
 ---
 
 ## Delegation
 
-Delegate when work can be meaningfully separated or independently verified.
+Delegate only when work can be meaningfully separated or independently verified.
 
-Do not create subagents merely to satisfy the operating model.
+Do not create subagents merely to satisfy this operating model.
 
 ### Full-stack feature
 
-Architect
-→ Backend + Frontend in parallel where interfaces are clear
+Use Architect first only when the feature materially changes domain boundaries, service/query architecture, transaction boundaries, schema, permissions, or cross-system design.
+
+Otherwise:
+
+Backend + Frontend where both layers are affected
+→ UX for meaningful user-facing behaviour
 → QA
-→ Security where access, identity, tenant data or sensitive operations are affected
-→ UX for all meaningful user-facing changes
+→ Security where access, identity, tenant data, aggregation, or sensitive operations are affected
 → Lead synthesis
 
 ### Backend feature
@@ -132,6 +160,7 @@ Architect
 Backend
 → QA
 → Security where relevant
+→ Architect only if architecture materially changes
 → Lead verification
 
 ### Frontend feature
@@ -139,7 +168,17 @@ Backend
 Frontend
 → UX
 → QA
+→ Security where permissions or tenant-scoped data presentation are affected
 → Lead verification
+
+### Dashboard or reporting feature
+
+Backend establishes tenant-safe aggregation/query behaviour
+→ Frontend implements server-rendered presentation and interaction
+→ UX verifies information hierarchy and operational usefulness
+→ QA verifies counts, dates, filters, edge states, and regressions
+→ Security verifies aggregation cannot leak cross-tenant data
+→ Architect only if a new read-model/query architecture is introduced
 
 ### Bug
 
@@ -147,6 +186,7 @@ QA reproduces or characterises the failure
 → Relevant implementation specialist fixes it
 → QA verifies the regression
 → UX verifies if user-facing behaviour changed
+→ Security verifies if the defect affected access boundaries
 
 ### Security issue
 
@@ -158,9 +198,9 @@ Security establishes the realistic failure path
 ### Architectural change
 
 Architect reviews the proposal first
-→ Implementation specialists execute
+→ Relevant implementation specialists execute
 → QA and relevant reviewers verify
-→ Architecture is rechecked against the resulting implementation
+→ Architect rechecks the resulting implementation where useful
 
 ---
 
@@ -168,23 +208,23 @@ Architect reviews the proposal first
 
 User experience is a protected system property.
 
-A technically correct implementation is not complete if it introduces unnecessary friction, ambiguity, inconsistency, or operational risk for the user.
+A technically correct implementation is not complete if it creates unnecessary friction, ambiguity, inconsistency, or operational risk.
 
 For user-facing changes, verify:
 
-* the intended action is obvious
-* important state is visible
+* intended actions are obvious
+* current state is obvious
 * required next steps are clear
+* responsibility is visible where relevant
+* important deadlines and risks are visible
 * entered information is not unnecessarily lost
 * errors explain what the user can do next
 * permission restrictions do not expose misleading actions
-* loading, empty and error states remain usable
+* loading, empty, success, and error states remain usable
 * existing interaction patterns are reused where appropriate
 * keyboard and accessibility behaviour are preserved
 * responsive behaviour remains functional
-* unnecessary steps, modals or configuration are avoided
-
-Do not optimise implementation convenience at the expense of the user's workflow.
+* unnecessary steps, modals, animation, and configuration are avoided
 
 Where technical simplicity and user experience conflict, prefer the simplest implementation that preserves the better user experience.
 
@@ -192,7 +232,7 @@ Where technical simplicity and user experience conflict, prefer the simplest imp
 
 ## Reliability requirements
 
-Do not consider a change complete because the intended code path works once.
+Do not consider a change complete because the intended path works once.
 
 Before completion, consider:
 
@@ -202,9 +242,12 @@ Before completion, consider:
 * permission differences
 * tenant isolation
 * missing resources
+* invalid parent-child relationships
 * stale or conflicting data
 * duplicate submission where relevant
 * database failures
+* aggregation/count accuracy
+* date boundaries and empty datasets
 * existing behaviour that could regress
 * user-facing failure states
 
@@ -234,6 +277,10 @@ Always consider:
 * IDOR risks
 * client manipulation of identifiers
 * frontend/API policy parity
+* aggregate queries, counts, searches, dashboards, and reports
+* cache or derived-state tenant boundaries where introduced
+
+A dashboard count that includes another organisation's records is a tenant-isolation failure even if individual records cannot be opened.
 
 Hiding a control in the frontend is never sufficient authorisation.
 
@@ -245,9 +292,9 @@ Security-sensitive rules should have central enforcement rather than duplicated 
 
 Do not silently invent new product behaviour.
 
-When behaviour is already established in `/docs` or the existing implementation, preserve it unless the task explicitly changes it.
+When behaviour is established in `/docs` or the existing implementation, preserve it unless the task explicitly changes it.
 
-When a minor behaviour detail is unspecified:
+When a minor detail is unspecified:
 
 1. Prefer existing patterns.
 2. Prefer the least surprising user behaviour.
@@ -296,7 +343,7 @@ Before implementation:
 * identify pre-existing modified or untracked files
 * distinguish task-related changes from existing work
 
-Never discard, reset, overwrite or reformat unrelated user changes.
+Never discard, reset, overwrite, or reformat unrelated user changes.
 
 If relevant files already contain overlapping edits, inspect carefully and preserve compatible work.
 
@@ -310,7 +357,7 @@ Verification must match the risk of the change.
 
 Use the relevant layers defined in `/docs/testing.md`.
 
-At minimum, run targeted tests covering the changed behaviour.
+At minimum, run targeted tests covering changed behaviour.
 
 Where justified, also run:
 
@@ -319,8 +366,9 @@ Where justified, also run:
 * authentication/authorisation tests
 * database tests
 * migration checks
-* template linting
-* syntax/type/lint checks
+* template rendering tests
+* JavaScript syntax or interaction checks
+* lint/type/compile checks
 * browser verification
 * responsive checks
 * operational workflow tests
@@ -331,6 +379,8 @@ For permission changes, test both allowed and denied roles.
 
 For tenant-scoped changes, test cross-tenant behaviour.
 
+For dashboard/reporting changes, verify aggregate accuracy with multiple tenants and boundary datasets.
+
 For user-facing changes, verification should include actual rendered behaviour where tooling permits.
 
 ---
@@ -339,18 +389,18 @@ For user-facing changes, verification should include actual rendered behaviour w
 
 Implementation and verification should be separated where practical.
 
-The agent that writes the change should not be the only agent determining whether it is correct.
+The agent that writes a change should not be the only agent determining whether it is correct.
 
-Use QA, Security and UX as independent reviewers where their domains are affected.
+Use QA, Security, and UX as independent reviewers where their domains are affected.
 
-Reviewers should inspect the finished implementation rather than merely trusting the implementation summary.
+Reviewers should inspect the finished implementation rather than trusting the implementation summary.
 
 Reviewers must not change production code unless explicitly assigned to fix a discovered issue.
 
 If a reviewer finds a genuine defect:
 
 1. Report it.
-2. Route it back to the relevant implementation specialist.
+2. Route it to the relevant implementation specialist.
 3. Apply the fix.
 4. Re-run verification.
 
@@ -367,16 +417,16 @@ If a test cannot complete:
 * investigate the cause
 * determine whether it is task-related
 * use an alternative reliable verification method where appropriate
-* clearly distinguish verified behaviour from unverified behaviour
+* distinguish verified behaviour from unverified behaviour
 
 If unrelated repository tests fail, report:
 
-* the failing area
+* failing area
 * whether the task modified that area
 * whether the failure existed independently of the task
 * whether it affects confidence in the requested change
 
-Do not fix unrelated failures unless requested or required for the current change.
+Do not fix unrelated failures unless requested or required for the current task.
 
 ---
 
@@ -384,14 +434,15 @@ Do not fix unrelated failures unless requested or required for the current chang
 
 A task is complete only when:
 
-1. The requested behaviour is implemented.
+1. Requested behaviour is implemented.
 2. Relevant tests pass.
-3. Relevant security boundaries remain intact.
-4. User-facing behaviour has been considered and verified where applicable.
-5. No known material regression remains.
-6. Unrelated repository changes were preserved.
-7. Durable new architectural/product rules are documented where appropriate.
-8. Remaining uncertainty is explicitly disclosed.
+3. Relevant tenant and security boundaries remain intact.
+4. Data integrity and transaction behaviour remain correct.
+5. User-facing behaviour has been considered and verified where applicable.
+6. No known material regression remains.
+7. Unrelated repository changes were preserved.
+8. Durable new architectural/product rules are documented where appropriate.
+9. Remaining uncertainty is explicitly disclosed.
 
 ---
 
@@ -405,11 +456,11 @@ State the user-visible or system behaviour that now works.
 
 ### Changed
 
-List the important files or components changed and why.
+List important files or components changed and why.
 
 ### Verified
 
-List tests, checks and independent reviews completed.
+List tests, checks, and independent reviews completed.
 
 Include actual pass/fail results.
 
@@ -422,9 +473,7 @@ Only include:
 * necessary product decisions
 * clearly separate follow-up work
 
-Do not fill this section with speculative improvements.
-
-If nothing material remains, state:
+If nothing material remains:
 
 `None within the scope of this task.`
 
@@ -441,14 +490,8 @@ During longer tasks, report:
 * blockers
 * verification results
 
-Do not narrate routine file reads, searches or commands.
+Do not narrate routine file reads, searches, or commands.
 
 Do not require the user to approve routine implementation decisions already covered by the task.
 
-The user should primarily interact with:
-
-* desired outcomes
-* material product decisions
-* final verified results
-
-rather than low-level engineering coordination.
+The user should primarily interact with desired outcomes, material product decisions, and final verified results rather than low-level engineering coordination.

@@ -115,7 +115,7 @@ def new_programme_activity_page(
         database,
         project_id,
         offset=0,
-        limit=100,
+        limit=None,
     )
 
     revision = get_or_create_current_revision(database, project)
@@ -124,7 +124,7 @@ def new_programme_activity_page(
         database,
         revision.id,
         offset=0,
-        limit=200,
+        limit=None,
     )
 
     parent_options = [
@@ -209,7 +209,7 @@ async def create_programme_activity_page(
         database,
         project_id,
         offset=0,
-        limit=100,
+        limit=None,
     )
 
     revision_for_options = get_or_create_current_revision(database, project)
@@ -218,7 +218,7 @@ async def create_programme_activity_page(
         database,
         revision_for_options.id,
         offset=0,
-        limit=200,
+        limit=None,
     )
 
     parent_options = [
@@ -356,14 +356,14 @@ def edit_programme_activity_page(
         database,
         project_id,
         offset=0,
-        limit=100,
+        limit=None,
     )
 
     activities = list_activities(
         database,
         revision.id,
         offset=0,
-        limit=200,
+        limit=None,
     )
 
     exclude_ids = get_descendant_ids(activities, activity.id)
@@ -467,14 +467,14 @@ async def update_programme_activity_page(
         database,
         project_id,
         offset=0,
-        limit=100,
+        limit=None,
     )
 
     activities = list_activities(
         database,
         revision.id,
         offset=0,
-        limit=200,
+        limit=None,
     )
 
     exclude_ids = get_descendant_ids(activities, activity.id)
@@ -587,7 +587,7 @@ async def delete_programme_activity_page(
     activity = get_activity(database, activity_id, revision.id)
 
     if activity is None:
-        activities = list_activities(database, revision.id, offset=0, limit=200)
+        activities = list_activities(database, revision.id, offset=0, limit=None)
         activity_rows = build_activity_tree(activities)
 
         return templates.TemplateResponse(
@@ -608,7 +608,7 @@ async def delete_programme_activity_page(
     try:
         delete_activity(database, activity)
     except ProgrammeActivityHasChildrenError as error:
-        activities = list_activities(database, revision.id, offset=0, limit=200)
+        activities = list_activities(database, revision.id, offset=0, limit=None)
 
         activity_rows = build_activity_tree(activities)
 

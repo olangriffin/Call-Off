@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import unittest
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 import httpx
 from sqlalchemy import create_engine, select
@@ -25,6 +25,11 @@ from app.backend.models.programme.programme_activity import ProgrammeActivity
 from app.backend.models.programme.programme_revision import ProgrammeRevision
 from app.backend.models.project import Project
 from app.backend.schemas.auth import AuthenticatedUser, OrganisationAccessContext
+from app.backend.services.deliverable import (
+    list_deliverables_with_review_history,
+)
+from app.backend.services.programme_activity import list_activities
+from app.backend.services.work_package import list_work_packages
 from app.main import create_app
 
 
@@ -475,6 +480,219 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
             with self.subTest(path=path):
                 response = await self.client.get(path)
                 self.assertEqual(response.status_code, 200, response.text)
+
+    async def test_frontend_approval_response_updates_only_nested_record(
+        self,
+    ) -> None:
+        with self.session_factory() as database:
+            approval = database.get(Approval, APPROVAL_A_ID)
+            approval.approval_stage = "client_approval"
+            approval.reviewer_name = "Design team"
+            approval.submitted_date = date(2026, 8, 1)
+            approval.response_due_date = date(2026, 8, 10)
+            database.commit()
+
+        response_path = (
+            f"/app/projects/{PROJECT_A_ID}/work-packages/{PACKAGE_A_ID}"
+            f"/deliverables/{DELIVERABLE_A_ID}/revisions/{REVISION_A_ID}"
+            f"/approvals/{APPROVAL_A_ID}/respond"
+        )
+        page = await self.client.get(response_path)
+        self.assertEqual(page.status_code, 200, page.text)
+        token_match = re.search(
+            r'name="csrf_token" value="([A-Za-z0-9_-]+)"',
+            page.text,
+        )
+        self.assertIsNotNone(token_match)
+
+        response = await self.client.post(
+            response_path,
+            data={
+                "csrf_token": token_match.group(1),
+                "status": "approved",
+                "response_received_date": "2026-08-09",
+                "comments": "Accepted for construction",
+            },
+            follow_redirects=False,
+        )
+        self.assertEqual(response.status_code, 303, response.text)
+
+        with self.session_factory() as database:
+            approval = database.get(Approval, APPROVAL_A_ID)
+            self.assertEqual(approval.status, "approved")
+            self.assertEqual(approval.response_received_date, date(2026, 8, 9))
+            self.assertEqual(approval.comments, "Accepted for construction")
+            self.assertEqual(approval.approval_stage, "client_approval")
+            self.assertEqual(approval.reviewer_name, "Design team")
+            self.assertEqual(approval.submitted_date, date(2026, 8, 1))
+            self.assertEqual(approval.response_due_date, date(2026, 8, 10))
+
+    async def test_frontend_approval_response_rejects_cross_tenant_hierarchy(
+        self,
+    ) -> None:
+        cross_tenant_path = (
+            f"/app/projects/{PROJECT_B_ID}/work-packages/{PACKAGE_B_ID}"
+            f"/deliverables/{DELIVERABLE_B_ID}/revisions/{REVISION_B_ID}"
+            f"/approvals/{APPROVAL_B_ID}/respond"
+        )
+        wrong_parent_path = (
+            f"/app/projects/{PROJECT_A_ID}/work-packages/{PACKAGE_A_ID}"
+            f"/deliverables/{DELIVERABLE_A_ID}/revisions/{REVISION_A_ID}"
+            f"/approvals/{APPROVAL_B_ID}/respond"
+        )
+
+        for path in (cross_tenant_path, wrong_parent_path):
+            with self.subTest(path=path):
+                for method in ("GET", "POST"):
+                    response = await self.client.request(method, path)
+                    self.assertEqual(response.status_code, 404, response.text)
+
+    async def test_frontend_approval_response_enforces_date_status_pair(
+        self,
+    ) -> None:
+        response_path = (
+            f"/app/projects/{PROJECT_A_ID}/work-packages/{PACKAGE_A_ID}"
+            f"/deliverables/{DELIVERABLE_A_ID}/revisions/{REVISION_A_ID}"
+            f"/approvals/{APPROVAL_A_ID}/respond"
+        )
+        page = await self.client.get(response_path)
+        token_match = re.search(
+            r'name="csrf_token" value="([A-Za-z0-9_-]+)"',
+            page.text,
+        )
+        self.assertIsNotNone(token_match)
+        csrf_token = token_match.group(1)
+
+        invalid_cases = (
+            (
+                {
+                    "csrf_token": csrf_token,
+                    "status": "pending",
+                    "response_received_date": "2026-08-09",
+                    "comments": "Should not persist",
+                },
+                "pending approval cannot have",
+            ),
+            (
+                {
+                    "csrf_token": csrf_token,
+                    "status": "status_a",
+                    "response_received_date": "",
+                    "comments": "Should not persist",
+                },
+                "response received date is required",
+            ),
+        )
+        for data, expected_message in invalid_cases:
+            with self.subTest(status=data["status"]):
+                response = await self.client.post(response_path, data=data)
+                self.assertEqual(response.status_code, 422, response.text)
+                self.assertIn(expected_message, response.text.lower())
+                with self.session_factory() as database:
+                    approval = database.get(Approval, APPROVAL_A_ID)
+                    self.assertEqual(approval.status, "pending")
+                    self.assertIsNone(approval.response_received_date)
+                    self.assertIsNone(approval.comments)
+
+        accepted = await self.client.post(
+            response_path,
+            data={
+                "csrf_token": csrf_token,
+                "status": "status_a",
+                "response_received_date": "2026-08-09",
+                "comments": "Contractor-specific outcome",
+            },
+            follow_redirects=False,
+        )
+        self.assertEqual(accepted.status_code, 303, accepted.text)
+        with self.session_factory() as database:
+            approval = database.get(Approval, APPROVAL_A_ID)
+            self.assertEqual(approval.status, "status_a")
+            self.assertEqual(approval.response_received_date, date(2026, 8, 9))
+
+    async def test_frontend_operational_lists_can_be_uncapped(self) -> None:
+        with self.session_factory() as database:
+            database.add_all(
+                [
+                    WorkPackage(
+                        project_id=PROJECT_A_ID,
+                        code=f"A-WP-{index:03}",
+                        name=f"Package {index}",
+                    )
+                    for index in range(100)
+                ]
+            )
+            database.add_all(
+                [
+                    Deliverable(
+                        work_package_id=PACKAGE_A_ID,
+                        reference=f"A-D-{index:03}",
+                        name=f"Deliverable {index}",
+                        deliverable_type="drawing",
+                    )
+                    for index in range(100)
+                ]
+            )
+            database.add_all(
+                [
+                    ProgrammeActivity(
+                        programme_revision_id=PROGRAMME_REVISION_A_ID,
+                        activity_code=f"A-ACT-{index:03}",
+                        name=f"Activity {index}",
+                    )
+                    for index in range(200)
+                ]
+            )
+            database.commit()
+
+            self.assertEqual(
+                len(list_work_packages(database, PROJECT_A_ID, limit=100)),
+                100,
+            )
+            self.assertEqual(
+                len(list_work_packages(database, PROJECT_A_ID, limit=None)),
+                101,
+            )
+            self.assertEqual(
+                len(
+                    list_deliverables_with_review_history(
+                        database,
+                        PACKAGE_A_ID,
+                        limit=100,
+                    )
+                ),
+                100,
+            )
+            self.assertEqual(
+                len(
+                    list_deliverables_with_review_history(
+                        database,
+                        PACKAGE_A_ID,
+                        limit=None,
+                    )
+                ),
+                101,
+            )
+            self.assertEqual(
+                len(
+                    list_activities(
+                        database,
+                        PROGRAMME_REVISION_A_ID,
+                        limit=200,
+                    )
+                ),
+                200,
+            )
+            self.assertEqual(
+                len(
+                    list_activities(
+                        database,
+                        PROGRAMME_REVISION_A_ID,
+                        limit=None,
+                    )
+                ),
+                201,
+            )
 
     async def test_openapi_has_no_client_controlled_tenant_identifier(self) -> None:
         schema = self.application.openapi()

@@ -254,6 +254,200 @@ body.app-interface .compact-empty-state {
   padding: 18px;
 }
 
+/* Operational context and hierarchy */
+body.app-interface .breadcrumbs {
+  overflow-x: auto;
+  color: rgba(var(--ink-rgb), 0.6);
+  font-size: 0.78rem;
+  scrollbar-width: thin;
+}
+
+body.app-interface .breadcrumbs ol {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: max-content;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+body.app-interface .breadcrumbs li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.app-interface .breadcrumbs li + li::before {
+  content: "/";
+  color: rgba(var(--ink-rgb), 0.35);
+}
+
+body.app-interface .breadcrumbs a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+}
+
+body.app-interface .breadcrumbs a:hover {
+  color: var(--text);
+  text-decoration-color: var(--accent);
+}
+
+body.app-interface .workspace-nav {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 5px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-action);
+  background: rgba(255, 255, 255, 0.4);
+  scrollbar-width: thin;
+}
+
+:root[data-theme="dark"] body.app-interface .workspace-nav {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+body.app-interface .workspace-nav a {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border-radius: calc(var(--radius-action) - 3px);
+  color: rgba(var(--ink-rgb), 0.7);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+body.app-interface .workspace-nav a:hover,
+body.app-interface .workspace-nav a[aria-current="page"] {
+  background: var(--text);
+  color: var(--background);
+}
+
+body.app-interface .dashboard-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 8px 2px;
+}
+
+body.app-interface .dashboard-hero p:last-child {
+  max-width: 64ch;
+  margin: 10px 0 0;
+  color: var(--muted);
+}
+
+body.app-interface .attention-count {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+body.app-interface .attention-list {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+body.app-interface .attention-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 15px 16px;
+  border: 1px solid var(--card-border);
+  border-left: 4px solid var(--warning);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.45);
+}
+
+body.app-interface .attention-item.is-overdue {
+  border-left-color: var(--critical);
+}
+
+:root[data-theme="dark"] body.app-interface .attention-item {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+body.app-interface .attention-item-main,
+body.app-interface .attention-item-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+body.app-interface .attention-item-main {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+body.app-interface .attention-item-main > span:last-child,
+body.app-interface .attention-item-action > span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+body.app-interface .attention-item-action {
+  flex: 0 0 auto;
+}
+
+body.app-interface .table-container:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+body.app-interface .table-secondary {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+body.app-interface .missing-value {
+  color: var(--muted);
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+body.app-interface .record-card-current {
+  border-left: 4px solid var(--accent);
+}
+
+body.app-interface .record-card-historical {
+  background: rgba(var(--ink-rgb), 0.02);
+}
+
+body.app-interface .approval-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--card-border);
+}
+
+body.app-interface .approval-summary > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+body.app-interface .approval-summary span:not(.badge) {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+body.app-interface .record-meta-details,
+body.app-interface .approval-request-meta {
+  margin-bottom: 0;
+}
+
 .visually-hidden {
   position: absolute !important;
   width: 1px !important;
@@ -265,4 +459,3 @@ body.app-interface .compact-empty-state {
   white-space: nowrap !important;
   border: 0 !important;
 }
-

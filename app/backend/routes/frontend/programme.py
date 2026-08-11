@@ -58,7 +58,7 @@ def programme_page(
         database,
         revision.id,
         offset=0,
-        limit=200,
+        limit=None,
     )
 
     activity_rows = build_activity_tree(activities)
@@ -68,7 +68,7 @@ def programme_page(
         database,
         project_id,
         offset=0,
-        limit=100,
+        limit=None,
     )
 
     return templates.TemplateResponse(

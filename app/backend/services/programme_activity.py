@@ -5,7 +5,7 @@ import uuid
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.backend.models.programme.programme_activity import ProgrammeActivity
 from app.backend.models.programme.programme_revision import ProgrammeRevision
@@ -226,15 +226,18 @@ def list_activities(
     revision_id: uuid.UUID,
     *,
     offset: int = 0,
-    limit: int = 200,
+    limit: int | None = 200,
 ) -> list[ProgrammeActivity]:
     statement = (
         select(ProgrammeActivity)
+        .options(selectinload(ProgrammeActivity.work_package))
         .where(ProgrammeActivity.programme_revision_id == revision_id)
         .order_by(ProgrammeActivity.activity_code)
         .offset(offset)
-        .limit(limit)
     )
+
+    if limit is not None:
+        statement = statement.limit(limit)
 
     return list(database.scalars(statement).all())
 
