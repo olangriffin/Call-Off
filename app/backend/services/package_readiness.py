@@ -1,20 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, time, timezone
 
 from app.backend.models.package.approval import Approval
 from app.backend.models.package.deliverable import Deliverable
 from app.backend.models.package.revision import DeliverableRevision
-
-_COMPLETE_STATUSES = {
-    "accepted",
-    "accepted_with_comments",
-    "approved",
-    "closed",
-    "complete",
-    "completed",
-}
+from app.backend.services.status import is_complete_status
 
 
 @dataclass(frozen=True, slots=True)
@@ -40,13 +32,6 @@ class PackageReadinessSummary:
         )
 
 
-def _normalise_status(value: str | None) -> str:
-    if value is None:
-        return ""
-
-    return value.strip().lower().replace("-", "_").replace(" ", "_")
-
-
 def latest_revision(
     deliverable: Deliverable,
 ) -> DeliverableRevision | None:
@@ -70,17 +55,37 @@ def latest_approval(
 
     return max(
         revision.approvals,
-        key=lambda approval: (
-            approval.response_received_date
-            or approval.submitted_date
-            or date.min,
-            str(approval.id),
-        ),
+        key=_approval_chronology_key,
     )
 
 
+def _approval_chronology_key(
+    approval: Approval,
+) -> tuple[datetime, datetime, str]:
+    created_at = getattr(approval, "created_at", None)
+    if created_at is None:
+        created_at_key = datetime.min
+    elif created_at.tzinfo is None:
+        created_at_key = created_at
+    else:
+        created_at_key = created_at.astimezone(timezone.utc).replace(
+            tzinfo=None
+        )
+
+    submitted_date = getattr(approval, "submitted_date", None)
+    chronology_key = (
+        datetime.combine(submitted_date, time.min)
+        if submitted_date is not None
+        else created_at_key
+    )
+
+    # The identifier is only a deterministic tie-breaker when the recorded
+    # submission and creation chronology are identical; it is not chronology.
+    return chronology_key, created_at_key, str(approval.id)
+
+
 def _is_deliverable_complete(deliverable: Deliverable) -> bool:
-    if _normalise_status(deliverable.status) in _COMPLETE_STATUSES:
+    if is_complete_status(deliverable.status):
         return True
 
     revision = latest_revision(deliverable)
@@ -91,7 +96,7 @@ def _is_deliverable_complete(deliverable: Deliverable) -> bool:
     if approval is None:
         return False
 
-    return _normalise_status(approval.status) in _COMPLETE_STATUSES
+    return is_complete_status(approval.status)
 
 
 def calculate_package_readiness(
@@ -135,7 +140,7 @@ def calculate_package_readiness(
             continue
 
         approval = latest_approval(revision)
-        if approval is None or _normalise_status(approval.status) not in _COMPLETE_STATUSES:
+        if approval is None or not is_complete_status(approval.status):
             pending_approval_count += 1
 
     incomplete_deliverables = total_deliverables - complete_deliverables

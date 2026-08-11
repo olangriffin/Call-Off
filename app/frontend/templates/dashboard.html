@@ -18,8 +18,8 @@
                 <h2 id="attention-title">Requires attention</h2>
                 <p>Overdue and approaching operational deadlines across your organisation.</p>
             </div>
-            {% if overview.overdue_count %}
-                <span class="attention-count status-critical">{{ overview.overdue_count }} overdue</span>
+            {% if overview.overdue_deadline_count %}
+                <span class="attention-count status-critical">{{ overview.overdue_deadline_count }} overdue deadlines</span>
             {% endif %}
         </div>
         {% if overview.attention_items %}
@@ -62,7 +62,7 @@
             <article class="metric-card"><span>Projects</span><strong>{{ overview.project_count }}</strong><small>{{ overview.active_project_count }} active</small></article>
             <article class="metric-card"><span>Work packages</span><strong>{{ overview.work_package_count }}</strong><small>Across all projects</small></article>
             <article class="metric-card"><span>Deliverables</span><strong>{{ overview.deliverable_count }}</strong><small>Controlled records</small></article>
-            <article class="metric-card"><span>Overdue items</span><strong{% if overview.overdue_count %} class="status-critical"{% endif %}>{{ overview.overdue_count }}</strong><small>Issue, approval or site dates</small></article>
+            <article class="metric-card"><span>Overdue deadlines</span><strong {% if overview.overdue_deadline_count %} class="status-critical"{% endif %}>{{ overview.overdue_deadline_count }}</strong><small>Issue, approval, response or site dates</small></article>
         </div>
     </section>
     <section class="panel" aria-labelledby="projects-title">

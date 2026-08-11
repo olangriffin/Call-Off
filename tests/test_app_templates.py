@@ -119,6 +119,13 @@ class AppTemplateTestCase(unittest.TestCase):
                 self.assertIn('{% extends "base.html" %}', source)
                 self.assertIn('class="page-title"', source)
 
+    def test_dashboard_labels_overdue_deadline_exceptions_precisely(self) -> None:
+        source = (self.template_root / "dashboard.html").read_text()
+
+        self.assertIn("Overdue deadlines", source)
+        self.assertIn("overview.overdue_deadline_count", source)
+        self.assertNotIn("Overdue items", source)
+
     def test_missing_project_state_keeps_primary_heading(self) -> None:
         request = Request(
             {

@@ -11,16 +11,10 @@ from app.backend.models.package.deliverable import Deliverable
 from app.backend.models.package.package import WorkPackage
 from app.backend.models.package.revision import DeliverableRevision
 from app.backend.models.project import Project
-
-
-_COMPLETE_STATUSES = {
-    "accepted",
-    "accepted_with_comments",
-    "approved",
-    "closed",
-    "complete",
-    "completed",
-}
+from app.backend.services.status import (
+    is_complete_status_expression,
+    normalize_status_expression,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -40,12 +34,14 @@ class DashboardOverview:
     active_project_count: int
     work_package_count: int
     deliverable_count: int
-    overdue_count: int
+    overdue_deadline_count: int
     attention_items: tuple[DashboardAttentionItem, ...]
 
+    @property
+    def overdue_count(self) -> int:
+        """Compatibility alias for callers using the previous metric name."""
 
-def _normalised_status(column):
-    return func.lower(func.trim(column))
+        return self.overdue_deadline_count
 
 
 def _count(database: Session, statement) -> int:
@@ -65,11 +61,9 @@ def get_dashboard_overview(
     upcoming_cutoff = current_date + timedelta(days=14)
 
     project_scope = Project.organization_id == organization_id
-    incomplete_package = _normalised_status(WorkPackage.status).not_in(
-        _COMPLETE_STATUSES
-    )
-    incomplete_deliverable = _normalised_status(Deliverable.status).not_in(
-        _COMPLETE_STATUSES
+    incomplete_package = ~is_complete_status_expression(WorkPackage.status)
+    incomplete_deliverable = ~is_complete_status_expression(
+        Deliverable.status
     )
 
     project_count = _count(
@@ -80,7 +74,7 @@ def get_dashboard_overview(
         database,
         select(func.count(Project.id)).where(
             project_scope,
-            _normalised_status(Project.status) == "active",
+            normalize_status_expression(Project.status) == "active",
         ),
     )
     work_package_count = _count(
@@ -325,7 +319,7 @@ def get_dashboard_overview(
         active_project_count=active_project_count,
         work_package_count=work_package_count,
         deliverable_count=deliverable_count,
-        overdue_count=(
+        overdue_deadline_count=(
             overdue_approval_count
             + overdue_issue_count
             + overdue_required_approval_count
