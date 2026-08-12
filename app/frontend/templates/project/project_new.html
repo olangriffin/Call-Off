@@ -1,14 +1,10 @@
-{% extends "base.html" %} {% from "partials/app_context.html" import breadcrumbs %} {% block title %} New project | Calloff {%
+{% extends "base.html" %} {% from "partials/app_context.html" import breadcrumbs %} {% from "partials/components/section_header.html" import section_header %} {% from "partials/components/button.html" import primary_button, secondary_button %} {% from "partials/components/section.html" import section %} {% block title %} New project | Calloff {%
     endblock %} {% block content %}
-    <section class="panel">
+    {% call section() %}
         {{ breadcrumbs(current_label="New project") }}
-        <div class="panel-header">
-            <div>
-                <p class="eyebrow">Projects</p>
-                <h1 class="page-title">Create new project</h1>
-            </div>
+        {% call section_header("Create new project", heading_level=1) %}
             <a href="/app">Back to dashboard</a>
-        </div>
+        {% endcall %}
         {% if error_message %}
             <div class="form-alert" role="alert">
                 <strong>Unable to create project</strong>
@@ -72,9 +68,9 @@
                        value="{{ form_values.planned_finish if form_values else '' }}" />
             </div>
             <div class="form-actions form-field-full">
-                <button type="submit" class="primary-button">Create project</button>
-                <a href="/app" class="ghost-button-sm">Cancel</a>
+                {{ primary_button("Create project", type="submit") }}
+                {{ secondary_button("Cancel", href="/app", button_class="ghost-button-sm") }}
             </div>
         </form>
-    </section>
+    {% endcall %}
 {% endblock %}

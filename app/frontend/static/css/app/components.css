@@ -150,7 +150,7 @@
   color: var(--muted);
 }
 
-.panel-header a:not(.primary-button) {
+.panel-header a:not(.primary-button):not(.secondary-button) {
   color: var(--text);
   font-size: 0.8rem;
   font-weight: 600;
@@ -573,3 +573,89 @@ td.actions-cell {
   font-size: 0.85rem;
 }
 
+/* =========================================================
+   Adaptive application section
+   ========================================================= */
+
+body.app-interface .app-section {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  isolation: isolate;
+}
+
+/* Visual surface */
+
+body.app-interface .app-section-surface {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  border: none;
+  border-radius: var(--radius-panel);
+
+  background: var(--card-gradient);
+
+  box-shadow: 0 18px 46px rgba(var(--ink-rgb), 0.07);
+
+  filter: url("#calloff-squircle");
+
+  pointer-events: none;
+}
+
+/* Actual section content */
+
+body.app-interface .app-section-content {
+  position: relative;
+
+  width: 100%;
+  min-width: 0;
+
+  padding: clamp(22px, 2.4vw, 30px);
+}
+
+/* =========================================================
+   Layout variants
+   ========================================================= */
+
+body.app-interface .app-section--default .app-section-content {
+  display: block;
+}
+
+body.app-interface .app-section--split .app-section-content {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+body.app-interface .app-section--grid .app-section-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* =========================================================
+   Dark theme
+   ========================================================= */
+
+:root[data-theme="dark"] body.app-interface .app-section-surface {
+  background: var(--card-gradient);
+
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.18);
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 760px) {
+  body.app-interface .app-section-content {
+    padding: 20px;
+  }
+
+  body.app-interface .app-section--split .app-section-content {
+    grid-template-columns: 1fr;
+  }
+}

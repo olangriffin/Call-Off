@@ -1,19 +1,17 @@
 {% extends "base.html" %}
 {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
+{% from "partials/components/section_header.html" import section_header %}
+{% from "partials/components/button.html" import primary_button, secondary_button %}
+{% from "partials/components/section.html" import section %}
 {% block title %}{% if approval %}Record approval response | {{ revision.revision_code }} | Call-Off{% else %}Approval not found | Call-Off{% endif %}{% endblock %}
 {% block content %}
     {% if project and work_package and deliverable and revision and approval %}
         {{ breadcrumbs(project=project, work_package=work_package, deliverable=deliverable, revision=revision, current_label="Approval response") }}
         {{ project_workspace_nav(project, "packages") }}
-        <section class="panel">
-            <div class="panel-header">
-                <div>
-                    <p class="eyebrow">{{ approval.approval_stage|replace('_', ' ') |title }} · {{ approval.reviewer_name or "Reviewer not recorded" }}</p>
-                    <h1 class="page-title">Record approval response</h1>
-                    <p>Update the outcome and response date for revision {{ revision.revision_code }}.</p>
-                </div>
+        {% call section() %}
+            {% call section_header("Record approval response", description="Update the outcome and response date for revision " ~ revision.revision_code ~ ".", heading_level=1) %}
                 <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}">Back to deliverable</a>
-            </div>
+            {% endcall %}
             {% if error_message %}<div class="form-alert" role="alert"><strong>Unable to update approval response</strong><p>{{ error_message }}</p></div>{% endif %}
             <dl class="record-meta approval-request-meta">
                 <div><dt>Submitted</dt><dd>{% if approval.submitted_date %}{{ approval.submitted_date.strftime("%d %b %Y") }}{% else %}<span class="missing-value">Not set</span>{% endif %}</dd></div>
@@ -63,19 +61,18 @@
                     <textarea id="comments" name="comments" rows="5">{{ form_values.comments if form_values else (approval.comments or '') }}</textarea>
                 </div>
                 <div class="form-actions form-field-full">
-                    <button type="submit" class="primary-button">Save response</button>
-                    <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}"
-                       class="ghost-button-sm">Cancel</a>
+                    {{ primary_button("Save response", type="submit") }}
+                    {{ secondary_button("Cancel", href="/app/projects/" ~ project.id ~ "/work-packages/" ~ work_package.id ~ "/deliverables/" ~ deliverable.id, button_class="ghost-button-sm") }}
                 </div>
             </form>
-        </section>
+        {% endcall %}
     {% else %}
-        <section class="panel">
+        {% call section() %}
             <div class="empty-state">
                 <h1 class="page-title">Approval not found</h1>
                 <p>The requested approval does not exist or is unavailable.</p>
                 <a href="/app">Return to dashboard</a>
             </div>
-        </section>
+        {% endcall %}
     {% endif %}
 {% endblock %}

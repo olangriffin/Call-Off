@@ -1,15 +1,10 @@
-{% extends "base.html" %} {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %} {% block title %} {% if project %} {{ project.code }}
+{% extends "base.html" %} {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %} {% from "partials/components/section_header.html" import section_header %} {% from "partials/components/button.html" import primary_button %} {% from "partials/components/section.html" import section %} {% block title %} {% if project %} {{ project.code }}
 | Calloff {% else %} Project not found | Calloff {% endif %} {% endblock %} {%
     block content %} {% if project %}
 {{ breadcrumbs(project=project, current_label="Overview") }}
 {{ project_workspace_nav(project, "overview") }}
-<section class="panel">
-    <div class="panel-header">
-        <div>
-            <h1 class="page-title">{{ project.name }}</h1>
-            <p>{{ project.client_name or "No client recorded" }}</p>
-        </div>
-    </div>
+{% call section() %}
+    {{ section_header(project.name, description=project.client_name or "No client recorded", heading_level=1) }}
     <div class="metric-grid">
         <article class="metric-card">
             <span>Status</span>
@@ -30,26 +25,16 @@
                                 </strong>
                                 </article>
                                 </div>
-                                </section>
-                                <section class="panel" id="programme">
-                                    <div class="panel-header">
-                                        <div>
-                                            <p class="eyebrow">Delivery</p>
-                                            <h2>Project programme</h2>
-                                        </div>
-                                        <a href="/app/projects/{{ project.id }}/programme"
-                                           class="primary-button">View programme</a>
-                                    </div>
-                                </section>
-                                <section class="panel" id="work-packages">
-                                    <div class="panel-header">
-                                        <div>
-                                            <p class="eyebrow">Delivery</p>
-                                            <h2>Work packages</h2>
-                                        </div>
-                                        <a href="/app/projects/{{ project.id }}/work-packages/new"
-                                           class="primary-button">New work package</a>
-                                    </div>
+                                {% endcall %}
+                                {% call section(section_id="programme") %}
+                                    {% call section_header("Project programme") %}
+                                        {{ primary_button("View programme", href="/app/projects/" ~ project.id ~ "/programme") }}
+                                    {% endcall %}
+                                {% endcall %}
+                                {% call section(section_id="work-packages") %}
+                                    {% call section_header("Work packages") %}
+                                        {{ primary_button("New work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}
+                                    {% endcall %}
                                     {% if work_packages %}
                                         <div class="table-container"
                                              tabindex="0"
@@ -103,18 +88,17 @@
                                                                             <div class="empty-state">
                                                                                 <h3>No work packages</h3>
                                                                                 <p>Add the first package to organise deliverables, approval deadlines and required-on-site dates.</p>
-                                                                                <a href="/app/projects/{{ project.id }}/work-packages/new"
-                                                                                   class="primary-button">Create first work package</a>
+                                                                                {{ primary_button("Create first work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}
                                                                             </div>
                                                                         {% endif %}
-                                                                    </section>
+                                                                    {% endcall %}
                                                                 {% else %}
-                                                                    <section class="panel">
+                                                                    {% call section() %}
                                                                         <div class="empty-state">
                                                                             <h1 class="page-title">Project not found</h1>
                                                                             <p>The requested project does not exist or is unavailable.</p>
                                                                             <a href="/app">Return to dashboard</a>
                                                                         </div>
-                                                                    </section>
+                                                                    {% endcall %}
                                                                 {% endif %}
                                                     {% endblock %}

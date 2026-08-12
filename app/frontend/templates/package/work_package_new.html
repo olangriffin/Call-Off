@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
+{% from "partials/components/section_header.html" import section_header %}
+{% from "partials/components/button.html" import primary_button, secondary_button %}
+{% from "partials/components/section.html" import section %}
 {% block title %}
     {% if project %}
         New work package | {{ project.code }} | Calloff
@@ -11,14 +14,10 @@
     {% if project %}
         {{ breadcrumbs(project=project, current_label="New package") }}
         {{ project_workspace_nav(project, "packages") }}
-        <section class="panel">
-            <div class="panel-header">
-                <div>
-                    <p class="eyebrow">{{ project.code }}</p>
-                    <h1 class="page-title">New work package</h1>
-                </div>
+        {% call section() %}
+            {% call section_header("New work package", heading_level=1) %}
                 <a href="/app/projects/{{ project.id }}">Back to project</a>
-            </div>
+            {% endcall %}
             {% if error_message %}
                 <div class="form-alert" role="alert">
                     <strong>Unable to create work package</strong>
@@ -102,18 +101,18 @@
                            value="{{ form_values.required_on_site_date if form_values else '' }}">
                 </div>
                 <div class="form-actions form-field-full">
-                    <button type="submit" class="primary-button">Create work package</button>
-                    <a href="/app/projects/{{ project.id }}" class="ghost-button-sm">Cancel</a>
+                    {{ primary_button("Create work package", type="submit") }}
+                    {{ secondary_button("Cancel", href="/app/projects/" ~ project.id, button_class="ghost-button-sm") }}
                 </div>
             </form>
-        </section>
+        {% endcall %}
     {% else %}
-        <section class="panel">
+        {% call section() %}
             <div class="empty-state">
                 <h1 class="page-title">Project not found</h1>
                 <p>The requested project does not exist or is unavailable.</p>
                 <a href="/app">Return to dashboard</a>
             </div>
-        </section>
+        {% endcall %}
     {% endif %}
 {% endblock %}

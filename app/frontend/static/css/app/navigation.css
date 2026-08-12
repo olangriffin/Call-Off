@@ -173,25 +173,7 @@ html[data-theme="dark"] .theme-toggle-rays {
 }
 
 body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 0;
-  width: 100%;
-  height: 170px;
-  pointer-events: none;
-
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--nav-scrim-1) 68%, var(--surface)) 0%,
-    color-mix(in srgb, var(--nav-scrim-1) 52%, var(--surface)) 18%,
-    color-mix(in srgb, var(--nav-scrim-1) 36%, var(--surface)) 36%,
-    color-mix(in srgb, var(--nav-scrim-1) 22%, var(--surface)) 54%,
-    color-mix(in srgb, var(--nav-scrim-1) 10%, var(--surface)) 72%,
-    color-mix(in srgb, var(--nav-scrim-1) 3%, var(--surface)) 88%,
-    var(--surface) 100%
-  );
+  display: none;
 }
 
 .site-nav {

@@ -117,7 +117,9 @@ class AppTemplateTestCase(unittest.TestCase):
             source = (self.template_root / template_name).read_text()
             with self.subTest(template=template_name):
                 self.assertIn('{% extends "base.html" %}', source)
-                self.assertIn('class="page-title"', source)
+                self.assertTrue(
+                    'class="page-title"' in source or "section_header(" in source
+                )
 
     def test_dashboard_labels_overdue_deadline_exceptions_precisely(self) -> None:
         source = (self.template_root / "dashboard.html").read_text()

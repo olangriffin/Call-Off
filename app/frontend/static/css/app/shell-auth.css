@@ -69,6 +69,17 @@ body.auth-marketing .login-panel::after {
   display: none;
 }
 
+body.auth-marketing .login-panel-signin {
+  display: grid;
+  gap: 20px;
+}
+
+body.auth-marketing .login-panel-signin .panel-header,
+body.auth-marketing .login-panel-signin .login-register-link,
+body.auth-marketing .login-panel-signin .login-form .primary-button {
+  margin: 0;
+}
+
 body.auth-marketing .panel-header {
   display: block;
   margin-bottom: 22px;
@@ -103,7 +114,7 @@ body.auth-marketing .panel-header p {
 }
 
 body.auth-marketing .login-register-link {
-  margin: 0 0 20px;
+  margin: 16px 0 20px;
   color: rgba(var(--ink-rgb), 0.62);
   text-align: center;
 }
@@ -173,4 +184,3 @@ body.auth-marketing .login-form .primary-button:hover {
 :root[data-theme="dark"] body.auth-marketing .login-form .primary-button:hover {
   background: #e2e4e2;
 }
-

@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
+{% from "partials/components/section_header.html" import section_header %}
+{% from "partials/components/button.html" import primary_button, secondary_button %}
+{% from "partials/components/section.html" import section %}
 {% block title %}
     {% if project %}
         Edit activity | {{ project.code }} | Calloff
@@ -11,14 +14,10 @@
     {% if project and activity %}
         {{ breadcrumbs(project=project, current_label="Edit programme activity") }}
         {{ project_workspace_nav(project, "programme") }}
-        <section class="panel">
-            <div class="panel-header">
-                <div>
-                    <p class="eyebrow">{{ project.code }}</p>
-                    <h1 class="page-title">Edit activity</h1>
-                </div>
+        {% call section() %}
+            {% call section_header("Edit activity", heading_level=1) %}
                 <a href="/app/projects/{{ project.id }}/programme">Back to programme</a>
-            </div>
+            {% endcall %}
             {% if error_message %}
                 <div class="form-alert" role="alert">
                     <strong>Unable to update activity</strong>
@@ -106,14 +105,13 @@
                     <textarea id="notes" name="notes" rows="4">{{ form_values.notes }}</textarea>
                 </div>
                 <div class="form-actions form-field-full">
-                    <button type="submit" class="primary-button">Save changes</button>
-                    <a href="/app/projects/{{ project.id }}/programme"
-                       class="ghost-button-sm">Cancel</a>
+                    {{ primary_button("Save changes", type="submit") }}
+                    {{ secondary_button("Cancel", href="/app/projects/" ~ project.id ~ "/programme", button_class="ghost-button-sm") }}
                 </div>
             </form>
-        </section>
+        {% endcall %}
     {% else %}
-        <section class="panel">
+        {% call section() %}
             <div class="empty-state">
                 <h1 class="page-title">Activity not found</h1>
                 <p>The requested activity does not exist or is unavailable.</p>
@@ -123,6 +121,6 @@
                     <a href="/app">Return to dashboard</a>
                 {% endif %}
             </div>
-        </section>
+        {% endcall %}
     {% endif %}
 {% endblock %}

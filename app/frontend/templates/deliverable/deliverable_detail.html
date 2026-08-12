@@ -1,38 +1,32 @@
 {% extends "base.html" %}
 {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
+{% from "partials/components/section_header.html" import section_header %}
+{% from "partials/components/button.html" import primary_button, secondary_button %}
+{% from "partials/components/section.html" import section %}
 {% block title %}{% if deliverable %}{{ deliverable.reference }} | Call-Off{% else %}Deliverable not found | Call-Off{% endif %}{% endblock %}
 {% block content %}
     {% if project and work_package and deliverable %}
         {{ breadcrumbs(project=project, work_package=work_package, deliverable=deliverable, current_label="Deliverable overview") }}
         {{ project_workspace_nav(project, "packages") }}
-        <section class="panel">
-            <div class="panel-header">
-                <div>
-                    <p class="eyebrow">{{ deliverable.reference }} · {{ work_package.code }}</p>
-                    <h1 class="page-title">{{ deliverable.name }}</h1>
-                    <p>{{ deliverable.deliverable_type|replace('_', ' ') |title }} · {{ deliverable.status|replace('_', ' ') |title }}</p>
-                </div>
-                <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/new"
-                   class="primary-button">Add revision</a>
-            </div>
+        {% call section() %}
+            {% set deliverable_header_description %}{{ deliverable.deliverable_type|replace('_', ' ') |title }} · {{ deliverable.status|replace('_', ' ') |title }}{% endset %}
+            {% call section_header(deliverable.name, description=deliverable_header_description, heading_level=1) %}
+                {{ primary_button("Add revision", href="/app/projects/" ~ project.id ~ "/work-packages/" ~ work_package.id ~ "/deliverables/" ~ deliverable.id ~ "/revisions/new") }}
+            {% endcall %}
             <div class="metric-grid">
                 <article class="metric-card"><span>Status</span><strong>{{ deliverable.status|replace('_', ' ') |title }}</strong><small>Current deliverable state</small></article>
                 <article class="metric-card"><span>Planned issue</span><strong>{% if deliverable.planned_issue_date %}<time datetime="{{ deliverable.planned_issue_date.isoformat() }}">{{ deliverable.planned_issue_date.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}</strong><small>Target issue date</small></article>
                 <article class="metric-card"><span>Required approval</span><strong>{% if deliverable.required_approval_date %}<time datetime="{{ deliverable.required_approval_date.isoformat() }}">{{ deliverable.required_approval_date.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}</strong><small>Approval needed by</small></article>
             </div>
-        </section>
-        <section class="panel current-record" aria-labelledby="current-revision-title">
-            <div class="panel-header">
-                <div>
-                    <p class="eyebrow">Current operational state</p>
-                    <h2 id="current-revision-title">Current revision</h2>
-                    <p>The latest issued revision and its most recent approval record.</p>
-                </div>
-                {% if current_revision %}
-                    <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/{{ current_revision.id }}/approvals/new"
-                       class="primary-button">Send for approval</a>
-                {% endif %}
-            </div>
+        {% endcall %}
+        {% call section(labelledby="current-revision-title", section_class="current-record") %}
+            {% if current_revision %}
+                {% call section_header("Current revision", description="The latest issued revision and its most recent approval record.", title_id="current-revision-title") %}
+                    {{ primary_button("Send for approval", href="/app/projects/" ~ project.id ~ "/work-packages/" ~ work_package.id ~ "/deliverables/" ~ deliverable.id ~ "/revisions/" ~ current_revision.id ~ "/approvals/new") }}
+                {% endcall %}
+            {% else %}
+                {{ section_header("Current revision", description="The latest issued revision and its most recent approval record.", title_id="current-revision-title") }}
+            {% endif %}
             {% if current_revision %}
                 <article class="record-card record-card-current">
                     <div class="record-card-header">
@@ -66,8 +60,7 @@
                             </div>
                             <div>
                                 <span>{% if current_approval.response_received_date %}Received {{ current_approval.response_received_date.strftime("%d %b %Y") }}{% elif current_approval.status != "pending" %}<span class="missing-value">Response date missing</span>{% elif current_approval.response_due_date %}Response due {{ current_approval.response_due_date.strftime("%d %b %Y") }}{% else %}Response due date not set{% endif %}</span>
-                                <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/{{ current_revision.id }}/approvals/{{ current_approval.id }}/respond"
-                                   class="ghost-button-sm">{% if current_approval.response_received_date %}View or update response{% elif current_approval.status != "pending" %}Complete response record{% else %}Record response{% endif %}</a>
+                                {{ secondary_button("View or update response" if current_approval.response_received_date else "Complete response record" if current_approval.status != "pending" else "Record response", href="/app/projects/" ~ project.id ~ "/work-packages/" ~ work_package.id ~ "/deliverables/" ~ deliverable.id ~ "/revisions/" ~ current_revision.id ~ "/approvals/" ~ current_approval.id ~ "/respond", button_class="ghost-button-sm") }}
                             </div>
                         </div>
                     {% else %}
@@ -119,20 +112,13 @@
                 <div class="empty-state">
                     <h3>No revision issued</h3>
                     <p>Create the first revision to establish the current controlled record and start the approval workflow.</p>
-                    <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/new"
-                       class="primary-button">Create first revision</a>
+                    {{ primary_button("Create first revision", href="/app/projects/" ~ project.id ~ "/work-packages/" ~ work_package.id ~ "/deliverables/" ~ deliverable.id ~ "/revisions/new") }}
                 </div>
             {% endif %}
-        </section>
+        {% endcall %}
         {% if historical_revisions %}
-            <section class="panel" aria-labelledby="history-title">
-                <div class="panel-header">
-                    <div>
-                        <p class="eyebrow">Audit trail</p>
-                        <h2 id="history-title">Revision history</h2>
-                        <p>Earlier revisions are shown for reference and cannot be re-issued for approval here.</p>
-                    </div>
-                </div>
+            {% call section(labelledby="history-title") %}
+                {{ section_header("Revision history", description="Earlier revisions are shown for reference and cannot be re-issued for approval here.", title_id="history-title") }}
                 <div class="record-stack">
                     {% for revision in historical_revisions %}
                         <article class="record-card record-card-historical">
@@ -197,14 +183,10 @@
                         </article>
                     {% endfor %}
                 </div>
-            </section>
+            {% endcall %}
         {% endif %}
-        <section class="panel" aria-labelledby="details-title">
-            <div class="panel-header">
-                <div>
-                    <h2 id="details-title">Record details</h2>
-                </div>
-            </div>
+        {% call section(labelledby="details-title") %}
+            {{ section_header("Record details", title_id="details-title") }}
             <dl class="record-meta record-meta-details">
                 <div>
                     <dt>Description</dt>
@@ -225,14 +207,14 @@
                     </dd>
                 </div>
             </dl>
-        </section>
+        {% endcall %}
     {% else %}
-        <section class="panel">
+        {% call section() %}
             <div class="empty-state">
                 <h1 class="page-title">Deliverable not found</h1>
                 <p>The requested deliverable does not exist or is unavailable.</p>
                 <a href="/app">Return to dashboard</a>
             </div>
-        </section>
+        {% endcall %}
     {% endif %}
 {% endblock %}
