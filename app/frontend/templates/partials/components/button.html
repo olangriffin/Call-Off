@@ -1,0 +1,31 @@
+{% macro primary_button( label, href=none, type="button", button_class=none )
+-%} {% if href %}
+<a
+  href="{{ href }}"
+  class="primary-button{% if button_class %} {{ button_class }}{% endif %}"
+>
+  {{ label }}
+</a>
+{% else %}
+<button
+  type="{{ type }}"
+  class="primary-button{% if button_class %} {{ button_class }}{% endif %}"
+>
+  {{ label }}
+</button>
+{% endif %} {%- endmacro %} {% macro secondary_button( label, href=none,
+type="button", button_class=none ) -%} {% if href %}
+<a
+  href="{{ href }}"
+  class="secondary-button{% if button_class %} {{ button_class }}{% endif %}"
+>
+  {{ label }}
+</a>
+{% else %}
+<button
+  type="{{ type }}"
+  class="secondary-button{% if button_class %} {{ button_class }}{% endif %}"
+>
+  {{ label }}
+</button>
+{% endif %} {%- endmacro %}

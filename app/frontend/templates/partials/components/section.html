@@ -1,0 +1,26 @@
+{% macro section( layout="default", section_id=none, labelledby=none,
+section_class=none ) -%}
+
+<section
+  {%
+  if
+  section_id
+  %}id="{{ section_id }}"
+  {%
+  endif
+  %}
+  class="app-section app-section--{{ layout }}{% if section_class %} {{ section_class }}{% endif %}"
+  {%
+  if
+  labelledby
+  %}aria-labelledby="{{ labelledby }}"
+  {%
+  endif
+  %}
+>
+  <div class="app-section-surface" aria-hidden="true"></div>
+
+  <div class="app-section-content">{{ caller() }}</div>
+</section>
+
+{%- endmacro %}

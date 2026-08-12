@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
+{% from "partials/components/button.html" import secondary_button %}
+{% from "partials/components/section.html" import section %}
 {% block title %}
     {% if project %}
         Programme | {{ project.code }} | Calloff
@@ -110,7 +112,7 @@
                         <a href="/app/projects/{{ project.id }}/programme/new"
                            class="primary-button"
                            data-programme-add-trigger>Add first activity</a>
-                        <a href="/app/projects/{{ project.id }}" class="ghost-button-sm">Back to project</a>
+                        {{ secondary_button("Back to project", href="/app/projects/" ~ project.id, button_class="ghost-button-sm") }}
                     </div>
                 </div>
             {% endif %}
@@ -237,13 +239,13 @@
             {% endif %}
         </section>
     {% else %}
-        <section class="panel">
+        {% call section() %}
             <div class="empty-state">
                 <h1 class="page-title">Project not found</h1>
                 <p>The requested project does not exist or is unavailable.</p>
                 <a href="/app">Return to dashboard</a>
             </div>
-        </section>
+        {% endcall %}
     {% endif %}
 {% endblock %}
 {% block scripts %}

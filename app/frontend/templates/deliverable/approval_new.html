@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
 {% from "partials/components/section_header.html" import section_header %}
+{% from "partials/components/button.html" import primary_button, secondary_button %}
+{% from "partials/components/section.html" import section %}
 {% block title %}
     {% if revision %}
         Send for approval | {{ revision.revision_code }} | Call-Off
@@ -12,7 +14,7 @@
     {% if project and work_package and deliverable and revision %}
         {{ breadcrumbs(project=project, work_package=work_package, deliverable=deliverable, revision=revision, current_label="Send for approval") }}
         {{ project_workspace_nav(project, "packages") }}
-        <section class="panel">
+        {% call section() %}
             {% call section_header("Send revision for approval", heading_level=1) %}
                 <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}">
                     Back to deliverable
@@ -65,19 +67,18 @@
                            required>
                 </div>
                 <div class="form-actions form-field-full">
-                    <button type="submit" class="primary-button">Send for approval</button>
-                    <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}"
-                       class="ghost-button-sm">Cancel</a>
+                    {{ primary_button("Send for approval", type="submit") }}
+                    {{ secondary_button("Cancel", href="/app/projects/" ~ project.id ~ "/work-packages/" ~ work_package.id ~ "/deliverables/" ~ deliverable.id, button_class="ghost-button-sm") }}
                 </div>
             </form>
-        </section>
+        {% endcall %}
     {% else %}
-        <section class="panel">
+        {% call section() %}
             <div class="empty-state">
                 <h1 class="page-title">Revision not found</h1>
                 <p>The requested revision does not exist or is unavailable.</p>
                 <a href="/app">Return to dashboard</a>
             </div>
-        </section>
+        {% endcall %}
     {% endif %}
 {% endblock %}

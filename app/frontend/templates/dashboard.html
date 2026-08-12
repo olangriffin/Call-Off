@@ -1,27 +1,27 @@
-{% extends "base.html" %} {% from "partials/components/section_header.html" import section_header %} {% block title %}Dashboard | Call-Off{% endblock %} {%
-block content %}
+{% extends "base.html" %} {% from "partials/components/section_header.html"
+import section_header %} {% from "partials/components/button.html" import
+primary_button, secondary_button %} {% from "partials/components/section.html"
+import section %}{% block title %}Dashboard | Call-Off{% endblock %} {% block
+content %}
 <section class="dashboard-hero" aria-labelledby="dashboard-title">
   <div>
     <h1 class="page-title" id="dashboard-title">Operational dashboard</h1>
   </div>
-  {% if can_create_projects %}
-  <a href="/app/projects/new" class="primary-button">New project</a>
-  {% endif %}
+  {% if can_create_projects %} {{ primary_button("New project",
+  href="/app/projects/new") }} {% endif %}
 </section>
 <section aria-labelledby="portfolio-title">
+  <h2 id="portfolio-title" class="visually-hidden">Portfolio metrics</h2>
   <div class="metric-grid dashboard-metrics">
     <article class="metric-card">
-      <span>Projects</span><strong>{{ overview.project_count }}</strong
-      ><small>{{ overview.active_project_count }} active</small>
+      <span>Projects</span><strong>{{ overview.project_count }}</strong>
     </article>
     <article class="metric-card">
       <span>Work packages</span
-      ><strong>{{ overview.work_package_count }}</strong
-      ><small>Across all projects</small>
+      ><strong>{{ overview.work_package_count }}</strong>
     </article>
     <article class="metric-card">
-      <span>Deliverables</span><strong>{{ overview.deliverable_count }}</strong
-      ><small>Controlled records</small>
+      <span>Deliverables</span><strong>{{ overview.deliverable_count }}</strong>
     </article>
     <article class="metric-card">
       <span>Overdue deadlines</span
@@ -35,65 +35,69 @@ block content %}
         endif
         %}
         >{{ overview.overdue_deadline_count }}</strong
-      ><small>Issue, approval, response or site dates</small>
+      >
     </article>
   </div>
 </section>
-<section class="panel dashboard-attention" aria-labelledby="attention-title">
-  {% if overview.overdue_deadline_count %}
-  {% call section_header("Requires attention", title_id="attention-title") %}
-    <span class="attention-count status-critical"
-      >{{ overview.overdue_deadline_count }} overdue deadlines</span
-    >
-  {% endcall %}
-  {% else %}
-  {{ section_header("Requires attention", title_id="attention-title") }}
-  {% endif %}
-  {% if overview.attention_items %}
-  <ol class="attention-list">
-    {% for item in overview.attention_items %}
-    <li class="attention-item{% if item.is_overdue %} is-overdue{% endif %}">
-      <div class="attention-item-main">
-        <span
-          class="badge {% if item.is_overdue %}badge-critical{% else %}badge-muted{% endif %}"
-        >
-          {{ item.kind|replace('_', ' ') |title }}{% if item.is_overdue %} ·
-          Overdue{% endif %}
-        </span>
-        <a href="{{ item.url }}"><strong>{{ item.label }}</strong></a>
-        <span>{{ item.context }}</span>
-      </div>
-      <div class="attention-item-action">
-        {% if item.due_date %}
-        <span
-          >Due
-          <time datetime="{{ item.due_date.isoformat() }}"
-            >{{ item.due_date.strftime("%d %b %Y") }}</time
-          ></span
-        >
-        {% else %}
-        <span>Date not set</span>
-        {% endif %}
-        <a href="{{ item.url }}" class="ghost-button-sm"
-          >{{ item.action_label }}</a
-        >
-      </div>
-    </li>
-    {% endfor %}
-  </ol>
-  {% else %}
-  <div class="empty-state compact-empty-state">
-    <h3>No immediate exceptions</h3>
-    <p>
-      There are no overdue or approaching deadlines requiring action right now.
-    </p>
-  </div>
-  {% endif %}
-</section>
+{% call section( labelledby="attention-title",
+section_class="dashboard-attention" ) %} {% if overview.overdue_deadline_count
+%} {% call section_header( "Requires attention", title_id="attention-title" ) %}
+<span class="attention-count status-critical">
+  {{ overview.overdue_deadline_count }} overdue deadlines
+</span>
+{% endcall %} {% else %} {{ section_header( "Requires attention",
+title_id="attention-title" ) }} {% endif %} {% if overview.attention_items %}
 
-<section class="panel" aria-labelledby="projects-title">
-  {{ section_header("Projects", title_id="projects-title") }}
-  {% if projects %}
+<ol class="attention-list">
+  {% for item in overview.attention_items %}
+
+  <li class="attention-item{% if item.is_overdue %} is-overdue{% endif %}">
+    <div class="attention-item-main">
+      <span
+        class="badge {% if item.is_overdue %}badge-critical{% else %}badge-muted{% endif %}"
+      >
+        {{ item.kind|replace('_', ' ') |title }} {% if item.is_overdue %} ·
+        Overdue{% endif %}
+      </span>
+
+      <a href="{{ item.url }}">
+        <strong>{{ item.label }}</strong>
+      </a>
+
+      <span>{{ item.context }}</span>
+    </div>
+
+    <div class="attention-item-action">
+      {% if item.due_date %}
+      <span>
+        Due
+        <time datetime="{{ item.due_date.isoformat() }}">
+          {{ item.due_date.strftime("%d %b %Y") }}
+        </time>
+      </span>
+      {% else %}
+      <span>Date not set</span>
+      {% endif %} {{ secondary_button( item.action_label, href=item.url,
+      button_class="ghost-button-sm" ) }}
+    </div>
+  </li>
+
+  {% endfor %}
+</ol>
+
+{% else %}
+
+<div class="empty-state compact-empty-state">
+  <h3>No immediate exceptions</h3>
+  <p>
+    There are no overdue or approaching deadlines requiring action right now.
+  </p>
+</div>
+
+{% endif %} {% endcall %}
+
+{% call section(labelledby="projects-title") %}
+  {{ section_header("Projects", title_id="projects-title") }} {% if projects %}
   <div class="table-container" tabindex="0" aria-label="Project register">
     <table>
       <caption class="visually-hidden">
@@ -155,8 +159,8 @@ block content %}
       Create the first project for {{ company_name }} to begin managing
       packages, deliverables and programme information.
     </p>
-    <a href="/app/projects/new" class="primary-button">Create first project</a>
-    {% else %}
+    {{ primary_button("Create first project", href="/app/projects/new") }} {%
+    else %}
     <p>
       No projects are available to your organisation yet. A project
       administrator or owner can create the first one.
@@ -164,5 +168,5 @@ block content %}
     {% endif %}
   </div>
   {% endif %}
-</section>
+{% endcall %}
 {% endblock %}

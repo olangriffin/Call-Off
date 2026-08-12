@@ -1,114 +1,107 @@
-{% extends "base.html" %}
-
-{% block title %}
-  Create account | Call-Off
-{% endblock %}
-{% block body_class %}auth-marketing{% endblock %}
-{% block shell_class %}app-shell-auth{% endblock %}
-{% block nav %}{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% block title %} Create account | Call-Off {%
+endblock %} {% block body_class %}auth-marketing{% endblock %} {% block
+shell_class %}app-shell-auth{% endblock %} {% block nav %}{% endblock %} {%
+block content %}
 <section class="panel login-panel">
   {% if registration_enabled %}
-    <div class="panel-header">
-      <div>
-        <span class="login-mark" aria-hidden="true">
-          {{ inline_svg_asset("favicon.svg") }}
-        </span>
-        <h2>Create account</h2>
-        <p>Set up your Call-Off workspace.</p>
-      </div>
+  <div class="panel-header">
+    <div>
+      <span class="login-mark" aria-hidden="true">
+        {{ inline_svg_asset("favicon.svg") }}
+      </span>
+      <h2>Create account</h2>
+    </div>
+  </div>
+
+  {% if error_message %}
+  <div role="alert">
+    <strong>Unable to create account</strong>
+    <p>{{ error_message }}</p>
+  </div>
+  {% endif %}
+
+  <p class="login-register-link">
+    Already have an account?
+    <a href="/login">Sign in</a>
+  </p>
+
+  <form method="post" action="/register" class="login-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+    <div>
+      <label for="name">Full name</label>
+
+      <input
+        id="name"
+        name="name"
+        type="text"
+        autocomplete="name"
+        maxlength="200"
+        value="{{ form_values.name if form_values else '' }}"
+        required
+      />
     </div>
 
-    {% if error_message %}
-      <div role="alert">
-        <strong>Unable to create account</strong>
-        <p>{{ error_message }}</p>
-      </div>
-    {% endif %}
+    <div>
+      <label for="email">Email address</label>
 
-    <p class="login-register-link">
-      Already have an account?
-      <a href="/login">Sign in</a>
-    </p>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        autocomplete="email"
+        maxlength="320"
+        value="{{ form_values.email if form_values else '' }}"
+        required
+      />
+    </div>
 
-    <form method="post" action="/register" class="login-form">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}">
-      <div>
-        <label for="name">Full name</label>
+    <div>
+      <label for="password">Password</label>
 
-        <input
-          id="name"
-          name="name"
-          type="text"
-          autocomplete="name"
-          maxlength="200"
-          value="{{ form_values.name if form_values else '' }}"
-          required
-        >
-      </div>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        autocomplete="new-password"
+        maxlength="1024"
+        required
+      />
+    </div>
 
-      <div>
-        <label for="email">Email address</label>
+    <div>
+      <label for="confirm_password">Confirm password</label>
 
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autocomplete="email"
-          maxlength="320"
-          value="{{ form_values.email if form_values else '' }}"
-          required
-        >
-      </div>
+      <input
+        id="confirm_password"
+        name="confirm_password"
+        type="password"
+        autocomplete="new-password"
+        maxlength="1024"
+        required
+      />
+    </div>
+    <div></div>
 
-      <div>
-        <label for="password">Password</label>
-
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autocomplete="new-password"
-          maxlength="1024"
-          required
-        >
-      </div>
-
-      <div>
-        <label for="confirm_password">Confirm password</label>
-
-        <input
-          id="confirm_password"
-          name="confirm_password"
-          type="password"
-          autocomplete="new-password"
-          maxlength="1024"
-          required
-        >
-      </div>
-
-      <div>
-        <button type="submit" class="primary-button">
-          Create account
-        </button>
-      </div>
-    </form>
+    <div>
+      <button type="submit" class="primary-button">Create account</button>
+    </div>
+  </form>
 
   {% else %}
-    <div class="panel-header">
-      <div>
-        <span class="login-mark" aria-hidden="true">
-          {{ inline_svg_asset("favicon.svg") }}
-        </span>
-        <h2>Registration unavailable</h2>
-        <p>New accounts can only be created by invitation.</p>
-      </div>
+  <div class="panel-header">
+    <div>
+      <span class="login-mark" aria-hidden="true">
+        {{ inline_svg_asset("favicon.svg") }}
+      </span>
+      <h2>Registration unavailable</h2>
+      <p>New accounts can only be created by invitation.</p>
     </div>
+  </div>
 
-    <p class="login-register-link">
-      Already have an account?
-      <a href="/login">Sign in</a>
-    </p>
+  <p class="login-register-link">
+    Already have an account?
+    <a href="/login">Sign in</a>
+  </p>
   {% endif %}
 </section>
 {% endblock %}
