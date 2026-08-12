@@ -1,22 +1,14 @@
-{% extends "base.html" %} {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %} {% block title %} {% if work_package %} {{
+{% extends "base.html" %} {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %} {% from "partials/components/section_header.html" import section_header %} {% block title %} {% if work_package %} {{
     work_package.code }} | Calloff {% else %} Work package not found | Calloff {%
         endif %} {% endblock %} {% block content %} {% if project and work_package %}
     {{ breadcrumbs(project=project, work_package=work_package, current_label="Package overview") }}
     {{ project_workspace_nav(project, "packages") }}
     <section class="panel">
-        <div class="panel-header">
-            <div>
-                <p class="eyebrow">
-                    <a href="/app/projects/{{ project.id }}">{{ project.code }}</a>
-                    / {{ work_package.code }}
-                </p>
-                <h1 class="page-title">{{ work_package.name }}</h1>
-                <p>
-                    {{ work_package.package_type|replace('_', ' ') |title if
-                        work_package.package_type else "Work package" }} / {{ work_package.status|replace('_', ' ') |title }}
-                </p>
-            </div>
-        </div>
+        {% set package_header_description %}
+            {{ work_package.package_type|replace('_', ' ') |title if
+                work_package.package_type else "Work package" }} / {{ work_package.status|replace('_', ' ') |title }}
+        {% endset %}
+        {{ section_header(work_package.name, description=package_header_description, heading_level=1) }}
         <div class="readiness-banner readiness-{{ readiness.key }}">
             <div>
                 <p class="eyebrow">Package readiness</p>
@@ -59,14 +51,10 @@
                         </div>
                         </section>
                         <section class="panel">
-                            <div class="panel-header">
-                                <div>
-                                    <p class="eyebrow">Design and approval control</p>
-                                    <h2>Deliverables</h2>
-                                </div>
+                            {% call section_header("Deliverables") %}
                                 <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/new"
                                    class="primary-button">New deliverable</a>
-                            </div>
+                            {% endcall %}
                             {% if deliverable_rows %}
                                 <div class="table-container"
                                      tabindex="0"

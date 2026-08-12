@@ -1,0 +1,26 @@
+{% macro section_header( title, description=none, heading_level=2,
+title_id=none, header_class=none ) -%}
+
+<div class="panel-header{% if header_class %} {{ header_class }}{% endif %}">
+  <div class="panel-header-content">
+    {% if heading_level == 1 %}
+    <h1 class="page-title" {% if title_id %}id="{{ title_id }}" {% endif %}>
+      {{ title }}
+    </h1>
+
+    {% elif heading_level == 3 %}
+    <h3 {% if title_id %}id="{{ title_id }}" {% endif %}>{{ title }}</h3>
+
+    {% else %}
+    <h2 {% if title_id %}id="{{ title_id }}" {% endif %}>{{ title }}</h2>
+    {% endif %} {% if description %}
+    <p class="panel-header-description">{{ description }}</p>
+    {% endif %}
+  </div>
+
+  {% if caller is defined %}
+  <div class="panel-header-actions">{{ caller() }}</div>
+  {% endif %}
+</div>
+
+{%- endmacro %}

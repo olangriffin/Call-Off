@@ -1,15 +1,10 @@
-{% extends "base.html" %} {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %} {% block title %} {% if project %} {{ project.code }}
+{% extends "base.html" %} {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %} {% from "partials/components/section_header.html" import section_header %} {% block title %} {% if project %} {{ project.code }}
 | Calloff {% else %} Project not found | Calloff {% endif %} {% endblock %} {%
     block content %} {% if project %}
 {{ breadcrumbs(project=project, current_label="Overview") }}
 {{ project_workspace_nav(project, "overview") }}
 <section class="panel">
-    <div class="panel-header">
-        <div>
-            <h1 class="page-title">{{ project.name }}</h1>
-            <p>{{ project.client_name or "No client recorded" }}</p>
-        </div>
-    </div>
+    {{ section_header(project.name, description=project.client_name or "No client recorded", heading_level=1) }}
     <div class="metric-grid">
         <article class="metric-card">
             <span>Status</span>
@@ -32,24 +27,16 @@
                                 </div>
                                 </section>
                                 <section class="panel" id="programme">
-                                    <div class="panel-header">
-                                        <div>
-                                            <p class="eyebrow">Delivery</p>
-                                            <h2>Project programme</h2>
-                                        </div>
+                                    {% call section_header("Project programme") %}
                                         <a href="/app/projects/{{ project.id }}/programme"
                                            class="primary-button">View programme</a>
-                                    </div>
+                                    {% endcall %}
                                 </section>
                                 <section class="panel" id="work-packages">
-                                    <div class="panel-header">
-                                        <div>
-                                            <p class="eyebrow">Delivery</p>
-                                            <h2>Work packages</h2>
-                                        </div>
+                                    {% call section_header("Work packages") %}
                                         <a href="/app/projects/{{ project.id }}/work-packages/new"
                                            class="primary-button">New work package</a>
-                                    </div>
+                                    {% endcall %}
                                     {% if work_packages %}
                                         <div class="table-container"
                                              tabindex="0"

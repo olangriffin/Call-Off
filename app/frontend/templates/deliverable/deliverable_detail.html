@@ -1,20 +1,17 @@
 {% extends "base.html" %}
 {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
+{% from "partials/components/section_header.html" import section_header %}
 {% block title %}{% if deliverable %}{{ deliverable.reference }} | Call-Off{% else %}Deliverable not found | Call-Off{% endif %}{% endblock %}
 {% block content %}
     {% if project and work_package and deliverable %}
         {{ breadcrumbs(project=project, work_package=work_package, deliverable=deliverable, current_label="Deliverable overview") }}
         {{ project_workspace_nav(project, "packages") }}
         <section class="panel">
-            <div class="panel-header">
-                <div>
-                    <p class="eyebrow">{{ deliverable.reference }} · {{ work_package.code }}</p>
-                    <h1 class="page-title">{{ deliverable.name }}</h1>
-                    <p>{{ deliverable.deliverable_type|replace('_', ' ') |title }} · {{ deliverable.status|replace('_', ' ') |title }}</p>
-                </div>
+            {% set deliverable_header_description %}{{ deliverable.deliverable_type|replace('_', ' ') |title }} · {{ deliverable.status|replace('_', ' ') |title }}{% endset %}
+            {% call section_header(deliverable.name, description=deliverable_header_description, heading_level=1) %}
                 <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/new"
                    class="primary-button">Add revision</a>
-            </div>
+            {% endcall %}
             <div class="metric-grid">
                 <article class="metric-card"><span>Status</span><strong>{{ deliverable.status|replace('_', ' ') |title }}</strong><small>Current deliverable state</small></article>
                 <article class="metric-card"><span>Planned issue</span><strong>{% if deliverable.planned_issue_date %}<time datetime="{{ deliverable.planned_issue_date.isoformat() }}">{{ deliverable.planned_issue_date.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}</strong><small>Target issue date</small></article>
@@ -22,17 +19,14 @@
             </div>
         </section>
         <section class="panel current-record" aria-labelledby="current-revision-title">
-            <div class="panel-header">
-                <div>
-                    <p class="eyebrow">Current operational state</p>
-                    <h2 id="current-revision-title">Current revision</h2>
-                    <p>The latest issued revision and its most recent approval record.</p>
-                </div>
-                {% if current_revision %}
+            {% if current_revision %}
+                {% call section_header("Current revision", description="The latest issued revision and its most recent approval record.", title_id="current-revision-title") %}
                     <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}/deliverables/{{ deliverable.id }}/revisions/{{ current_revision.id }}/approvals/new"
                        class="primary-button">Send for approval</a>
-                {% endif %}
-            </div>
+                {% endcall %}
+            {% else %}
+                {{ section_header("Current revision", description="The latest issued revision and its most recent approval record.", title_id="current-revision-title") }}
+            {% endif %}
             {% if current_revision %}
                 <article class="record-card record-card-current">
                     <div class="record-card-header">
@@ -126,13 +120,7 @@
         </section>
         {% if historical_revisions %}
             <section class="panel" aria-labelledby="history-title">
-                <div class="panel-header">
-                    <div>
-                        <p class="eyebrow">Audit trail</p>
-                        <h2 id="history-title">Revision history</h2>
-                        <p>Earlier revisions are shown for reference and cannot be re-issued for approval here.</p>
-                    </div>
-                </div>
+                {{ section_header("Revision history", description="Earlier revisions are shown for reference and cannot be re-issued for approval here.", title_id="history-title") }}
                 <div class="record-stack">
                     {% for revision in historical_revisions %}
                         <article class="record-card record-card-historical">
@@ -200,11 +188,7 @@
             </section>
         {% endif %}
         <section class="panel" aria-labelledby="details-title">
-            <div class="panel-header">
-                <div>
-                    <h2 id="details-title">Record details</h2>
-                </div>
-            </div>
+            {{ section_header("Record details", title_id="details-title") }}
             <dl class="record-meta record-meta-details">
                 <div>
                     <dt>Description</dt>

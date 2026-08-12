@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
+{% from "partials/components/section_header.html" import section_header %}
 {% block title %}
     {% if project %}
         New work package | {{ project.code }} | Calloff
@@ -12,13 +13,9 @@
         {{ breadcrumbs(project=project, current_label="New package") }}
         {{ project_workspace_nav(project, "packages") }}
         <section class="panel">
-            <div class="panel-header">
-                <div>
-                    <p class="eyebrow">{{ project.code }}</p>
-                    <h1 class="page-title">New work package</h1>
-                </div>
+            {% call section_header("New work package", heading_level=1) %}
                 <a href="/app/projects/{{ project.id }}">Back to project</a>
-            </div>
+            {% endcall %}
             {% if error_message %}
                 <div class="form-alert" role="alert">
                     <strong>Unable to create work package</strong>

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
+{% from "partials/components/section_header.html" import section_header %}
 {% block title %}
     {% if work_package %}
         New deliverable | {{ work_package.code }} | Calloff
@@ -12,13 +13,9 @@
         {{ breadcrumbs(project=project, work_package=work_package, current_label="New deliverable") }}
         {{ project_workspace_nav(project, "packages") }}
         <section class="panel">
-            <div class="panel-header">
-                <div>
-                    <p class="eyebrow">{{ project.code }} / {{ work_package.code }}</p>
-                    <h1 class="page-title">New deliverable</h1>
-                </div>
+            {% call section_header("New deliverable", heading_level=1) %}
                 <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}">Back to package</a>
-            </div>
+            {% endcall %}
             {% if error_message %}
                 <div class="form-alert" role="alert">
                     <strong>Unable to create deliverable</strong>

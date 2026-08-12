@@ -1,121 +1,168 @@
-{% extends "base.html" %}
-{% block title %}Dashboard | Call-Off{% endblock %}
-{% block content %}
-    <section class="dashboard-hero" aria-labelledby="dashboard-title">
-        <div>
-            <p class="eyebrow">{{ company_name }} portfolio</p>
-            <h1 class="page-title" id="dashboard-title">Operational dashboard</h1>
-            <p>Focus on deadlines and records that need action, then move directly into the work.</p>
-        </div>
-        {% if can_create_projects %}
-            <a href="/app/projects/new" class="primary-button">New project</a>
-        {% endif %}
-    </section>
-    <section class="panel dashboard-attention" aria-labelledby="attention-title">
-        <div class="panel-header">
-            <div>
-                <p class="eyebrow">Exceptions</p>
-                <h2 id="attention-title">Requires attention</h2>
-                <p>Overdue and approaching operational deadlines across your organisation.</p>
-            </div>
-            {% if overview.overdue_deadline_count %}
-                <span class="attention-count status-critical">{{ overview.overdue_deadline_count }} overdue deadlines</span>
-            {% endif %}
-        </div>
-        {% if overview.attention_items %}
-            <ol class="attention-list">
-                {% for item in overview.attention_items %}
-                    <li class="attention-item{% if item.is_overdue %} is-overdue{% endif %}">
-                        <div class="attention-item-main">
-                            <span class="badge {% if item.is_overdue %}badge-critical{% else %}badge-muted{% endif %}">
-                                {{ item.kind|replace('_', ' ') |title }}{% if item.is_overdue %} · Overdue{% endif %}
-                            </span>
-                            <a href="{{ item.url }}"><strong>{{ item.label }}</strong></a>
-                            <span>{{ item.context }}</span>
-                        </div>
-                        <div class="attention-item-action">
-                            {% if item.due_date %}
-                                <span>Due <time datetime="{{ item.due_date.isoformat() }}">{{ item.due_date.strftime("%d %b %Y") }}</time></span>
-                            {% else %}
-                                <span>Date not set</span>
-                            {% endif %}
-                            <a href="{{ item.url }}" class="ghost-button-sm">{{ item.action_label }}</a>
-                        </div>
-                    </li>
-                {% endfor %}
-            </ol>
+{% extends "base.html" %} {% from "partials/components/section_header.html" import section_header %} {% block title %}Dashboard | Call-Off{% endblock %} {%
+block content %}
+<section class="dashboard-hero" aria-labelledby="dashboard-title">
+  <div>
+    <h1 class="page-title" id="dashboard-title">Operational dashboard</h1>
+  </div>
+  {% if can_create_projects %}
+  <a href="/app/projects/new" class="primary-button">New project</a>
+  {% endif %}
+</section>
+<section aria-labelledby="portfolio-title">
+  <div class="metric-grid dashboard-metrics">
+    <article class="metric-card">
+      <span>Projects</span><strong>{{ overview.project_count }}</strong
+      ><small>{{ overview.active_project_count }} active</small>
+    </article>
+    <article class="metric-card">
+      <span>Work packages</span
+      ><strong>{{ overview.work_package_count }}</strong
+      ><small>Across all projects</small>
+    </article>
+    <article class="metric-card">
+      <span>Deliverables</span><strong>{{ overview.deliverable_count }}</strong
+      ><small>Controlled records</small>
+    </article>
+    <article class="metric-card">
+      <span>Overdue deadlines</span
+      ><strong
+        {%
+        if
+        overview.overdue_deadline_count
+        %}
+        class="status-critical"
+        {%
+        endif
+        %}
+        >{{ overview.overdue_deadline_count }}</strong
+      ><small>Issue, approval, response or site dates</small>
+    </article>
+  </div>
+</section>
+<section class="panel dashboard-attention" aria-labelledby="attention-title">
+  {% if overview.overdue_deadline_count %}
+  {% call section_header("Requires attention", title_id="attention-title") %}
+    <span class="attention-count status-critical"
+      >{{ overview.overdue_deadline_count }} overdue deadlines</span
+    >
+  {% endcall %}
+  {% else %}
+  {{ section_header("Requires attention", title_id="attention-title") }}
+  {% endif %}
+  {% if overview.attention_items %}
+  <ol class="attention-list">
+    {% for item in overview.attention_items %}
+    <li class="attention-item{% if item.is_overdue %} is-overdue{% endif %}">
+      <div class="attention-item-main">
+        <span
+          class="badge {% if item.is_overdue %}badge-critical{% else %}badge-muted{% endif %}"
+        >
+          {{ item.kind|replace('_', ' ') |title }}{% if item.is_overdue %} ·
+          Overdue{% endif %}
+        </span>
+        <a href="{{ item.url }}"><strong>{{ item.label }}</strong></a>
+        <span>{{ item.context }}</span>
+      </div>
+      <div class="attention-item-action">
+        {% if item.due_date %}
+        <span
+          >Due
+          <time datetime="{{ item.due_date.isoformat() }}"
+            >{{ item.due_date.strftime("%d %b %Y") }}</time
+          ></span
+        >
         {% else %}
-            <div class="empty-state compact-empty-state">
-                <h3>No immediate exceptions</h3>
-                <p>There are no overdue or approaching deadlines requiring action right now.</p>
-            </div>
+        <span>Date not set</span>
         {% endif %}
-    </section>
-    <section class="panel" aria-labelledby="portfolio-title">
-        <div class="panel-header">
-            <div>
-                <p class="eyebrow">Portfolio</p>
-                <h2 id="portfolio-title">Current workload</h2>
-            </div>
-        </div>
-        <div class="metric-grid dashboard-metrics">
-            <article class="metric-card"><span>Projects</span><strong>{{ overview.project_count }}</strong><small>{{ overview.active_project_count }} active</small></article>
-            <article class="metric-card"><span>Work packages</span><strong>{{ overview.work_package_count }}</strong><small>Across all projects</small></article>
-            <article class="metric-card"><span>Deliverables</span><strong>{{ overview.deliverable_count }}</strong><small>Controlled records</small></article>
-            <article class="metric-card"><span>Overdue deadlines</span><strong {% if overview.overdue_deadline_count %} class="status-critical"{% endif %}>{{ overview.overdue_deadline_count }}</strong><small>Issue, approval, response or site dates</small></article>
-        </div>
-    </section>
-    <section class="panel" aria-labelledby="projects-title">
-        <div class="panel-header">
-            <div>
-                <p class="eyebrow">Project register</p>
-                <h2 id="projects-title">Projects</h2>
-                <p>Open a project workspace to review packages, deliverables and programme.</p>
-            </div>
-        </div>
-        {% if projects %}
-            <div class="table-container" tabindex="0" aria-label="Project register">
-                <table>
-                    <caption class="visually-hidden">Projects for {{ company_name }}</caption>
-                    <thead>
-                        <tr>
-                            <th>Project</th>
-                            <th>Client</th>
-                            <th>Status</th>
-                            <th>Planned start</th>
-                            <th>Planned finish</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for project in projects %}
-                            <tr>
-                                <th scope="row">
-                                    <a href="/app/projects/{{ project.id }}"><strong>{{ project.code }}</strong>
-                                        <br>
-                                        <span>{{ project.name }}</span></a>
-                                </th>
-                                <td>{{ project.client_name or "Not recorded" }}</td>
-                                <td><span class="badge {% if project.status|lower == 'active' %}badge-success{% else %}badge-muted{% endif %}">{{ project.status|replace('_', ' ') |title }}</span></td>
-                                <td>{% if project.planned_start %}<time datetime="{{ project.planned_start.isoformat() }}">{{ project.planned_start.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}</td>
-                                <td>{% if project.planned_finish %}<time datetime="{{ project.planned_finish.isoformat() }}">{{ project.planned_finish.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% if overview.project_count > projects|length %}
-                <p class="register-limit-note">Showing the first {{ projects|length }} of {{ overview.project_count }} projects.</p>
-            {% endif %}
-        {% else %}
-            <div class="empty-state">
-                <h3>No projects yet</h3>
-                {% if can_create_projects %}
-                    <p>Create the first project for {{ company_name }} to begin managing packages, deliverables and programme information.</p>
-                    <a href="/app/projects/new" class="primary-button">Create first project</a>
-                {% else %}
-                    <p>No projects are available to your organisation yet. A project administrator or owner can create the first one.</p>
-                {% endif %}
-            </div>
-        {% endif %}
-    </section>
+        <a href="{{ item.url }}" class="ghost-button-sm"
+          >{{ item.action_label }}</a
+        >
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <div class="empty-state compact-empty-state">
+    <h3>No immediate exceptions</h3>
+    <p>
+      There are no overdue or approaching deadlines requiring action right now.
+    </p>
+  </div>
+  {% endif %}
+</section>
+
+<section class="panel" aria-labelledby="projects-title">
+  {{ section_header("Projects", title_id="projects-title") }}
+  {% if projects %}
+  <div class="table-container" tabindex="0" aria-label="Project register">
+    <table>
+      <caption class="visually-hidden">
+        Projects for {{ company_name }}
+      </caption>
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>Client</th>
+          <th>Status</th>
+          <th>Planned start</th>
+          <th>Planned finish</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for project in projects %}
+        <tr>
+          <th scope="row">
+            <a href="/app/projects/{{ project.id }}"
+              ><strong>{{ project.code }}</strong>
+              <br />
+              <span>{{ project.name }}</span></a
+            >
+          </th>
+          <td>{{ project.client_name or "Not recorded" }}</td>
+          <td>
+            <span
+              class="badge {% if project.status|lower == 'active' %}badge-success{% else %}badge-muted{% endif %}"
+              >{{ project.status|replace('_', ' ') |title }}</span
+            >
+          </td>
+          <td>
+            {% if project.planned_start %}<time
+              datetime="{{ project.planned_start.isoformat() }}"
+              >{{ project.planned_start.strftime("%d %b %Y") }}</time
+            >{% else %}<span class="missing-value">Not set</span>{% endif %}
+          </td>
+          <td>
+            {% if project.planned_finish %}<time
+              datetime="{{ project.planned_finish.isoformat() }}"
+              >{{ project.planned_finish.strftime("%d %b %Y") }}</time
+            >{% else %}<span class="missing-value">Not set</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if overview.project_count > projects|length %}
+  <p class="register-limit-note">
+    Showing the first {{ projects|length }} of {{ overview.project_count }}
+    projects.
+  </p>
+  {% endif %} {% else %}
+  <div class="empty-state">
+    <h3>No projects yet</h3>
+    {% if can_create_projects %}
+    <p>
+      Create the first project for {{ company_name }} to begin managing
+      packages, deliverables and programme information.
+    </p>
+    <a href="/app/projects/new" class="primary-button">Create first project</a>
+    {% else %}
+    <p>
+      No projects are available to your organisation yet. A project
+      administrator or owner can create the first one.
+    </p>
+    {% endif %}
+  </div>
+  {% endif %}
+</section>
 {% endblock %}
