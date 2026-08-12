@@ -77,31 +77,20 @@
     padding: 16px;
   }
 
-  .panel-header {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .panel-header .primary-button {
-    align-self: flex-start;
-  }
-
   body.app-interface .dashboard-hero,
-  body.app-interface .attention-item,
   body.app-interface .approval-summary {
     align-items: stretch;
     flex-direction: column;
   }
 
-  body.app-interface .dashboard-hero .primary-button,
-  body.app-interface .attention-item-action .ghost-button-sm {
+  body.app-interface .dashboard-hero .primary-button {
     align-self: flex-start;
   }
 
-  body.app-interface .attention-item-action {
-    align-items: flex-start;
-    flex-direction: column;
+  body.app-interface .delivery-health-row {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   body.app-interface .workspace-nav {
@@ -117,7 +106,6 @@
     width: 100%;
   }
 
-  .metric-grid,
   .form-grid,
   .record-meta {
     grid-template-columns: 1fr;
@@ -147,14 +135,6 @@
   body.app-interface .panel {
     padding: 20px;
     border-radius: 16px;
-  }
-
-  body.app-interface .panel-header {
-    margin-bottom: 20px;
-  }
-
-  body.app-interface .metric-card {
-    min-height: 108px;
   }
 
   body.app-interface .programme-page {

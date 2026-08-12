@@ -1,172 +1,159 @@
-{% extends "base.html" %} {% from "partials/components/section_header.html"
-import section_header %} {% from "partials/components/button.html" import
-primary_button, secondary_button %} {% from "partials/components/section.html"
-import section %}{% block title %}Dashboard | Call-Off{% endblock %} {% block
-content %}
-<section class="dashboard-hero" aria-labelledby="dashboard-title">
-  <div>
-    <h1 class="page-title" id="dashboard-title">Operational dashboard</h1>
-  </div>
-  {% if can_create_projects %} {{ primary_button("New project",
-  href="/app/projects/new") }} {% endif %}
-</section>
-<section aria-labelledby="portfolio-title">
-  <h2 id="portfolio-title" class="visually-hidden">Portfolio metrics</h2>
-  <div class="metric-grid dashboard-metrics">
-    <article class="metric-card">
-      <span>Projects</span><strong>{{ overview.project_count }}</strong>
-    </article>
-    <article class="metric-card">
-      <span>Work packages</span
-      ><strong>{{ overview.work_package_count }}</strong>
-    </article>
-    <article class="metric-card">
-      <span>Deliverables</span><strong>{{ overview.deliverable_count }}</strong>
-    </article>
-    <article class="metric-card">
-      <span>Overdue deadlines</span
-      ><strong
-        {%
-        if
-        overview.overdue_deadline_count
-        %}
-        class="status-critical"
-        {%
-        endif
-        %}
-        >{{ overview.overdue_deadline_count }}</strong
-      >
-    </article>
-  </div>
-</section>
-{% call section( labelledby="attention-title",
-section_class="dashboard-attention" ) %} {% if overview.overdue_deadline_count
-%} {% call section_header( "Requires attention", title_id="attention-title" ) %}
-<span class="attention-count status-critical">
-  {{ overview.overdue_deadline_count }} overdue deadlines
-</span>
-{% endcall %} {% else %} {{ section_header( "Requires attention",
-title_id="attention-title" ) }} {% endif %} {% if overview.attention_items %}
-
-<ol class="attention-list">
-  {% for item in overview.attention_items %}
-
-  <li class="attention-item{% if item.is_overdue %} is-overdue{% endif %}">
-    <div class="attention-item-main">
-      <span
-        class="badge {% if item.is_overdue %}badge-critical{% else %}badge-muted{% endif %}"
-      >
-        {{ item.kind|replace('_', ' ') |title }} {% if item.is_overdue %} ·
-        Overdue{% endif %}
-      </span>
-
-      <a href="{{ item.url }}">
-        <strong>{{ item.label }}</strong>
-      </a>
-
-      <span>{{ item.context }}</span>
-    </div>
-
-    <div class="attention-item-action">
-      {% if item.due_date %}
-      <span>
-        Due
-        <time datetime="{{ item.due_date.isoformat() }}">
-          {{ item.due_date.strftime("%d %b %Y") }}
-        </time>
-      </span>
-      {% else %}
-      <span>Date not set</span>
-      {% endif %} {{ secondary_button( item.action_label, href=item.url,
-      button_class="ghost-button-sm" ) }}
-    </div>
-  </li>
-
-  {% endfor %}
-</ol>
-
-{% else %}
-
-<div class="empty-state compact-empty-state">
-  <h3>No immediate exceptions</h3>
-  <p>
-    There are no overdue or approaching deadlines requiring action right now.
-  </p>
-</div>
-
-{% endif %} {% endcall %}
-
-{% call section(labelledby="projects-title") %}
-  {{ section_header("Projects", title_id="projects-title") }} {% if projects %}
-  <div class="table-container" tabindex="0" aria-label="Project register">
-    <table>
-      <caption class="visually-hidden">
-        Projects for {{ company_name }}
-      </caption>
-      <thead>
-        <tr>
-          <th>Project</th>
-          <th>Client</th>
-          <th>Status</th>
-          <th>Planned start</th>
-          <th>Planned finish</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for project in projects %}
-        <tr>
-          <th scope="row">
-            <a href="/app/projects/{{ project.id }}"
-              ><strong>{{ project.code }}</strong>
-              <br />
-              <span>{{ project.name }}</span></a
-            >
-          </th>
-          <td>{{ project.client_name or "Not recorded" }}</td>
-          <td>
-            <span
-              class="badge {% if project.status|lower == 'active' %}badge-success{% else %}badge-muted{% endif %}"
-              >{{ project.status|replace('_', ' ') |title }}</span
-            >
-          </td>
-          <td>
-            {% if project.planned_start %}<time
-              datetime="{{ project.planned_start.isoformat() }}"
-              >{{ project.planned_start.strftime("%d %b %Y") }}</time
-            >{% else %}<span class="missing-value">Not set</span>{% endif %}
-          </td>
-          <td>
-            {% if project.planned_finish %}<time
-              datetime="{{ project.planned_finish.isoformat() }}"
-              >{{ project.planned_finish.strftime("%d %b %Y") }}</time
-            >{% else %}<span class="missing-value">Not set</span>{% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% if overview.project_count > projects|length %}
-  <p class="register-limit-note">
-    Showing the first {{ projects|length }} of {{ overview.project_count }}
-    projects.
-  </p>
-  {% endif %} {% else %}
-  <div class="empty-state">
-    <h3>No projects yet</h3>
-    {% if can_create_projects %}
-    <p>
-      Create the first project for {{ company_name }} to begin managing
-      packages, deliverables and programme information.
-    </p>
-    {{ primary_button("Create first project", href="/app/projects/new") }} {%
-    else %}
-    <p>
-      No projects are available to your organisation yet. A project
-      administrator or owner can create the first one.
-    </p>
-    {% endif %}
-  </div>
-  {% endif %}
-{% endcall %}
+{% extends "base.html" %}
+{% from "partials/components/button.html" import primary_button %}
+{% from "partials/components/section.html" import section %}
+{% from "partials/components/section_header.html" import section_header %}
+{% block title %}Dashboard | Call-Off{% endblock %}
+{% block content %}
+    <section class="dashboard-hero" aria-labelledby="dashboard-title">
+        <div>
+            <h1 class="page-title" id="dashboard-title">Operational dashboard</h1>
+        </div>
+        {% if can_create_projects %}
+            {{ primary_button("New project", href="/app/projects/new") }}
+        {% endif %}
+    </section>
+    <section aria-labelledby="portfolio-summary-title">
+        <h2 id="portfolio-summary-title" class="visually-hidden">Portfolio health summary</h2>
+        <div class="metric-grid dashboard-metrics">
+            <article class="metric-card">
+                <span>Projects</span>
+                <strong>{{ overview.project_count }}</strong>
+            </article>
+            <article class="metric-card">
+                <span>On Track</span>
+                <strong class="status-success">{{ overview.health_counts.on_track }}</strong>
+            </article>
+            <article class="metric-card">
+                <span>At Risk</span>
+                <strong class="status-warning">{{ overview.health_counts.at_risk }}</strong>
+            </article>
+            <article class="metric-card">
+                <span>Critical</span>
+                <strong class="status-critical">{{ overview.health_counts.critical }}</strong>
+            </article>
+            <article class="metric-card">
+                <span>Incomplete</span>
+                <strong>{{ overview.health_counts.incomplete }}</strong>
+            </article>
+        </div>
+    </section>
+    {% call section(labelledby="portfolio-distribution-title") %}
+        {{ section_header("Project health distribution", title_id="portfolio-distribution-title") }}
+        {% if overview.active_project_count %}
+            <div class="portfolio-distribution"
+                 role="img"
+                 aria-label="{{ overview.health_counts.on_track }} on track, {{ overview.health_counts.at_risk }} at risk, {{ overview.health_counts.critical }} critical, and {{ overview.health_counts.incomplete }} incomplete active projects">
+                <div class="portfolio-distribution-bar" aria-hidden="true">
+                    {% if overview.health_counts.on_track %}
+                        <span class="portfolio-distribution-segment portfolio-distribution-segment--on-track"
+                              style="flex-grow: {{ overview.health_counts.on_track }}"></span>
+                    {% endif %}
+                    {% if overview.health_counts.at_risk %}
+                        <span class="portfolio-distribution-segment portfolio-distribution-segment--at-risk"
+                              style="flex-grow: {{ overview.health_counts.at_risk }}"></span>
+                    {% endif %}
+                    {% if overview.health_counts.critical %}
+                        <span class="portfolio-distribution-segment portfolio-distribution-segment--critical"
+                              style="flex-grow: {{ overview.health_counts.critical }}"></span>
+                    {% endif %}
+                    {% if overview.health_counts.incomplete %}
+                        <span class="portfolio-distribution-segment portfolio-distribution-segment--incomplete"
+                              style="flex-grow: {{ overview.health_counts.incomplete }}"></span>
+                    {% endif %}
+                </div>
+                <ul class="portfolio-distribution-legend"
+                    aria-label="Project health distribution">
+                    <li><span class="badge badge-success">On Track</span><strong>{{ overview.health_counts.on_track }}</strong></li>
+                    <li><span class="badge badge-warning">At Risk</span><strong>{{ overview.health_counts.at_risk }}</strong></li>
+                    <li><span class="badge badge-critical">Critical</span><strong>{{ overview.health_counts.critical }}</strong></li>
+                    <li><span class="badge badge-muted">Incomplete</span><strong>{{ overview.health_counts.incomplete }}</strong></li>
+                </ul>
+            </div>
+        {% else %}
+            <div class="empty-state compact-empty-state">
+                <h3>No active projects to assess</h3>
+                <p>Project health will appear here when an active project is available.</p>
+            </div>
+        {% endif %}
+    {% endcall %}
+    {% call section(labelledby="delivery-health-title") %}
+        {{ section_header("Delivery health by project", title_id="delivery-health-title") }}
+        {% if overview.active_project_health_rows %}
+            <ul class="delivery-health-list">
+                {% for row in overview.active_project_health_rows %}
+                    <li class="delivery-health-row">
+                        <a class="delivery-health-project"
+                           href="/app/projects/{{ row.project.id }}">
+                            <strong>{{ row.project.code }}</strong>
+                            <span>{{ row.project.name }}</span>
+                        </a>
+                        {% if row.delivery_health %}
+                            <div class="delivery-health-segments" role="img" aria-label="{{ row.project.code }} delivery health: {% for segment in row.delivery_health %}{{ segment.package.code }} {{ segment.health.label }}{% if not loop.last %}, {% endif %}{% endfor %}">
+                                {% for segment in row.delivery_health %}
+                                    <span class="delivery-health-segment delivery-health-segment--{{ segment.health.key }}"
+                                          title="{{ segment.package.code }}: {{ segment.health.label }}"></span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <span class="missing-value">No work packages</span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="empty-state compact-empty-state">
+                <h3>No delivery health to assess</h3>
+                <p>Delivery health will appear here when an active project has work packages.</p>
+            </div>
+        {% endif %}
+    {% endcall %}
+    {% call section(labelledby="portfolio-register-title") %}
+        {{ section_header("Project portfolio health", title_id="portfolio-register-title") }}
+        {% if overview.project_health_rows %}
+            <div class="table-container"
+                 tabindex="0"
+                 aria-label="Project portfolio health register">
+                <table>
+                    <caption class="visually-hidden">Project portfolio health for {{ company_name }}</caption>
+                    <thead>
+                        <tr>
+                            <th>Project</th>
+                            <th>Overall</th>
+                            <th>Design</th>
+                            <th>Programme</th>
+                            <th>Procurement</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in overview.project_health_rows %}
+                            <tr>
+                                <th scope="row">
+                                    <a href="/app/projects/{{ row.project.id }}">
+                                        <strong>{{ row.project.code }}</strong>
+                                        <span class="table-secondary">{{ row.project.name }}</span>
+                                    </a>
+                                </th>
+                                <td><span class="badge {{ row.overall_health.css_class }}">{{ row.overall_health.label }}</span></td>
+                                <td><span class="badge {{ row.design_health.css_class }}">{{ row.design_health.label }}</span></td>
+                                <td><span class="badge {{ row.programme_health.css_class }}">{{ row.programme_health.label }}</span></td>
+                                <td><span class="badge {{ row.procurement_health.css_class }}">{{ row.procurement_health.label }}</span></td>
+                                <td>{{ row.data_completeness }}%</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h3>No projects yet</h3>
+                {% if can_create_projects %}
+                    <p>Create the first project for {{ company_name }} to begin managing delivery health.</p>
+                    {{ primary_button("Create first project", href="/app/projects/new") }}
+                {% else %}
+                    <p>No projects are available to your organisation yet. A project administrator or owner can create the first one.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endcall %}
 {% endblock %}

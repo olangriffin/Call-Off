@@ -1,0 +1,94 @@
+/* Reusable operational tables */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+th {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--charcoal);
+  color: #c7cccf;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+tbody tr {
+  background: var(--surface);
+}
+
+tbody tr:hover {
+  background: #f3f6e8;
+}
+
+:root[data-theme="dark"] tbody tr:hover {
+  background: rgba(255, 212, 0, 0.06);
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+td.actions-cell {
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-align: right;
+}
+
+body.app-interface .table-container {
+  border-color: var(--card-border);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 12px 30px rgba(var(--ink-rgb), 0.05);
+}
+
+:root[data-theme="dark"] body.app-interface .table-container {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body.app-interface th {
+  padding-block: 12px;
+  border-bottom-color: rgba(247, 248, 245, 0.12);
+  background: var(--sidebar);
+  color: rgba(247, 248, 245, 0.76);
+}
+
+body.app-interface tbody tr {
+  background: rgba(255, 255, 255, 0.78);
+}
+
+:root[data-theme="dark"] body.app-interface tbody tr {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+body.app-interface tbody tr:hover {
+  background: rgba(255, 212, 0, 0.09);
+}
+
+body.app-interface .table-container:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+body.app-interface .table-secondary {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}

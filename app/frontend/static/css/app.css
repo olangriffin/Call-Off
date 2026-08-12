@@ -4,7 +4,14 @@
 @import url("./app/foundation.css");
 @import url("./app/shell-auth.css");
 @import url("./app/navigation.css");
+
 @import url("./app/components.css");
+@import url("./app/components/buttons.css");
+@import url("./app/components/sections.css");
+@import url("./app/components/metrics.css");
+@import url("./app/components/tables.css");
+@import url("./app/components/states.css");
+
 @import url("./app/forms-records.css");
 @import url("./app/interface.css");
 @import url("./app/programme.css");
