@@ -77,16 +77,6 @@
     padding: 16px;
   }
 
-  .panel-header {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .panel-header .primary-button {
-    align-self: flex-start;
-  }
-
   body.app-interface .dashboard-hero,
   body.app-interface .attention-item,
   body.app-interface .approval-summary {
@@ -117,7 +107,6 @@
     width: 100%;
   }
 
-  .metric-grid,
   .form-grid,
   .record-meta {
     grid-template-columns: 1fr;
@@ -147,14 +136,6 @@
   body.app-interface .panel {
     padding: 20px;
     border-radius: 16px;
-  }
-
-  body.app-interface .panel-header {
-    margin-bottom: 20px;
-  }
-
-  body.app-interface .metric-card {
-    min-height: 108px;
   }
 
   body.app-interface .programme-page {

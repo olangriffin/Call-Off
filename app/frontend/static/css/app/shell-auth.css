@@ -168,8 +168,7 @@ body.auth-marketing .login-form .primary-button {
   border-color: var(--text);
   border-radius: 999px;
   background: var(--text);
-  /* See the matching comment on body.app-interface .primary-button in
-     interface.css - --background is --text's actual contrast partner. */
+  /* --background is --text's actual contrast partner. */
   color: var(--background);
   font-size: 0.92rem;
   box-shadow:

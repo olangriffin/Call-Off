@@ -343,7 +343,7 @@ class AppTemplateTestCase(unittest.TestCase):
         # split files it pulls in under css/app/.
         app_css_dir = Path("app/frontend/static/css/app")
         source = Path("app/frontend/static/css/app.css").read_text() + "".join(
-            path.read_text() for path in sorted(app_css_dir.glob("*.css"))
+            path.read_text() for path in sorted(app_css_dir.rglob("*.css"))
         )
 
         for expected in (

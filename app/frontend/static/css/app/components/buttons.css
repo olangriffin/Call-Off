@@ -1,0 +1,71 @@
+/* Shared application buttons */
+
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid var(--text);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background: var(--accent-hover);
+}
+
+.secondary-button,
+.ghost-button-sm {
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondary-button:hover,
+.ghost-button-sm:hover {
+  border-color: var(--accent);
+}
+
+body.app-interface .primary-button,
+body.app-interface .secondary-button,
+body.app-interface .ghost-button-sm {
+  min-height: 42px;
+  padding: 9px 16px;
+  border-radius: var(--radius-action);
+}
+
+body.app-interface .primary-button {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-text);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 12px 28px rgba(255, 212, 0, 0.18);
+}
+
+body.app-interface .primary-button:hover {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+  color: var(--accent-text);
+}
+
+body.app-interface .secondary-button,
+body.app-interface .ghost-button-sm {
+  border-color: rgba(var(--ink-rgb), 0.14);
+  background: rgba(255, 255, 255, 0.66);
+}
+
+:root[data-theme="dark"] body.app-interface .secondary-button,
+:root[data-theme="dark"] body.app-interface .ghost-button-sm {
+  background: rgba(255, 255, 255, 0.06);
+}

@@ -62,52 +62,6 @@ body.app-interface .panel::after {
   display: none;
 }
 
-body.app-interface .panel-header {
-  margin-bottom: 24px;
-}
-
-body.app-interface .panel-header h2 {
-  font-size: 1.28rem;
-  line-height: 1.15;
-}
-
-body.app-interface .panel-header a:not(.primary-button) {
-  padding-bottom: 2px;
-  border-bottom-width: 2px;
-}
-
-body.app-interface .primary-button,
-body.app-interface .ghost-button-sm {
-  min-height: 42px;
-  padding: 9px 16px;
-  border-radius: var(--radius-action);
-}
-
-body.app-interface .primary-button {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--accent-text);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 12px 28px rgba(255, 212, 0, 0.18);
-}
-
-body.app-interface .primary-button:hover {
-  border-color: var(--accent-hover);
-  background: var(--accent-hover);
-  color: var(--accent-text);
-}
-
-body.app-interface .ghost-button-sm {
-  border-color: rgba(var(--ink-rgb), 0.14);
-  background: rgba(255, 255, 255, 0.66);
-}
-
-:root[data-theme="dark"] body.app-interface .ghost-button-sm {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-body.app-interface .metric-card,
 body.app-interface .record-card,
 body.app-interface .record-meta div {
   border: 1px solid var(--card-border);
@@ -116,59 +70,9 @@ body.app-interface .record-meta div {
   box-shadow: 0 12px 30px rgba(17, 19, 21, 0.05);
 }
 
-body.app-interface .metric-card {
-  min-height: 126px;
-  padding: 20px;
-}
-
-body.app-interface .metric-card strong {
-  font-size: clamp(1.35rem, 2vw, 1.7rem);
-}
-
 body.app-interface .dashboard-metrics .metric-card {
   align-items: center;
   text-align: center;
-}
-
-body.app-interface .table-container {
-  border-color: var(--card-border);
-  border-radius: var(--radius-card);
-  background: rgba(255, 255, 255, 0.76);
-  box-shadow: 0 12px 30px rgba(var(--ink-rgb), 0.05);
-}
-
-:root[data-theme="dark"] body.app-interface .table-container {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-body.app-interface th {
-  padding-block: 12px;
-  border-bottom-color: rgba(247, 248, 245, 0.12);
-  background: var(--sidebar);
-  color: rgba(247, 248, 245, 0.76);
-}
-
-body.app-interface tbody tr {
-  background: rgba(255, 255, 255, 0.78);
-}
-
-:root[data-theme="dark"] body.app-interface tbody tr {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-body.app-interface tbody tr:hover {
-  background: rgba(255, 212, 0, 0.09);
-}
-
-body.app-interface .empty-state {
-  padding: 30px;
-  border-color: rgba(var(--ink-rgb), 0.16);
-  border-radius: var(--radius-card);
-  background: rgba(255, 255, 255, 0.42);
-}
-
-:root[data-theme="dark"] body.app-interface .empty-state {
-  background: rgba(255, 255, 255, 0.03);
 }
 
 body.app-interface .form-grid {
@@ -221,12 +125,6 @@ body.app-interface .form-alert {
   border-radius: var(--radius-control);
 }
 
-body.app-interface .badge {
-  padding: 4px 9px;
-  border: 1px solid currentColor;
-  border-radius: var(--radius-action);
-}
-
 body.app-interface .readiness-banner {
   padding: 18px;
   border-radius: var(--radius-card);
@@ -235,10 +133,6 @@ body.app-interface .readiness-banner {
 
 :root[data-theme="dark"] body.app-interface .readiness-banner {
   background: rgba(255, 255, 255, 0.04);
-}
-
-body.app-interface .compact-empty-state {
-  padding: 18px;
 }
 
 /* Operational context and hierarchy */
@@ -381,24 +275,6 @@ body.app-interface .attention-item-action > span {
 
 body.app-interface .attention-item-action {
   flex: 0 0 auto;
-}
-
-body.app-interface .table-container:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 3px;
-}
-
-body.app-interface .table-secondary {
-  display: block;
-  margin-top: 5px;
-  color: var(--muted);
-  font-size: 0.72rem;
-}
-
-body.app-interface .missing-value {
-  color: var(--muted);
-  font-size: 0.85em;
-  font-weight: 500;
 }
 
 body.app-interface .record-card-current {
