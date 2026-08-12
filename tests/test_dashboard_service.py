@@ -14,6 +14,9 @@ from app.backend.models.package.approval import Approval
 from app.backend.models.package.deliverable import Deliverable
 from app.backend.models.package.package import WorkPackage
 from app.backend.models.package.revision import DeliverableRevision
+from app.backend.models.programme.programme import Programme
+from app.backend.models.programme.programme_activity import ProgrammeActivity
+from app.backend.models.programme.programme_revision import ProgrammeRevision
 from app.backend.models.project import Project
 from app.backend.services.approval import (
     InvalidApprovalUpdateError,
@@ -45,15 +48,89 @@ class DashboardServiceTestCase(TestCase):
             Deliverable.__table__,
             DeliverableRevision.__table__,
             Approval.__table__,
+            Programme.__table__,
+            ProgrammeRevision.__table__,
+            ProgrammeActivity.__table__,
         ):
             table.create(self.engine)
 
     def tearDown(self) -> None:
         self.engine.dispose()
 
-    def test_counts_are_uncapped_and_attention_is_sorted_and_tenant_scoped(
+    def _add_healthy_project(
         self,
-    ) -> None:
+        database: Session,
+        *,
+        organization_id: str,
+        code: str,
+        today: date,
+        status: str = "active",
+    ) -> Project:
+        project = Project(
+            organization_id=organization_id,
+            code=code,
+            name=f"{code} project",
+            status=status,
+            planned_start=today - timedelta(days=30),
+            planned_finish=today + timedelta(days=90),
+        )
+        database.add(project)
+        database.flush()
+
+        package = WorkPackage(
+            project_id=project.id,
+            code=f"{code}-WP",
+            name="Facade",
+            status="active",
+            planned_start=today - timedelta(days=10),
+            planned_finish=today + timedelta(days=30),
+            required_on_site_date=today + timedelta(days=45),
+        )
+        database.add(package)
+        database.flush()
+        database.add(
+            Deliverable(
+                work_package_id=package.id,
+                reference=f"{code}-D01",
+                name="Coordination drawing",
+                deliverable_type="drawing",
+                status="in_progress",
+                planned_issue_date=today + timedelta(days=21),
+                required_approval_date=today + timedelta(days=35),
+            )
+        )
+
+        programme = Programme(project_id=project.id)
+        database.add(programme)
+        database.flush()
+        revision = ProgrammeRevision(
+            programme_id=programme.id,
+            revision_code="P01",
+            is_current=True,
+        )
+        database.add(revision)
+        database.flush()
+        database.add(
+            ProgrammeActivity(
+                programme_revision_id=revision.id,
+                activity_code="A-001",
+                name="Coordinate facade",
+                activity_type="task",
+                status="in_progress",
+                planned_start=datetime.combine(
+                    today + timedelta(days=7),
+                    datetime.min.time(),
+                ),
+                planned_finish=datetime.combine(
+                    today + timedelta(days=28),
+                    datetime.min.time(),
+                ),
+            )
+        )
+        database.flush()
+        return project
+
+    def test_portfolio_rows_are_uncapped_and_tenant_scoped(self) -> None:
         today = date(2026, 8, 11)
         now = datetime.now(timezone.utc)
         with Session(self.engine) as database:
@@ -90,75 +167,6 @@ class DashboardServiceTestCase(TestCase):
             database.add_all([*projects, project_b])
             database.flush()
 
-            package_a = WorkPackage(
-                project_id=projects[0].id,
-                code="WP-A",
-                name="Facade",
-                status="active",
-                required_on_site_date=today + timedelta(days=10),
-            )
-            package_b = WorkPackage(
-                project_id=project_b.id,
-                code="WP-B",
-                name="Other package",
-                required_on_site_date=today - timedelta(days=30),
-            )
-            database.add_all([package_a, package_b])
-            database.flush()
-
-            deliverable_a = Deliverable(
-                work_package_id=package_a.id,
-                reference="D-A",
-                name="Elevation drawing",
-                deliverable_type="drawing",
-                status="in_progress",
-                planned_issue_date=today - timedelta(days=2),
-                required_approval_date=today + timedelta(days=3),
-            )
-            deliverable_b = Deliverable(
-                work_package_id=package_b.id,
-                reference="D-B",
-                name="Other tenant drawing",
-                deliverable_type="drawing",
-                planned_issue_date=today - timedelta(days=20),
-            )
-            database.add_all([deliverable_a, deliverable_b])
-            database.flush()
-
-            revision_a = DeliverableRevision(
-                deliverable_id=deliverable_a.id,
-                revision_code="P01",
-            )
-            revision_b = DeliverableRevision(
-                deliverable_id=deliverable_b.id,
-                revision_code="P01",
-            )
-            database.add_all([revision_a, revision_b])
-            database.flush()
-            database.add_all(
-                [
-                    Approval(
-                        revision_id=revision_a.id,
-                        status="pending",
-                        response_due_date=today - timedelta(days=1),
-                    ),
-                    Approval(
-                        revision_id=revision_a.id,
-                        status="status_a",
-                        response_due_date=today - timedelta(days=3),
-                    ),
-                    Approval(
-                        revision_id=revision_a.id,
-                        status="pending",
-                        response_due_date=today + timedelta(days=60),
-                    ),
-                    Approval(
-                        revision_id=revision_b.id,
-                        status="pending",
-                        response_due_date=today - timedelta(days=10),
-                    ),
-                ]
-            )
             database.commit()
 
             overview = get_dashboard_overview(
@@ -169,43 +177,179 @@ class DashboardServiceTestCase(TestCase):
 
         self.assertEqual(overview.project_count, 101)
         self.assertEqual(overview.active_project_count, 1)
-        self.assertEqual(overview.work_package_count, 1)
-        self.assertEqual(overview.deliverable_count, 1)
-        self.assertEqual(overview.overdue_deadline_count, 3)
-        self.assertEqual(overview.overdue_count, 3)
-        self.assertEqual(len(overview.attention_items), 5)
-        self.assertEqual(
-            {item.kind for item in overview.attention_items},
-            {
-                "approval_response",
-                "deliverable_issue",
-                "deliverable_approval",
-                "package_on_site",
-            },
-        )
-        self.assertEqual(
-            [item.due_date for item in overview.attention_items],
-            sorted(item.due_date for item in overview.attention_items),
-        )
+        self.assertEqual(overview.health_counts.incomplete, 1)
+        self.assertEqual(overview.health_counts.inactive, 100)
+        self.assertEqual(len(overview.project_health_rows), 101)
         self.assertTrue(
             all(
-                item.due_date <= today + timedelta(days=14)
-                for item in overview.attention_items
+                row.project.organization_id == "org-a"
+                for row in overview.project_health_rows
             )
         )
-        self.assertTrue(
-            all("Other tenant" not in item.label for item in overview.attention_items)
-        )
-        self.assertTrue(
-            all("org-b" not in item.url for item in overview.attention_items)
-        )
+
+    def test_healthy_project_is_on_track_with_complete_assessable_data(
+        self,
+    ) -> None:
+        today = date(2026, 8, 11)
+        with Session(self.engine) as database:
+            organisation = Organisation(
+                id="org-health",
+                name="Health Organisation",
+                slug="health-organisation",
+                created_at=datetime.now(timezone.utc),
+            )
+            database.add(organisation)
+            self._add_healthy_project(
+                database,
+                organization_id=organisation.id,
+                code="HEALTH",
+                today=today,
+            )
+            database.commit()
+
+            overview = get_dashboard_overview(
+                database,
+                organisation.id,
+                today=today,
+            )
+
+        row = overview.project_health_rows[0]
+        self.assertEqual(row.overall_health.key, "on_track")
+        self.assertEqual(row.design_health.key, "on_track")
+        self.assertEqual(row.programme_health.key, "on_track")
+        self.assertEqual(row.procurement_health.key, "incomplete")
+        self.assertEqual(row.data_completeness, 100)
+        self.assertEqual(overview.health_counts.on_track, 1)
+
+    def test_missing_operational_setup_is_incomplete_not_on_track(self) -> None:
+        today = date(2026, 8, 11)
+        with Session(self.engine) as database:
+            organisation = Organisation(
+                id="org-incomplete",
+                name="Incomplete Organisation",
+                slug="incomplete-organisation",
+                created_at=datetime.now(timezone.utc),
+            )
+            database.add(organisation)
+            database.add(
+                Project(
+                    organization_id=organisation.id,
+                    code="GAP",
+                    name="Incomplete project",
+                    status="active",
+                )
+            )
+            database.commit()
+
+            overview = get_dashboard_overview(
+                database,
+                organisation.id,
+                today=today,
+            )
+
+        row = overview.project_health_rows[0]
+        self.assertEqual(row.overall_health.key, "incomplete")
+        self.assertEqual(row.design_health.key, "incomplete")
+        self.assertEqual(row.programme_health.key, "incomplete")
+        self.assertGreaterEqual(row.data_completeness, 0)
+        self.assertLessEqual(row.data_completeness, 100)
+
+    def test_critical_and_at_risk_conditions_take_precedence_over_incomplete(
+        self,
+    ) -> None:
+        today = date(2026, 8, 11)
+        with Session(self.engine) as database:
+            organisation = Organisation(
+                id="org-risk",
+                name="Risk Organisation",
+                slug="risk-organisation",
+                created_at=datetime.now(timezone.utc),
+            )
+            database.add(organisation)
+            critical_project = self._add_healthy_project(
+                database,
+                organization_id=organisation.id,
+                code="CRITICAL",
+                today=today,
+            )
+            risk_project = self._add_healthy_project(
+                database,
+                organization_id=organisation.id,
+                code="RISK",
+                today=today,
+            )
+            critical_project.work_packages[0].deliverables[0].planned_issue_date = (
+                today - timedelta(days=1)
+            )
+            risk_project.programme.revisions[0].activities[0].planned_finish = (
+                datetime.combine(
+                    today + timedelta(days=5),
+                    datetime.min.time(),
+                )
+            )
+            risk_project.planned_finish = None
+            database.commit()
+
+            overview = get_dashboard_overview(
+                database,
+                organisation.id,
+                today=today,
+            )
+
+        rows = {row.project.code: row for row in overview.project_health_rows}
+        self.assertEqual(rows["CRITICAL"].overall_health.key, "critical")
+        self.assertEqual(rows["RISK"].overall_health.key, "at_risk")
+        self.assertEqual(overview.health_counts.critical, 1)
+        self.assertEqual(overview.health_counts.at_risk, 1)
+
+    def test_inactive_projects_are_excluded_from_active_health_counts(self) -> None:
+        today = date(2026, 8, 11)
+        with Session(self.engine) as database:
+            organisation = Organisation(
+                id="org-inactive",
+                name="Inactive Organisation",
+                slug="inactive-organisation",
+                created_at=datetime.now(timezone.utc),
+            )
+            database.add(organisation)
+            self._add_healthy_project(
+                database,
+                organization_id=organisation.id,
+                code="CLOSED",
+                today=today,
+                status="completed",
+            )
+            database.commit()
+
+            overview = get_dashboard_overview(
+                database,
+                organisation.id,
+                today=today,
+            )
+
+        self.assertEqual(overview.active_project_count, 0)
+        self.assertEqual(overview.health_counts.inactive, 1)
         self.assertEqual(
-            sum(
-                item.kind == "approval_response"
-                for item in overview.attention_items
-            ),
-            2,
+            overview.project_health_rows[0].overall_health.key,
+            "inactive",
         )
+
+    def test_no_project_organisation_has_an_empty_portfolio(self) -> None:
+        with Session(self.engine) as database:
+            organisation = Organisation(
+                id="org-empty",
+                name="Empty Organisation",
+                slug="empty-organisation",
+                created_at=datetime.now(timezone.utc),
+            )
+            database.add(organisation)
+            database.commit()
+
+            overview = get_dashboard_overview(database, organisation.id)
+
+        self.assertEqual(overview.project_count, 0)
+        self.assertEqual(overview.active_project_count, 0)
+        self.assertEqual(overview.project_health_rows, ())
 
     def test_contractor_codes_do_not_imply_completion(self) -> None:
         for contractor_status in ("status_a", "status_b"):
@@ -342,8 +486,11 @@ class DashboardServiceTestCase(TestCase):
             )
 
         self.assertEqual(overview.active_project_count, 1)
-        self.assertEqual(overview.overdue_deadline_count, 3)
-        self.assertEqual(len(overview.attention_items), 3)
+        self.assertEqual(overview.health_counts.critical, 1)
+        self.assertEqual(
+            overview.project_health_rows[0].design_health.key,
+            "critical",
+        )
 
     def test_latest_approval_uses_request_chronology_not_response_date(
         self,

@@ -206,14 +206,18 @@ class ProjectCreationCapabilityTestCase(TestCase):
 
     def test_dashboard_creation_actions_match_capability_rule(self) -> None:
         application = create_app()
-        project = SimpleNamespace(
-            id=uuid.UUID("44444444-4444-4444-4444-444444444444"),
-            code="TEST",
-            name="Test project",
-            client_name=None,
-            status="active",
-            planned_start=None,
-            planned_finish=None,
+        overview = SimpleNamespace(
+            project_count=0,
+            active_project_count=0,
+            health_counts=SimpleNamespace(
+                on_track=0,
+                at_risk=0,
+                critical=0,
+                incomplete=0,
+                inactive=0,
+            ),
+            project_health_rows=[],
+            active_project_health_rows=[],
         )
 
         for role, should_show_action in (
@@ -221,29 +225,28 @@ class ProjectCreationCapabilityTestCase(TestCase):
             ("project_manager", True),
             ("member", False),
         ):
-            for projects in ([], [project]):
-                with self.subTest(role=role, empty=not projects):
-                    request = Request(
-                        {
-                            "type": "http",
-                            "method": "GET",
-                            "path": "/app",
-                            "headers": [],
-                            "router": application.router,
-                        }
+            with self.subTest(role=role):
+                request = Request(
+                    {
+                        "type": "http",
+                        "method": "GET",
+                        "path": "/app",
+                        "headers": [],
+                        "router": application.router,
+                    }
+                )
+                with patch(
+                    "app.backend.routes.frontend.dashboard.get_dashboard_overview",
+                    return_value=overview,
+                ):
+                    response = dashboard(
+                        request,
+                        MagicMock(),
+                        organisation_access(role),
                     )
-                    with patch(
-                        "app.backend.routes.frontend.dashboard.list_projects",
-                        return_value=projects,
-                    ):
-                        response = dashboard(
-                            request,
-                            MagicMock(),
-                            organisation_access(role),
-                        )
 
-                    body = response.body.decode("utf-8")
-                    self.assertEqual(
-                        '/app/projects/new' in body,
-                        should_show_action,
-                    )
+                body = response.body.decode("utf-8")
+                self.assertEqual(
+                    '/app/projects/new' in body,
+                    should_show_action,
+                )

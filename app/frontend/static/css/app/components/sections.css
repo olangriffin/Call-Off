@@ -36,7 +36,7 @@ body.app-interface .panel-header h2 {
   line-height: 1.15;
 }
 
-body.app-interface .panel-header a:not(.primary-button) {
+body.app-interface .panel-header a:not(.primary-button):not(.secondary-button) {
   padding-bottom: 2px;
   border-bottom-width: 2px;
 }

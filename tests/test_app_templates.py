@@ -121,12 +121,86 @@ class AppTemplateTestCase(unittest.TestCase):
                     'class="page-title"' in source or "section_header(" in source
                 )
 
-    def test_dashboard_labels_overdue_deadline_exceptions_precisely(self) -> None:
+    def test_dashboard_renders_portfolio_health_and_not_attention_queue(self) -> None:
         source = (self.template_root / "dashboard.html").read_text()
 
-        self.assertIn("Overdue deadlines", source)
-        self.assertIn("overview.overdue_deadline_count", source)
-        self.assertNotIn("Overdue items", source)
+        for expected in (
+            "Project health distribution",
+            "Delivery health by project",
+            "Project portfolio health",
+            "overview.health_counts.on_track",
+            "row.data_completeness",
+            "Procurement",
+        ):
+            self.assertIn(expected, source)
+
+        self.assertNotIn("Requires attention", source)
+        self.assertNotIn("attention_items", source)
+        self.assertNotIn("overdue_deadline_count", source)
+
+        request = Request(
+            {
+                "type": "http",
+                "method": "GET",
+                "path": "/app",
+                "headers": [],
+                "router": self.application.router,
+            }
+        )
+        project = SimpleNamespace(
+            id="project-1",
+            code="LON15",
+            name="London facade",
+        )
+
+        def state(key: str, label: str, css_class: str) -> SimpleNamespace:
+            return SimpleNamespace(
+                key=key,
+                label=label,
+                css_class=css_class,
+            )
+
+        row = SimpleNamespace(
+            project=project,
+            overall_health=state("critical", "Critical", "badge-critical"),
+            design_health=state("at_risk", "At Risk", "badge-warning"),
+            programme_health=state("critical", "Critical", "badge-critical"),
+            procurement_health=state("incomplete", "Incomplete", "badge-muted"),
+            data_completeness=98,
+            delivery_health=[
+                SimpleNamespace(
+                    package=SimpleNamespace(code="WP-01"),
+                    health=state("critical", "Critical", "badge-critical"),
+                )
+            ],
+        )
+        overview = SimpleNamespace(
+            project_count=1,
+            active_project_count=1,
+            health_counts=SimpleNamespace(
+                on_track=0,
+                at_risk=0,
+                critical=1,
+                incomplete=0,
+            ),
+            project_health_rows=[row],
+            active_project_health_rows=[row],
+        )
+        response = self.templates.TemplateResponse(
+            request=request,
+            name="dashboard.html",
+            context={
+                "page_title": "Dashboard",
+                "company_name": "Call-Off",
+                "can_create_projects": True,
+                "overview": overview,
+            },
+        )
+        body = response.body.decode("utf-8")
+        self.assertIn("LON15", body)
+        self.assertIn("98%", body)
+        self.assertIn("Procurement", body)
+        self.assertIn("Incomplete", body)
 
     def test_missing_project_state_keeps_primary_heading(self) -> None:
         request = Request(

@@ -220,61 +220,119 @@ body.app-interface .dashboard-hero p:last-child {
   color: var(--muted);
 }
 
-body.app-interface .attention-count {
-  flex: 0 0 auto;
-  font-family: var(--font-mono);
-  font-size: 0.84rem;
-  font-weight: 600;
+body.app-interface .portfolio-distribution {
+  display: grid;
+  gap: 16px;
+  padding: 0;
+  margin: 0;
 }
 
-body.app-interface .attention-list {
-  display: grid;
-  gap: 8px;
+body.app-interface .portfolio-distribution-bar {
+  display: flex;
+  min-height: 24px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-control);
+  background: rgba(var(--ink-rgb), 0.06);
+}
+
+body.app-interface .portfolio-distribution-segment {
+  min-width: 12px;
+}
+
+body.app-interface .portfolio-distribution-segment--on-track,
+body.app-interface .delivery-health-segment--on_track {
+  background: var(--success);
+}
+
+body.app-interface .portfolio-distribution-segment--at-risk,
+body.app-interface .delivery-health-segment--at_risk {
+  background: var(--warning);
+}
+
+body.app-interface .portfolio-distribution-segment--critical,
+body.app-interface .delivery-health-segment--critical {
+  background: var(--critical);
+}
+
+body.app-interface .portfolio-distribution-segment--incomplete,
+body.app-interface .delivery-health-segment--incomplete {
+  background: rgba(var(--ink-rgb), 0.28);
+}
+
+body.app-interface .portfolio-distribution-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 18px;
   padding: 0;
   margin: 0;
   list-style: none;
 }
 
-body.app-interface .attention-item {
-  display: flex;
+body.app-interface .portfolio-distribution-legend li {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 7px;
+}
+
+body.app-interface .portfolio-distribution-legend strong {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+body.app-interface .delivery-health-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+body.app-interface .delivery-health-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.45fr) minmax(0, 1fr);
+  align-items: center;
   gap: 20px;
-  padding: 15px 16px;
+  padding: 14px 16px;
   border: 1px solid var(--card-border);
-  border-left: 4px solid var(--warning);
   border-radius: var(--radius-control);
   background: rgba(255, 255, 255, 0.45);
 }
 
-body.app-interface .attention-item.is-overdue {
-  border-left-color: var(--critical);
-}
-
-:root[data-theme="dark"] body.app-interface .attention-item {
+:root[data-theme="dark"] body.app-interface .delivery-health-row {
   background: rgba(255, 255, 255, 0.035);
 }
 
-body.app-interface .attention-item-main,
-body.app-interface .attention-item-action {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-body.app-interface .attention-item-main {
+body.app-interface .delivery-health-project {
+  display: grid;
   min-width: 0;
-  flex-wrap: wrap;
+  gap: 3px;
 }
 
-body.app-interface .attention-item-main > span:last-child,
-body.app-interface .attention-item-action > span {
+body.app-interface .delivery-health-project span {
   color: var(--muted);
   font-size: 0.78rem;
 }
 
-body.app-interface .attention-item-action {
-  flex: 0 0 auto;
+body.app-interface .delivery-health-segments {
+  display: flex;
+  min-width: 0;
+  min-height: 20px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-action);
+  background: rgba(var(--ink-rgb), 0.06);
+}
+
+body.app-interface .delivery-health-segment {
+  flex: 1 1 0;
+  min-width: 14px;
+  border-right: 1px solid rgba(255, 255, 255, 0.58);
+}
+
+body.app-interface .delivery-health-segment:last-child {
+  border-right: 0;
 }
 
 body.app-interface .record-card-current {

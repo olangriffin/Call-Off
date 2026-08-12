@@ -84,7 +84,9 @@ def _approval_chronology_key(
     return chronology_key, created_at_key, str(approval.id)
 
 
-def _is_deliverable_complete(deliverable: Deliverable) -> bool:
+def is_deliverable_complete(deliverable: Deliverable) -> bool:
+    """Return whether a deliverable or its latest approval is complete."""
+
     if is_complete_status(deliverable.status):
         return True
 
@@ -115,7 +117,7 @@ def calculate_package_readiness(
     pending_approval_count = 0
 
     for deliverable in deliverables:
-        is_complete = _is_deliverable_complete(deliverable)
+        is_complete = is_deliverable_complete(deliverable)
 
         if is_complete:
             complete_deliverables += 1
