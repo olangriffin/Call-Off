@@ -3,26 +3,31 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .site-nav {
+  /* Scoped to body.marketing: this file now loads on every page (see
+     main.css), and .site-nav/.site-nav-links/.site-nav-actions are the
+     shared nav shell also used - unscoped - on non-marketing pages via
+     navigation/site-nav.css. Without body.marketing here, these breakpoint
+     overrides would leak onto the app and auth screens' nav too. */
+  body.marketing .site-nav {
     grid-template-columns: minmax(140px, 1fr) auto minmax(140px, 1fr);
     padding-inline: 24px;
   }
 
-  .site-nav .brand-logo {
+  body.marketing .site-nav .brand-logo {
     width: 150px;
   }
 
-  .site-nav-links a {
+  body.marketing .site-nav-links a {
     padding: 0 10px;
     font-size: 0.8rem;
   }
 
-  .site-nav-actions {
+  body.marketing .site-nav-actions {
     gap: 8px;
   }
 
-  .site-nav .ghost-button,
-  .site-nav .primary-button {
+  body.marketing .site-nav .ghost-button,
+  body.marketing .site-nav .primary-button {
     padding: 0 13px;
     font-size: 0.8rem;
   }
@@ -107,7 +112,8 @@
     grid-template-columns: 1fr;
   }
 
-  .site-nav {
+  /* Scoped to body.marketing - see the note on the equivalent block above. */
+  body.marketing .site-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -116,11 +122,11 @@
     padding: 16px 20px;
   }
 
-  .site-nav .brand-logo {
+  body.marketing .site-nav .brand-logo {
     width: 148px;
   }
 
-  .site-nav-links {
+  body.marketing .site-nav-links {
     order: 3;
     width: 100%;
     justify-content: center;
@@ -129,8 +135,8 @@
     border-radius: 999px;
   }
 
-  .site-nav-links::before,
-  .site-nav-links::after {
+  body.marketing .site-nav-links::before,
+  body.marketing .site-nav-links::after {
     display: none;
   }
 

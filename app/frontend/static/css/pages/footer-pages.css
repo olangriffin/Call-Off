@@ -33,7 +33,13 @@
   color: var(--accent-hover);
 }
 
-.skip-link {
+/* Scoped to body.marketing: this is a marketing-only border-radius override
+   of the shared .skip-link base rule (layout/interface.css). This file now
+   loads on every page (see main.css), so left unscoped it would flatten the
+   app/auth pages' skip-link corners from 8px to 6px too. The identical
+   .skip-link:focus rule that used to sit alongside this was dropped as a
+   pure duplicate of the shared one in layout/interface.css. */
+body.marketing .skip-link {
   position: fixed;
   top: 8px;
   left: 8px;
@@ -44,10 +50,6 @@
   color: var(--accent-text);
   font-weight: 700;
   transform: translateY(-160%);
-}
-
-.skip-link:focus {
-  transform: translateY(0);
 }
 
 .pricing-kicker,

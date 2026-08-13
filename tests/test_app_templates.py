@@ -413,11 +413,11 @@ class AppTemplateTestCase(unittest.TestCase):
         self.assertNotIn("Response due 10 Aug 2026", body)
 
     def test_operational_styles_are_scoped_to_authenticated_pages(self) -> None:
-        # app.css is just the @import manifest; the actual rules live in the
-        # split files it pulls in under css/app/.
-        app_css_dir = Path("app/frontend/static/css/app")
-        source = Path("app/frontend/static/css/app.css").read_text() + "".join(
-            path.read_text() for path in sorted(app_css_dir.rglob("*.css"))
+        # main.css is just the @import manifest; the actual rules live in
+        # the split files it pulls in under css/.
+        css_dir = Path("app/frontend/static/css")
+        source = (css_dir / "main.css").read_text() + "".join(
+            path.read_text() for path in sorted(css_dir.rglob("*.css")) if path.name != "main.css"
         )
 
         for expected in (

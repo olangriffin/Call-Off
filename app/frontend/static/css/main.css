@@ -1,0 +1,38 @@
+/* Call-Off stylesheet entry point - shared by both the authenticated app
+   shell (templates/base.html) and the marketing site shell
+   (templates/marketing/base.html). Order here matters more than filename:
+   it reproduces the exact cascade the two former entry points (app.css,
+   then app.css + marketing.css) already produced, so merging them into one
+   file loaded everywhere is not expected to change how anything looks.
+
+   Files under navigation/marketing-*, layout/marketing-responsive.css and
+   pages/* that came from the old marketing.css are scoped to
+   `body.marketing` wherever their selectors could otherwise have matched
+   shared elements (e.g. .site-nav, .ghost-button, .skip-link) on non-
+   marketing pages - see the comments in those files. Everything else moved
+   as-is with no selector changes. */
+
+@import url("./foundation/foundation.css");
+@import url("./layout/shell-auth.css");
+@import url("./navigation/site-nav.css");
+
+@import url("./components/components.css");
+@import url("./components/buttons.css");
+@import url("./components/sections.css");
+@import url("./components/metric-card.css");
+@import url("./components/tables.css");
+@import url("./components/states.css");
+
+@import url("./components/forms-records.css");
+@import url("./layout/interface.css");
+@import url("./pages/programme.css");
+@import url("./layout/responsive.css");
+
+@import url("./navigation/marketing-nav.css");
+@import url("./pages/landing.css");
+@import url("./pages/pricing.css");
+@import url("./pages/early-access.css");
+@import url("./pages/footer-pages.css");
+@import url("./navigation/marketing-nav-responsive.css");
+@import url("./pages/effects.css");
+@import url("./layout/marketing-responsive.css");

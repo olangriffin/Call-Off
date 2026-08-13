@@ -79,7 +79,12 @@ body.marketing {
   gap: 12px;
 }
 
-.ghost-button {
+/* Scoped to body.marketing: now that this file loads on every page (not
+   just marketing ones, see main.css), an unscoped .ghost-button would leak
+   onto the bare-.ghost-button "Log in" link that the shared marketing_actions
+   nav partial also renders on non-marketing pages (e.g. the login/register
+   screens), which currently get no base .ghost-button styling at all. */
+body.marketing .ghost-button {
   display: inline-flex;
   min-height: 38px;
   align-items: center;
@@ -91,7 +96,7 @@ body.marketing {
   font-weight: 600;
 }
 
-.ghost-button:hover {
+body.marketing .ghost-button:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
