@@ -2,6 +2,7 @@
 {% from "partials/components/button.html" import primary_button %}
 {% from "partials/components/section.html" import section %}
 {% from "partials/components/section_header.html" import section_header %}
+{% from "partials/components/metric_card.html" import metric_card %}
 {% block title %}Dashboard | Call-Off{% endblock %}
 {% block content %}
     <section class="dashboard-hero" aria-labelledby="dashboard-title">
@@ -15,26 +16,11 @@
     <section aria-labelledby="portfolio-summary-title">
         <h2 id="portfolio-summary-title" class="visually-hidden">Portfolio health summary</h2>
         <div class="metric-grid dashboard-metrics">
-            <article class="metric-card">
-                <span>Projects</span>
-                <strong>{{ overview.project_count }}</strong>
-            </article>
-            <article class="metric-card">
-                <span>On Track</span>
-                <strong class="status-success">{{ overview.health_counts.on_track }}</strong>
-            </article>
-            <article class="metric-card">
-                <span>At Risk</span>
-                <strong class="status-warning">{{ overview.health_counts.at_risk }}</strong>
-            </article>
-            <article class="metric-card">
-                <span>Critical</span>
-                <strong class="status-critical">{{ overview.health_counts.critical }}</strong>
-            </article>
-            <article class="metric-card">
-                <span>Incomplete</span>
-                <strong>{{ overview.health_counts.incomplete }}</strong>
-            </article>
+            {{ metric_card("Projects", value=overview.project_count) }}
+            {{ metric_card("On Track", value=overview.health_counts.on_track, value_class="status-success") }}
+            {{ metric_card("At Risk", value=overview.health_counts.at_risk, value_class="status-warning") }}
+            {{ metric_card("Critical", value=overview.health_counts.critical, value_class="status-critical") }}
+            {{ metric_card("Incomplete", value=overview.health_counts.incomplete) }}
         </div>
     </section>
     {% call section(labelledby="portfolio-distribution-title") %}

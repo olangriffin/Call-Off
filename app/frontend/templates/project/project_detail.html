@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %} {% from "partials/components/section_header.html" import section_header %} {% from "partials/components/button.html" import primary_button %} {% from "partials/components/section.html" import section %} {% block title %} {% if project %} {{ project.code }}
+{% extends "base.html" %} {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %} {% from "partials/components/section_header.html" import section_header %} {% from "partials/components/button.html" import primary_button %} {% from "partials/components/section.html" import section %} {% from "partials/components/metric_card.html" import metric_card %} {% block title %} {% if project %} {{ project.code }}
 | Calloff {% else %} Project not found | Calloff {% endif %} {% endblock %} {%
     block content %} {% if project %}
 {{ breadcrumbs(project=project, current_label="Overview") }}
@@ -6,25 +6,14 @@
 {% call section() %}
     {{ section_header(project.name, description=project.client_name or "No client recorded", heading_level=1) }}
     <div class="metric-grid">
-        <article class="metric-card">
-            <span>Status</span>
-            <strong>{{ project.status|title }}</strong>
-        </article>
-        <article class="metric-card">
-            <span>Planned start</span>
-            <strong>
-                {% if project.planned_start %} {{ project.planned_start.strftime("%d %b
-                    %Y") }} {% else %} — {% endif %}
-                    </strong>
-                    </article>
-                    <article class="metric-card">
-                        <span>Planned finish</span>
-                        <strong>
-                            {% if project.planned_finish %} {{ project.planned_finish.strftime("%d
-                                %b %Y") }} {% else %} — {% endif %}
-                                </strong>
-                                </article>
-                                </div>
+        {{ metric_card("Status", value=project.status|title) }}
+        {% call metric_card("Planned start") %}
+            {% if project.planned_start %}{{ project.planned_start.strftime("%d %b %Y") }}{% else %}—{% endif %}
+        {% endcall %}
+        {% call metric_card("Planned finish") %}
+            {% if project.planned_finish %}{{ project.planned_finish.strftime("%d %b %Y") }}{% else %}—{% endif %}
+        {% endcall %}
+    </div>
                                 {% endcall %}
                                 {% call section(section_id="programme") %}
                                     {% call section_header("Project programme") %}

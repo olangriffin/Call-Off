@@ -3,6 +3,7 @@
 {% from "partials/components/section_header.html" import section_header %}
 {% from "partials/components/button.html" import primary_button, secondary_button %}
 {% from "partials/components/section.html" import section %}
+{% from "partials/components/metric_card.html" import metric_card %}
 {% block title %}{% if deliverable %}{{ deliverable.reference }} | Call-Off{% else %}Deliverable not found | Call-Off{% endif %}{% endblock %}
 {% block content %}
     {% if project and work_package and deliverable %}
@@ -14,9 +15,9 @@
                 {{ primary_button("Add revision", href="/app/projects/" ~ project.id ~ "/work-packages/" ~ work_package.id ~ "/deliverables/" ~ deliverable.id ~ "/revisions/new") }}
             {% endcall %}
             <div class="metric-grid">
-                <article class="metric-card"><span>Status</span><strong>{{ deliverable.status|replace('_', ' ') |title }}</strong><small>Current deliverable state</small></article>
-                <article class="metric-card"><span>Planned issue</span><strong>{% if deliverable.planned_issue_date %}<time datetime="{{ deliverable.planned_issue_date.isoformat() }}">{{ deliverable.planned_issue_date.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}</strong><small>Target issue date</small></article>
-                <article class="metric-card"><span>Required approval</span><strong>{% if deliverable.required_approval_date %}<time datetime="{{ deliverable.required_approval_date.isoformat() }}">{{ deliverable.required_approval_date.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}</strong><small>Approval needed by</small></article>
+                {{ metric_card("Status", value=deliverable.status|replace('_', ' ') |title, supporting_text="Current deliverable state") }}
+                {% call metric_card("Planned issue", supporting_text="Target issue date") %}{% if deliverable.planned_issue_date %}<time datetime="{{ deliverable.planned_issue_date.isoformat() }}">{{ deliverable.planned_issue_date.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}{% endcall %}
+                {% call metric_card("Required approval", supporting_text="Approval needed by") %}{% if deliverable.required_approval_date %}<time datetime="{{ deliverable.required_approval_date.isoformat() }}">{{ deliverable.required_approval_date.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}{% endcall %}
             </div>
         {% endcall %}
         {% call section(labelledby="current-revision-title", section_class="current-record") %}

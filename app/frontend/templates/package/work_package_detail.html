@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %} {% from "partials/components/section_header.html" import section_header %} {% from "partials/components/button.html" import primary_button %} {% from "partials/components/section.html" import section %} {% block title %} {% if work_package %} {{
+{% extends "base.html" %} {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %} {% from "partials/components/section_header.html" import section_header %} {% from "partials/components/button.html" import primary_button %} {% from "partials/components/section.html" import section %} {% from "partials/components/metric_card.html" import metric_card %} {% block title %} {% if work_package %} {{
     work_package.code }} | Calloff {% else %} Work package not found | Calloff {%
         endif %} {% endblock %} {% block content %} {% if project and work_package %}
     {{ breadcrumbs(project=project, work_package=work_package, current_label="Package overview") }}
@@ -27,27 +27,10 @@
                         </div>
                         </div>
                         <div class="metric-grid">
-                            <article class="metric-card">
-                                <span>Deliverables complete</span>
-                                <strong>{{ readiness.complete_deliverables }}/{{ readiness.total_deliverables
-                                }}</strong>
-                                <small>Complete or accepted</small>
-                            </article>
-                            <article class="metric-card">
-                                <span>Overdue issues</span>
-                                <strong class="{% if readiness.overdue_issue_count %}status-critical{% endif %}">{{ readiness.overdue_issue_count }}</strong>
-                                <small>Planned issue dates passed</small>
-                            </article>
-                            <article class="metric-card">
-                                <span>Overdue approvals</span>
-                                <strong class="{% if readiness.overdue_approval_count %}status-critical{% endif %}">{{ readiness.overdue_approval_count }}</strong>
-                                <small>Required approval dates passed</small>
-                            </article>
-                            <article class="metric-card">
-                                <span>Awaiting acceptance</span>
-                                <strong>{{ readiness.pending_approval_count }}</strong>
-                                <small>Latest revision not accepted</small>
-                            </article>
+                            {{ metric_card("Deliverables complete", value=readiness.complete_deliverables ~ "/" ~ readiness.total_deliverables, supporting_text="Complete or accepted") }}
+                            {{ metric_card("Overdue issues", value=readiness.overdue_issue_count, supporting_text="Planned issue dates passed", value_class="status-critical" if readiness.overdue_issue_count else none) }}
+                            {{ metric_card("Overdue approvals", value=readiness.overdue_approval_count, supporting_text="Required approval dates passed", value_class="status-critical" if readiness.overdue_approval_count else none) }}
+                            {{ metric_card("Awaiting acceptance", value=readiness.pending_approval_count, supporting_text="Latest revision not accepted") }}
                         </div>
                         {% endcall %}
                         {% call section() %}

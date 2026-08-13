@@ -1,0 +1,15 @@
+{% macro metric_card(label, value=none, supporting_text=none, value_class=none) %}
+<article class="metric-card">
+    <span>{{ label }}</span>
+    <strong{% if value_class %} class="{{ value_class }}"{% endif %}>
+        {% if caller is defined %}
+            {{ caller() }}
+        {% else %}
+            {{ value }}
+        {% endif %}
+    </strong>
+    {% if supporting_text %}
+        <small>{{ supporting_text }}</small>
+    {% endif %}
+</article>
+{% endmacro %}
