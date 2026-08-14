@@ -24,6 +24,9 @@ from app.backend.models.programme.programme_calendar import ProgrammeCalendar
 
 if TYPE_CHECKING:
     from app.backend.models.package.package import WorkPackage
+    from app.backend.models.programme.programme_activity_link import (
+        ProgrammeActivityLink,
+    )
     from app.backend.models.programme.programme_dependency import ProgrammeDependency
     from app.backend.models.programme.programme_revision import ProgrammeRevision
 
@@ -157,6 +160,42 @@ class ProgrammeActivity(Base):
         foreign_keys="ProgrammeDependency.predecessor_id",
         back_populates="predecessor",
         cascade="all, delete-orphan",
+    )
+
+    source_alignment_links: Mapped[list[ProgrammeActivityLink]] = relationship(
+        foreign_keys="ProgrammeActivityLink.source_activity_id",
+        back_populates="source_activity",
+        cascade="all, delete-orphan",
+    )
+
+    target_alignment_links: Mapped[list[ProgrammeActivityLink]] = relationship(
+        foreign_keys="ProgrammeActivityLink.target_activity_id",
+        back_populates="target_activity",
+        cascade="all, delete-orphan",
+    )
+
+    linked_internal_activities: Mapped[list["ProgrammeActivity"]] = relationship(
+        "ProgrammeActivity",
+        secondary="programme_activity_links",
+        primaryjoin=(
+            "ProgrammeActivity.id == ProgrammeActivityLink.source_activity_id"
+        ),
+        secondaryjoin=(
+            "ProgrammeActivity.id == ProgrammeActivityLink.target_activity_id"
+        ),
+        viewonly=True,
+    )
+
+    linked_client_activities: Mapped[list["ProgrammeActivity"]] = relationship(
+        "ProgrammeActivity",
+        secondary="programme_activity_links",
+        primaryjoin=(
+            "ProgrammeActivity.id == ProgrammeActivityLink.target_activity_id"
+        ),
+        secondaryjoin=(
+            "ProgrammeActivity.id == ProgrammeActivityLink.source_activity_id"
+        ),
+        viewonly=True,
     )
 
     calendar_id: Mapped[uuid.UUID | None] = mapped_column(

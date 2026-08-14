@@ -61,6 +61,18 @@ def downgrade() -> None:
         "programmes",
         type_="unique",
     )
+    # The previous schema can retain only one programme per project. Preserve
+    # the internal workspace and remove its client counterpart before restoring
+    # the old unique project index.
+    op.execute(
+        sa.text(
+            "DELETE FROM programmes AS client_programme "
+            "USING programmes AS internal_programme "
+            "WHERE client_programme.project_id = internal_programme.project_id "
+            "AND client_programme.programme_type = 'client' "
+            "AND internal_programme.programme_type = 'internal'"
+        )
+    )
     op.drop_index("ix_programmes_project_id", table_name="programmes")
     op.create_index(
         "ix_programmes_project_id",

@@ -11,6 +11,7 @@ from app.backend.models.package.package import WorkPackage
 from app.backend.models.package.revision import DeliverableRevision
 from app.backend.models.programme.programme import Programme
 from app.backend.models.programme.programme_activity import ProgrammeActivity
+from app.backend.models.programme.programme_activity_link import ProgrammeActivityLink
 from app.backend.models.programme.programme_baseline import ProgrammeBaseline
 from app.backend.models.programme.programme_baseline_activity import (
     ProgrammeBaselineActivity,
@@ -33,6 +34,7 @@ __all__ = [
     "Organisation",
     "Programme",
     "ProgrammeActivity",
+    "ProgrammeActivityLink",
     "ProgrammeBaseline",
     "ProgrammeBaselineActivity",
     "ProgrammeCalendar",
