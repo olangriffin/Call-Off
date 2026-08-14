@@ -70,10 +70,9 @@ class Project(Base):
         server_default="active",
     )
 
-    programme: Mapped[Programme | None] = relationship(
+    programmes: Mapped[list[Programme]] = relationship(
         back_populates="project",
         cascade="all, delete-orphan",
-        uselist=False,
     )
 
     planned_start: Mapped[date | None] = mapped_column(

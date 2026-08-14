@@ -281,7 +281,7 @@ class DashboardServiceTestCase(TestCase):
             critical_project.work_packages[0].deliverables[0].planned_issue_date = (
                 today - timedelta(days=1)
             )
-            risk_project.programme.revisions[0].activities[0].planned_finish = (
+            risk_project.programmes[0].revisions[0].activities[0].planned_finish = (
                 datetime.combine(
                     today + timedelta(days=5),
                     datetime.min.time(),

@@ -128,12 +128,20 @@ def _worst_health(*health_keys: str) -> str:
 
 
 def _current_programme_activities(project: Project) -> list[ProgrammeActivity]:
-    if project.programme is None:
+    internal_programme = next(
+        (
+            programme
+            for programme in project.programmes
+            if programme.programme_type == "internal"
+        ),
+        None,
+    )
+    if internal_programme is None:
         return []
 
     return [
         activity
-        for revision in project.programme.revisions
+        for revision in internal_programme.revisions
         if revision.is_current
         for activity in revision.activities
         if not activity.is_summary
@@ -402,7 +410,7 @@ def get_dashboard_overview(
                 .selectinload(WorkPackage.deliverables)
                 .selectinload(Deliverable.revisions)
                 .selectinload(DeliverableRevision.approvals),
-                selectinload(Project.programme)
+                selectinload(Project.programmes)
                 .selectinload(Programme.revisions)
                 .selectinload(ProgrammeRevision.activities),
             )

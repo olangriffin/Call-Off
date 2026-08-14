@@ -4,7 +4,16 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, Uuid, func
+from sqlalchemy import (
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    String,
+    Text,
+    UniqueConstraint,
+    Uuid,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.backend.database.base import Base
@@ -20,6 +29,18 @@ if TYPE_CHECKING:
 class Programme(Base):
     __tablename__ = "programmes"
 
+    __table_args__ = (
+        CheckConstraint(
+            "programme_type IN ('client', 'internal')",
+            name="ck_programmes_type",
+        ),
+        UniqueConstraint(
+            "project_id",
+            "programme_type",
+            name="uq_programmes_project_type",
+        ),
+    )
+
     id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True),
         primary_key=True,
@@ -30,8 +51,14 @@ class Programme(Base):
         Uuid(as_uuid=True),
         ForeignKey("projects.id", ondelete="CASCADE"),
         nullable=False,
-        unique=True,
         index=True,
+    )
+
+    programme_type: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default="internal",
+        server_default="internal",
     )
 
     name: Mapped[str] = mapped_column(
@@ -67,7 +94,7 @@ class Programme(Base):
     )
 
     project: Mapped[Project] = relationship(
-        back_populates="programme",
+        back_populates="programmes",
     )
 
     revisions: Mapped[list[ProgrammeRevision]] = relationship(
