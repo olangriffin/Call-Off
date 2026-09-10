@@ -245,6 +245,7 @@ class PublicSiteTestCase(unittest.TestCase):
         self.assertIn("subcontractor delivery platform", body)
         self.assertNotIn("calloff.app", body)
         self.assertIn("marketing-scroll-fade-top", body)
+        self.assertIn("Delivery control for specialist subcontractors", body)
         self.assertNotIn("marketing-bottom-blur", body)
         self.assertNotIn("marketing-scroll-fade.js", body)
 
@@ -292,14 +293,23 @@ class PublicSiteTestCase(unittest.TestCase):
         status_code, _headers, body = self.request("GET", "/")
         self.assertEqual(status_code, 200)
         self.assertIn('class="site-nav-menu-panel"', body)
+        self.assertIn('class="site-nav-menu-primary-links"', body)
         self.assertIn('href="/early-access" class="primary-button"', body)
 
-    def test_login_uses_app_shell_without_marketing_nav(self) -> None:
+    def test_login_uses_public_marketing_shell(self) -> None:
         status_code, _headers, body = self.request("GET", "/login")
         self.assertEqual(status_code, 200)
-        self.assertNotIn('class="site-nav"', body)
+        self.assertIn('class="site-nav"', body)
+        self.assertIn('class="marketing-main auth-main"', body)
         self.assertNotIn('href="/register"', body)
+        self.assertNotIn('href="/login" class="ghost-button"', body)
+        self.assertIn('href="/early-access" class="primary-button"', body)
         self.assertIn("Call-Off", body)
+        self.assertIn("Delivery control", body)
+
+        register_status, _headers, register_body = self.request("GET", "/register")
+        self.assertEqual(register_status, 403)
+        self.assertNotIn('href="/login" class="ghost-button"', register_body)
 
     def test_login_rejects_invalid_input_without_provider_request(self) -> None:
         page_status, _headers, page_body = self.request("GET", "/login")
@@ -475,6 +485,7 @@ class PublicSiteTestCase(unittest.TestCase):
         self.assertEqual(status_code, 200)
         self.assertIn("Plans for controlled delivery across every project.", body)
         self.assertIn("may change before general availability", body)
+        self.assertIn("Recommended", body)
         self.assertGreaterEqual(body.count('href="/early-access"'), 5)
 
     def test_health_endpoint(self) -> None:

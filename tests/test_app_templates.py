@@ -435,7 +435,28 @@ class AppTemplateTestCase(unittest.TestCase):
             source = (self.template_root / template_name).read_text()
             with self.subTest(template=template_name):
                 self.assertIn("auth-marketing", source)
-                self.assertIn("app-shell-auth", source)
+                self.assertIn("marketing-main auth-main", source)
+
+    def test_marketing_navigation_uses_one_collapse_breakpoint(self) -> None:
+        responsive_source = Path(
+            "app/frontend/static/css/navigation/marketing-nav-responsive.css"
+        ).read_text()
+
+        self.assertIn("@media (max-width: 1050px)", responsive_source)
+        self.assertIn("body.marketing .site-nav-actions", responsive_source)
+        self.assertIn("grid-column: 3", responsive_source)
+        self.assertIn(
+            "body.marketing .site-nav > .site-nav-links",
+            responsive_source,
+        )
+        self.assertIn(
+            ".site-nav-menu-marketing .site-nav-menu-primary-links",
+            responsive_source,
+        )
+        self.assertIn(
+            ".site-nav-menu-marketing .site-nav-menu-toggle",
+            responsive_source,
+        )
 
     def test_programme_uses_operational_register_and_timeline(self) -> None:
         # programme.html pulls its thead/add-row/edit-row markup in from
