@@ -40,8 +40,8 @@ class AuthTemplateTestCase(unittest.TestCase):
         body = self.render_register(registration_enabled=True)
 
         for expected in (
-            'class="auth-marketing"',
-            "app-shell-auth",
+            'class="marketing auth-marketing"',
+            "marketing-main auth-main",
             "login-panel",
             "login-mark",
             "auth-kicker",
@@ -52,7 +52,7 @@ class AuthTemplateTestCase(unittest.TestCase):
         self.assertIn('<form method="post" action="/register" class="login-form">', body)
         self.assertIn('name="csrf_token"', body)
         self.assertIn('href="/login"', body)
-        self.assertNotIn('<header class="site-nav">', body)
+        self.assertIn('<header class="site-nav">', body)
 
         for field_name in ("name", "email", "password", "confirm_password"):
             self.assertIn(f'name="{field_name}"', body)
@@ -60,8 +60,8 @@ class AuthTemplateTestCase(unittest.TestCase):
     def test_unavailable_registration_uses_login_visual_shell(self) -> None:
         body = self.render_register(registration_enabled=False)
 
-        self.assertIn('class="auth-marketing"', body)
-        self.assertIn("app-shell-auth", body)
+        self.assertIn('class="marketing auth-marketing"', body)
+        self.assertIn("marketing-main auth-main", body)
         self.assertIn("login-panel", body)
         self.assertIn("login-mark", body)
         self.assertIn("auth-kicker", body)

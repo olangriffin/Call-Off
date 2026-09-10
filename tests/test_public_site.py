@@ -296,11 +296,14 @@ class PublicSiteTestCase(unittest.TestCase):
         self.assertIn('class="site-nav-menu-primary-links"', body)
         self.assertIn('href="/early-access" class="primary-button"', body)
 
-    def test_login_uses_app_shell_without_marketing_nav(self) -> None:
+    def test_login_uses_public_marketing_shell(self) -> None:
         status_code, _headers, body = self.request("GET", "/login")
         self.assertEqual(status_code, 200)
-        self.assertNotIn('class="site-nav"', body)
+        self.assertIn('class="site-nav"', body)
+        self.assertIn('class="marketing-main auth-main"', body)
         self.assertNotIn('href="/register"', body)
+        self.assertNotIn('href="/login" class="ghost-button"', body)
+        self.assertIn('href="/early-access" class="primary-button"', body)
         self.assertIn("Call-Off", body)
         self.assertIn("Delivery control", body)
 
