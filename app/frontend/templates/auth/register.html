@@ -9,12 +9,13 @@ block content %}
       <span class="login-mark" aria-hidden="true">
         {{ inline_svg_asset("favicon.svg") }}
       </span>
+      <p class="auth-kicker">Delivery control</p>
       <h2>Create account</h2>
     </div>
   </div>
 
   {% if error_message %}
-  <div role="alert">
+  <div class="auth-message auth-message-error" role="alert">
     <strong>Unable to create account</strong>
     <p>{{ error_message }}</p>
   </div>
@@ -80,8 +81,6 @@ block content %}
         required
       />
     </div>
-    <div></div>
-
     <div>
       <button type="submit" class="primary-button">Create account</button>
     </div>
@@ -93,6 +92,7 @@ block content %}
       <span class="login-mark" aria-hidden="true">
         {{ inline_svg_asset("favicon.svg") }}
       </span>
+      <p class="auth-kicker">Delivery control</p>
       <h2>Registration unavailable</h2>
       <p>New accounts can only be created by invitation.</p>
     </div>
