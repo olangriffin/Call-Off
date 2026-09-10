@@ -7,17 +7,18 @@ block body_class %}auth-marketing{% endblock %} {% block shell_class
       <span class="login-mark" aria-hidden="true">
         {{ inline_svg_asset("favicon.svg") }}
       </span>
+      <p class="auth-kicker">Delivery control</p>
       <h2>Log in</h2>
     </div>
   </div>
 
   {% if success_message %}
-  <div role="status">
+  <div class="auth-message auth-message-success" role="status">
     <strong>Account created</strong>
     <p>{{ success_message }}</p>
   </div>
   {% endif %} {% if error_message %}
-  <div role="alert">
+  <div class="auth-message auth-message-error" role="alert">
     <strong>Unable to sign in</strong>
     <p>{{ error_message }}</p>
   </div>
@@ -51,8 +52,6 @@ block body_class %}auth-marketing{% endblock %} {% block shell_class
         required
       />
     </div>
-    <div></div>
-
     <div>
       <button type="submit" class="primary-button">Sign in</button>
     </div>
