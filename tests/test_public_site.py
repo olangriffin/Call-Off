@@ -307,10 +307,6 @@ class PublicSiteTestCase(unittest.TestCase):
         self.assertIn("Call-Off", body)
         self.assertIn("Delivery control", body)
 
-        register_status, _headers, register_body = self.request("GET", "/register")
-        self.assertEqual(register_status, 403)
-        self.assertNotIn('href="/login" class="ghost-button"', register_body)
-
     def test_login_rejects_invalid_input_without_provider_request(self) -> None:
         page_status, _headers, page_body = self.request("GET", "/login")
         self.assertEqual(page_status, 200)

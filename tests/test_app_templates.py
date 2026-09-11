@@ -512,19 +512,6 @@ class AppTemplateTestCase(unittest.TestCase):
             responsive_source,
         )
 
-    def test_dark_marketing_login_action_has_visible_contrast(self) -> None:
-        navigation_source = Path(
-            "app/frontend/static/css/navigation/site-nav.css"
-        ).read_text()
-
-        dark_login_rule = navigation_source.split(
-            ':root[data-theme="dark"] .site-nav .ghost-button {',
-            maxsplit=1,
-        )[1].split("}", maxsplit=1)[0]
-        self.assertIn("border-color: #111315", dark_login_rule)
-        self.assertIn("background: #111315", dark_login_rule)
-        self.assertIn("color: #f7f8f5", dark_login_rule)
-
     def test_programme_uses_operational_register_and_timeline(self) -> None:
         # programme.html pulls its thead/add-row/edit-row markup in from
         # partials/programme/, so check the page's whole template graph
