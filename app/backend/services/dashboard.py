@@ -87,6 +87,25 @@ class DashboardOverview:
             if row.overall_health.key != "inactive"
         )
 
+    @property
+    def attention_project_health_rows(self) -> tuple[ProjectHealthRow, ...]:
+        """Return active projects ordered by the severity of required attention."""
+
+        severity = {"critical": 0, "at_risk": 1, "incomplete": 2}
+        return tuple(
+            sorted(
+                (
+                    row
+                    for row in self.project_health_rows
+                    if row.overall_health.key in severity
+                ),
+                key=lambda row: (
+                    severity[row.overall_health.key],
+                    row.project.code,
+                ),
+            )
+        )
+
 
 def _health_state(key: str) -> HealthState:
     return HealthState(

@@ -38,10 +38,18 @@
 body.app-interface .metric-card {
   min-height: 126px;
   padding: 20px;
+  border: 0;
+  border-radius: 0;
+  background: var(--card-gradient);
+  box-shadow: none;
+}
+
+body.app-interface .metric-grid {
+  gap: 1px;
+  overflow: hidden;
   border: 1px solid var(--card-border);
   border-radius: var(--radius-card);
-  background: var(--card-gradient);
-  box-shadow: 0 12px 30px rgba(17, 19, 21, 0.05);
+  background: var(--card-border);
 }
 
 body.app-interface .metric-card strong {

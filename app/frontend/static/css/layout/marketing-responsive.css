@@ -126,20 +126,6 @@
     width: 148px;
   }
 
-  body.marketing .site-nav-links {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-    overflow-x: auto;
-    margin-top: 0;
-    border-radius: 999px;
-  }
-
-  body.marketing .site-nav-links::before,
-  body.marketing .site-nav-links::after {
-    display: none;
-  }
-
   .site-nav-menu-marketing .site-nav-menu-toggle {
     position: relative;
     display: inline-flex;
@@ -194,19 +180,6 @@
   .hero-actions .primary-button,
   .hero-actions .ghost-button {
     width: min(100%, 320px);
-  }
-
-  .hero-workflow {
-    grid-template-columns: 1fr;
-    margin-top: 40px;
-  }
-
-  .workflow-column {
-    min-height: 104px;
-  }
-
-  .workflow-column span {
-    margin-bottom: 16px;
   }
 
   .section-header {

@@ -1,6 +1,23 @@
 body.marketing {
   --marketing-fade-color: rgba(17, 19, 21, 0.86);
-  background: var(--surface);
+  background:
+    radial-gradient(
+      circle at 50% 2%,
+      rgba(255, 212, 0, 0.055) 0%,
+      rgba(255, 212, 0, 0) 28rem
+    ),
+    var(--surface);
+  font-family: "Inter", var(--font-body);
+  font-size: 15px;
+}
+
+body.marketing h1,
+body.marketing h2,
+body.marketing h3,
+body.auth-marketing h1,
+body.auth-marketing h2,
+body.auth-marketing h3 {
+  font-family: "IBM Plex Sans", var(--font-heading);
 }
 
 .marketing-scroll-fade {
@@ -36,7 +53,8 @@ body.marketing {
   justify-content: center;
   border: 1px solid var(--nav-border);
   border-radius: 999px;
-  background: transparent;
+  background: var(--nav-surface);
+  box-shadow: var(--nav-shadow);
   color: var(--nav-text-strong);
   cursor: pointer;
   list-style: none;
@@ -79,6 +97,10 @@ body.marketing {
   gap: 12px;
 }
 
+.site-nav-menu-primary-links {
+  display: none;
+}
+
 /* Scoped to body.marketing: now that this file loads on every page (not
    just marketing ones, see main.css), an unscoped .ghost-button would leak
    onto the bare-.ghost-button "Log in" link that the shared marketing_actions
@@ -99,4 +121,11 @@ body.marketing .ghost-button {
 body.marketing .ghost-button:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+body.marketing .primary-button:focus-visible,
+body.marketing .ghost-button:focus-visible,
+body.marketing a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }

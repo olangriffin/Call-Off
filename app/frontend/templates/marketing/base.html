@@ -30,16 +30,16 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/main.css') }}" />
   </head>
 
-  <body class="marketing">
+  <body class="{% block body_class %}marketing{% endblock %}">
     <a class="skip-link" href="#main-content">Skip to main content</a>
 
     {% include "partials/nav.html" %}
 
-    <main class="marketing-main" id="main-content">
+    <main class="{% block main_class %}marketing-main{% endblock %}" id="main-content">
       {% block content %}{% endblock %}
     </main>
 
-    {% include "partials/marketing/footer.html" %}
+    {% block footer %}{% include "partials/marketing/footer.html" %}{% endblock %}
 
     <script src="{{ url_for('static', path='js/core/theme-toggle.js') }}"></script>
     <script src="{{ url_for('static', path='js/core/nav-menu.js') }}"></script>

@@ -14,7 +14,7 @@
   font-weight: 600;
 }
 
-.panel-header p:not(.eyebrow) {
+.panel-header p {
   max-width: 66ch;
   margin: 8px 0 0;
   color: var(--muted);
@@ -32,8 +32,9 @@ body.app-interface .panel-header {
 }
 
 body.app-interface .panel-header h2 {
-  font-size: 1.28rem;
-  line-height: 1.15;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
 }
 
 body.app-interface .panel-header a:not(.primary-button):not(.secondary-button) {
@@ -52,11 +53,12 @@ body.app-interface .app-section-surface {
   position: absolute;
   inset: 0;
   z-index: -1;
-  border: none;
+  border: 1px solid var(--card-border);
   border-radius: var(--radius-panel);
   background: var(--card-gradient);
-  box-shadow: 0 18px 46px rgba(var(--ink-rgb), 0.07);
-  filter: url("#calloff-squircle");
+  box-shadow:
+    inset 0 1px 0 rgba(var(--paper-rgb), 0.5),
+    0 16px 44px rgba(var(--ink-rgb), 0.055);
   pointer-events: none;
 }
 
@@ -87,7 +89,9 @@ body.app-interface .app-section--grid .app-section-content {
 
 :root[data-theme="dark"] body.app-interface .app-section-surface {
   background: var(--card-gradient);
-  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(var(--paper-rgb), 0.04),
+    0 18px 48px rgba(0, 0, 0, 0.22);
 }
 
 @media (max-width: 760px) {

@@ -1,7 +1,6 @@
-{% extends "base.html" %} {% block title %} Create account | Call-Off {%
-endblock %} {% block body_class %}auth-marketing{% endblock %} {% block
-shell_class %}app-shell-auth{% endblock %} {% block nav %}{% endblock %} {%
-block content %}
+{% extends "marketing/base.html" %} {% block title %}Create account | Call-Off{%
+endblock %} {% block body_class %}marketing auth-marketing{% endblock %} {% block
+main_class %}marketing-main auth-main{% endblock %} {% block content %}
 <section class="panel login-panel">
   {% if registration_enabled %}
   <div class="panel-header">
@@ -9,12 +8,12 @@ block content %}
       <span class="login-mark" aria-hidden="true">
         {{ inline_svg_asset("favicon.svg") }}
       </span>
-      <h2>Create account</h2>
+      <h1>Create account</h1>
     </div>
   </div>
 
   {% if error_message %}
-  <div role="alert">
+  <div class="auth-message auth-message-error" role="alert">
     <strong>Unable to create account</strong>
     <p>{{ error_message }}</p>
   </div>
@@ -80,8 +79,6 @@ block content %}
         required
       />
     </div>
-    <div></div>
-
     <div>
       <button type="submit" class="primary-button">Create account</button>
     </div>
@@ -93,7 +90,7 @@ block content %}
       <span class="login-mark" aria-hidden="true">
         {{ inline_svg_asset("favicon.svg") }}
       </span>
-      <h2>Registration unavailable</h2>
+      <h1>Registration unavailable</h1>
       <p>New accounts can only be created by invitation.</p>
     </div>
   </div>
