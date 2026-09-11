@@ -220,6 +220,7 @@ class DashboardServiceTestCase(TestCase):
         self.assertEqual(row.procurement_health.key, "incomplete")
         self.assertEqual(row.data_completeness, 100)
         self.assertEqual(overview.health_counts.on_track, 1)
+        self.assertEqual(overview.attention_project_health_rows, ())
 
     def test_missing_operational_setup_is_incomplete_not_on_track(self) -> None:
         today = date(2026, 8, 11)
@@ -253,6 +254,10 @@ class DashboardServiceTestCase(TestCase):
         self.assertEqual(row.programme_health.key, "incomplete")
         self.assertGreaterEqual(row.data_completeness, 0)
         self.assertLessEqual(row.data_completeness, 100)
+        self.assertEqual(
+            [item.project.code for item in overview.attention_project_health_rows],
+            ["GAP"],
+        )
 
     def test_critical_and_at_risk_conditions_take_precedence_over_incomplete(
         self,
@@ -301,6 +306,10 @@ class DashboardServiceTestCase(TestCase):
         self.assertEqual(rows["RISK"].overall_health.key, "at_risk")
         self.assertEqual(overview.health_counts.critical, 1)
         self.assertEqual(overview.health_counts.at_risk, 1)
+        self.assertEqual(
+            [row.project.code for row in overview.attention_project_health_rows],
+            ["CRITICAL", "RISK"],
+        )
 
     def test_inactive_projects_are_excluded_from_active_health_counts(self) -> None:
         today = date(2026, 8, 11)
@@ -333,6 +342,7 @@ class DashboardServiceTestCase(TestCase):
             overview.project_health_rows[0].overall_health.key,
             "inactive",
         )
+        self.assertEqual(overview.attention_project_health_rows, ())
 
     def test_no_project_organisation_has_an_empty_portfolio(self) -> None:
         with Session(self.engine) as database:
@@ -350,6 +360,7 @@ class DashboardServiceTestCase(TestCase):
         self.assertEqual(overview.project_count, 0)
         self.assertEqual(overview.active_project_count, 0)
         self.assertEqual(overview.project_health_rows, ())
+        self.assertEqual(overview.attention_project_health_rows, ())
 
     def test_contractor_codes_do_not_imply_completion(self) -> None:
         for contractor_status in ("status_a", "status_b"):

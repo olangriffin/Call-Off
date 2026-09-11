@@ -55,7 +55,7 @@ body.app-interface .table-container {
   border-color: var(--card-border);
   border-radius: var(--radius-card);
   background: rgba(255, 255, 255, 0.76);
-  box-shadow: 0 12px 30px rgba(var(--ink-rgb), 0.05);
+  box-shadow: none;
 }
 
 :root[data-theme="dark"] body.app-interface .table-container {
@@ -64,9 +64,9 @@ body.app-interface .table-container {
 
 body.app-interface th {
   padding-block: 12px;
-  border-bottom-color: rgba(247, 248, 245, 0.12);
-  background: var(--sidebar);
-  color: rgba(247, 248, 245, 0.76);
+  border-bottom-color: var(--card-border);
+  background: rgba(var(--ink-rgb), 0.045);
+  color: rgba(var(--ink-rgb), 0.68);
 }
 
 body.app-interface tbody tr {

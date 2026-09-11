@@ -1,93 +1,87 @@
-{% extends "base.html" %} {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %} {% from "partials/components/section_header.html" import section_header %} {% from "partials/components/button.html" import primary_button %} {% from "partials/components/section.html" import section %} {% from "partials/components/metric_card.html" import metric_card %} {% block title %} {% if project %} {{ project.code }}
-| Calloff {% else %} Project not found | Calloff {% endif %} {% endblock %} {%
-    block content %} {% if project %}
-{{ breadcrumbs(project=project, current_label="Overview") }}
-{{ project_workspace_nav(project, "overview") }}
-{% call section() %}
-    {{ section_header(project.name, description=project.client_name or "No client recorded", heading_level=1) }}
-    <div class="metric-grid">
-        {{ metric_card("Status", value=project.status|title) }}
-        {% call metric_card("Planned start") %}
-            {% if project.planned_start %}{{ project.planned_start.strftime("%d %b %Y") }}{% else %}—{% endif %}
+{% extends "base.html" %}
+{% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
+{% from "partials/components/section_header.html" import section_header %}
+{% from "partials/components/button.html" import primary_button %}
+{% from "partials/components/section.html" import section %}
+{% from "partials/components/metric_card.html" import metric_card %}
+{% block title %}{% if project %}{{ project.code }} | Call-Off{% else %}Project not found | Call-Off{% endif %}{% endblock %}
+{% block content %}
+    {% if project %}
+        {{ breadcrumbs(project=project, current_label="Overview") }}
+        {{ project_workspace_nav(project, "overview") }}
+        <header class="project-hero">
+            <div>
+                <p class="eyebrow">Project / {{ project.code }}</p>
+                <h1 class="page-title">{{ project.name }}</h1>
+                <p>{{ project.client_name or "No client recorded" }}</p>
+            </div>
+            <span class="project-status">{{ project.status|replace('_', ' ')|title }}</span>
+        </header>
+        {% call section(labelledby="project-controls-title") %}
+            {{ section_header("Project controls", description="Controlling dates for this project.", title_id="project-controls-title") }}
+            <div class="metric-grid project-metrics">
+                {% call metric_card("Planned start", supporting_text="Project start") %}
+                    {% if project.planned_start %}<time datetime="{{ project.planned_start.isoformat() }}">{{ project.planned_start.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}
+                {% endcall %}
+                {% call metric_card("Planned finish", supporting_text="Project completion") %}
+                    {% if project.planned_finish %}<time datetime="{{ project.planned_finish.isoformat() }}">{{ project.planned_finish.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}
+                {% endcall %}
+            </div>
         {% endcall %}
-        {% call metric_card("Planned finish") %}
-            {% if project.planned_finish %}{{ project.planned_finish.strftime("%d %b %Y") }}{% else %}—{% endif %}
+        {% call section(section_id="programme", labelledby="project-programme-title", section_class="project-programme-summary") %}
+            {% call section_header("Project programme", description="Review activities, milestones and the dates that protect delivery.", title_id="project-programme-title") %}
+                {{ primary_button("View programme", href="/app/projects/" ~ project.id ~ "/programme") }}
+            {% endcall %}
         {% endcall %}
-    </div>
-                                {% endcall %}
-                                {% call section(section_id="programme") %}
-                                    {% call section_header("Project programme") %}
-                                        {{ primary_button("View programme", href="/app/projects/" ~ project.id ~ "/programme") }}
-                                    {% endcall %}
-                                {% endcall %}
-                                {% call section(section_id="work-packages") %}
-                                    {% call section_header("Work packages") %}
-                                        {{ primary_button("New work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}
-                                    {% endcall %}
-                                    {% if work_packages %}
-                                        <div class="table-container"
-                                             tabindex="0"
-                                             aria-label="{{ project.code }} work packages">
-                                            <table>
-                                                <caption class="visually-hidden">Work packages for {{ project.code }}</caption>
-                                                <thead>
-                                                    <tr>
-                                                        <th>Code</th>
-                                                        <th>Package name</th>
-                                                        <th>Type</th>
-                                                        <th>Status</th>
-                                                        <th>Planned start</th>
-                                                        <th>Planned finish</th>
-                                                        <th>Required on site</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for work_package in work_packages %}
-                                                        <tr>
-                                                            <td class="mono">
-                                                                <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}">{{ work_package.code }}</a>
-                                                            </td>
-                                                            <td>
-                                                                <a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}">{{ work_package.name }}</a>
-                                                            </td>
-                                                            <td>
-                                                                {% if work_package.package_type %} {{ work_package.package_type|replace('_', ' ') |title }} {% else %} — {%
-                                                                    endif %}
-                                                                    </td>
-                                                                    <td>{{ work_package.status|title }}</td>
-                                                                    <td>
-                                                                        {% if work_package.planned_start %} {{ work_package.planned_start.strftime("%d %b %Y") }} {% else %} — {%
-                                                                            endif %}
-                                                                            </td>
-                                                                            <td>
-                                                                                {% if work_package.planned_finish %} {{ work_package.planned_finish.strftime("%d %b %Y") }} {% else %} — {%
-                                                                                    endif %}
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        {% if work_package.required_on_site_date %} {{ work_package.required_on_site_date.strftime("%d %b %Y") }}
-                                                                                        {% else
-                                                                                            %} — {% endif %}
-                                                                                    </td>
-                                                                                    </tr>
-                                                                                {% endfor %}
-                                                                            </tbody>
-                                                                            </table>
-                                                                            </div>
-                                                                        {% else %}
-                                                                            <div class="empty-state">
-                                                                                <h3>No work packages</h3>
-                                                                                <p>Add the first package to organise deliverables, approval deadlines and required-on-site dates.</p>
-                                                                                {{ primary_button("Create first work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}
-                                                                            </div>
-                                                                        {% endif %}
-                                                                    {% endcall %}
-                                                                {% else %}
-                                                                    {% call section() %}
-                                                                        <div class="empty-state">
-                                                                            <h1 class="page-title">Project not found</h1>
-                                                                            <p>The requested project does not exist or is unavailable.</p>
-                                                                            <a href="/app">Return to dashboard</a>
-                                                                        </div>
-                                                                    {% endcall %}
-                                                                {% endif %}
-                                                    {% endblock %}
+        {% call section(section_id="work-packages", labelledby="work-packages-title") %}
+            {% call section_header("Work packages", description="Package scope, programme dates and required-on-site commitments.", title_id="work-packages-title") %}
+                {% if work_packages %}{{ primary_button("New work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}{% endif %}
+            {% endcall %}
+            {% if work_packages %}
+                <div class="table-container" tabindex="0" aria-label="{{ project.code }} work packages">
+                    <table>
+                        <caption class="visually-hidden">Work packages for {{ project.code }}</caption>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Package name</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Planned start</th>
+                                <th>Planned finish</th>
+                                <th>Required on site</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for work_package in work_packages %}
+                                <tr>
+                                    <td class="mono"><a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}">{{ work_package.code }}</a></td>
+                                    <td><a href="/app/projects/{{ project.id }}/work-packages/{{ work_package.id }}">{{ work_package.name }}</a></td>
+                                    <td>{% if work_package.package_type %}{{ work_package.package_type|replace('_', ' ')|title }}{% else %}—{% endif %}</td>
+                                    <td>{{ work_package.status|replace('_', ' ')|title }}</td>
+                                    <td>{% if work_package.planned_start %}<time datetime="{{ work_package.planned_start.isoformat() }}">{{ work_package.planned_start.strftime("%d %b %Y") }}</time>{% else %}—{% endif %}</td>
+                                    <td>{% if work_package.planned_finish %}<time datetime="{{ work_package.planned_finish.isoformat() }}">{{ work_package.planned_finish.strftime("%d %b %Y") }}</time>{% else %}—{% endif %}</td>
+                                    <td>{% if work_package.required_on_site_date %}<time datetime="{{ work_package.required_on_site_date.isoformat() }}">{{ work_package.required_on_site_date.strftime("%d %b %Y") }}</time>{% else %}—{% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>No work packages</h3>
+                    <p>Add the first package to organise deliverables, approval deadlines and required-on-site dates.</p>
+                    {{ primary_button("Create first work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}
+                </div>
+            {% endif %}
+        {% endcall %}
+    {% else %}
+        {% call section() %}
+            <div class="empty-state">
+                <h1 class="page-title">Project not found</h1>
+                <p>The requested project does not exist or is unavailable.</p>
+                <a href="/app">Return to dashboard</a>
+            </div>
+        {% endcall %}
+    {% endif %}
+{% endblock %}
