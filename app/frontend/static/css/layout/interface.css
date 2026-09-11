@@ -23,6 +23,7 @@ body.app-interface {
     radial-gradient(circle at 12% 12%, rgba(255, 212, 0, 0.055), transparent 26rem),
     radial-gradient(circle at 88% 30%, rgba(var(--ink-rgb), 0.035), transparent 32rem),
     var(--background);
+  background: var(--background);
   font-family: "Inter", var(--font-body);
   font-size: 15px;
 }
@@ -51,6 +52,16 @@ body.app-interface .page-title {
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.035em;
+}
+
+body.app-interface .eyebrow {
+  color: rgba(var(--ink-rgb), 0.54);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.11em;
+  line-height: 1.4;
+  text-transform: uppercase;
 }
 
 body.app-interface .panel {
@@ -223,7 +234,7 @@ body.app-interface .workspace-nav a:hover {
 }
 
 body.app-interface .workspace-nav a[aria-current="page"] {
-  border-bottom-color: var(--text);
+  border-bottom-color: var(--accent);
   background: transparent;
   color: var(--text);
 }
@@ -234,6 +245,11 @@ body.app-interface .dashboard-hero {
   justify-content: space-between;
   gap: 24px;
   padding: 8px 2px;
+}
+
+body.app-interface .dashboard-hero .eyebrow,
+body.app-interface .project-hero .eyebrow {
+  margin: 0 0 10px;
 }
 
 body.app-interface .dashboard-attention .app-section-surface {
@@ -421,7 +437,7 @@ body.app-interface .project-programme-summary .app-section-content {
   }
 
   body.app-interface .attention-open {
-    justify-self: end;
+    display: none;
   }
 
   body.app-interface .dashboard-metrics {

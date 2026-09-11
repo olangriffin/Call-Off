@@ -44,6 +44,7 @@ class AuthTemplateTestCase(unittest.TestCase):
             "marketing-main auth-main",
             "login-panel",
             "login-mark",
+            "auth-kicker",
             'class="login-form"',
         ):
             self.assertIn(expected, body)
@@ -64,6 +65,7 @@ class AuthTemplateTestCase(unittest.TestCase):
         self.assertIn("marketing-main auth-main", body)
         self.assertIn("login-panel", body)
         self.assertIn("login-mark", body)
+        self.assertIn("auth-kicker", body)
         self.assertIn("Registration unavailable", body)
         self.assertIn("<h1>Registration unavailable</h1>", body)
         self.assertIn('href="/login"', body)

@@ -118,6 +118,10 @@ body.auth-marketing .panel-header h1 {
   line-height: 1.04;
 }
 
+body.auth-marketing .auth-kicker {
+  margin: 0 0 8px;
+}
+
 body.auth-marketing .panel-header p {
   max-width: 300px;
   margin: 10px auto 0;

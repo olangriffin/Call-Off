@@ -73,6 +73,10 @@ body.marketing .skip-link {
   border-bottom: 1px solid var(--border);
 }
 
+.legal-page .page-kicker {
+  margin-bottom: 14px;
+}
+
 .legal-page h1 {
   margin: 0 0 16px;
   font-size: clamp(2.4rem, 5vw, 4rem);

@@ -13,7 +13,12 @@
   letter-spacing: -0.035em;
 }
 
-.pricing-hero > p {
+.pricing-hero .page-kicker,
+.early-access-hero .page-kicker {
+  margin-top: 24px;
+}
+
+.pricing-hero > p:not(.page-kicker) {
   max-width: 640px;
   margin: 22px auto 0;
   color: rgba(var(--ink-rgb), 0.62);
@@ -119,16 +124,10 @@
     0 22px 56px rgba(17, 19, 21, 0.14);
 }
 
-.pricing-card-recommendation {
-  display: inline-flex;
-  padding: 4px 9px;
-  margin: 0 0 14px;
-  border: 1px solid rgba(255, 212, 0, 0.48);
-  border-radius: 999px;
-  background: rgba(255, 212, 0, 0.1);
+.pricing-card-label {
+  width: fit-content;
+  margin-bottom: 14px;
   color: var(--accent);
-  font-size: 0.75rem;
-  font-weight: 600;
 }
 
 .pricing-card-featured .pricing-price small,

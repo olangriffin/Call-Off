@@ -13,7 +13,7 @@
   letter-spacing: -0.035em;
 }
 
-.early-access-hero > p {
+.early-access-hero > p:not(.page-kicker) {
   max-width: 640px;
   margin: 22px auto 0;
   color: rgba(var(--ink-rgb), 0.62);
