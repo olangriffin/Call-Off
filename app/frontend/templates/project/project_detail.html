@@ -11,7 +11,6 @@
         {{ project_workspace_nav(project, "overview") }}
         <header class="project-hero">
             <div>
-                <p class="eyebrow">Project / {{ project.code }}</p>
                 <h1 class="page-title">{{ project.name }}</h1>
                 <p>{{ project.client_name or "No client recorded" }}</p>
             </div>
@@ -36,7 +35,6 @@
         {% call section(section_id="work-packages", labelledby="work-packages-title") %}
             {% call section_header("Work packages", description="Package scope, programme dates and required-on-site commitments.", title_id="work-packages-title") %}
                 {% if work_packages %}{{ primary_button("New work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}{% endif %}
-                {{ primary_button("New work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}
             {% endcall %}
             {% if work_packages %}
                 <div class="table-container" tabindex="0" aria-label="{{ project.code }} work packages">

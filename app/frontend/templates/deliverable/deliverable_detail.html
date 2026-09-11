@@ -32,7 +32,6 @@
                 <article class="record-card record-card-current">
                     <div class="record-card-header">
                         <div>
-                            <p class="eyebrow">Latest revision</p>
                             <h3>{{ current_revision.revision_code }}</h3>
                         </div>
                         <span class="badge badge-muted">{{ current_revision.status|replace('_', ' ') |title }}</span>
@@ -125,7 +124,6 @@
                         <article class="record-card record-card-historical">
                             <div class="record-card-header">
                                 <div>
-                                    <p class="eyebrow">Historical revision</p>
                                     <h3>{{ revision.revision_code }}</h3>
                                 </div>
                                 <span class="badge badge-muted">{{ revision.status|replace('_', ' ') |title }}</span>

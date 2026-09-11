@@ -227,7 +227,12 @@ body.app-interface .workspace-nav a {
   font-weight: 700;
 }
 
-body.app-interface .workspace-nav a:hover,
+body.app-interface .workspace-nav a:hover {
+  border-bottom-color: var(--accent);
+  background: transparent;
+  color: var(--text);
+}
+
 body.app-interface .workspace-nav a[aria-current="page"] {
   border-bottom-color: var(--accent);
   background: transparent;

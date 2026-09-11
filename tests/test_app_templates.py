@@ -204,6 +204,38 @@ class AppTemplateTestCase(unittest.TestCase):
         self.assertIn("Procurement", body)
         self.assertIn("Incomplete", body)
         self.assertIn("Delivery health by project", body)
+        self.assertIn('<a class="attention-row attention-row--critical"', body)
+        self.assertEqual(body.count('href="/app/projects/project-1"'), 3)
+
+        for active_count, expected in (
+            (1, "No active project exceptions"),
+            (0, "No active projects to assess"),
+        ):
+            empty_overview = SimpleNamespace(
+                project_count=0,
+                active_project_count=active_count,
+                health_counts=SimpleNamespace(
+                    on_track=active_count,
+                    at_risk=0,
+                    critical=0,
+                    incomplete=0,
+                ),
+                project_health_rows=[],
+                active_project_health_rows=[],
+                attention_project_health_rows=[],
+            )
+            empty_response = self.templates.TemplateResponse(
+                request=request,
+                name="dashboard.html",
+                context={
+                    "page_title": "Dashboard",
+                    "company_name": "Call-Off",
+                    "can_create_projects": False,
+                    "overview": empty_overview,
+                },
+            )
+            with self.subTest(active_project_count=active_count):
+                self.assertIn(expected, empty_response.body.decode("utf-8"))
 
     def test_project_overview_renders_controls_and_work_packages(self) -> None:
         request = Request(
@@ -503,6 +535,18 @@ class AppTemplateTestCase(unittest.TestCase):
             maxsplit=1,
         )[1].split("}", maxsplit=1)[0]
         self.assertIn("color: rgba(247, 248, 245, 0.76)", programme_header_rule)
+
+    def test_templates_do_not_render_eyebrow_or_kicker_elements(self) -> None:
+        source = "".join(path.read_text() for path in self.template_root.rglob("*.html"))
+
+        for removed_class in (
+            'class="eyebrow"',
+            'class="page-kicker"',
+            'class="section-kicker"',
+            'class="auth-kicker"',
+            'class="pricing-card-label"',
+        ):
+            self.assertNotIn(removed_class, source)
 
     def test_auth_pages_keep_their_marketing_shell_overrides(self) -> None:
         for template_name in ("auth/login.html", "auth/register.html"):

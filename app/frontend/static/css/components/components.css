@@ -20,14 +20,6 @@
   font-weight: 600;
 }
 
-.eyebrow {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
 .page-content {
   display: flex;
   flex-direction: column;
@@ -97,10 +89,6 @@
 
 .panel-dark .panel-header h2 {
   color: var(--sidebar-text);
-}
-
-.panel-dark .eyebrow {
-  color: var(--sidebar-muted);
 }
 
 .panel-actions {

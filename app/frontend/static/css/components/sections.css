@@ -14,7 +14,7 @@
   font-weight: 600;
 }
 
-.panel-header p:not(.eyebrow) {
+.panel-header p {
   max-width: 66ch;
   margin: 8px 0 0;
   color: var(--muted);

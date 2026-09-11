@@ -112,7 +112,7 @@ body.auth-marketing .login-mark svg {
   height: 100%;
 }
 
-body.auth-marketing .panel-header h2 {
+body.auth-marketing .panel-header h1 {
   margin: 0;
   font-size: clamp(1.9rem, 4vw, 2.45rem);
   line-height: 1.04;

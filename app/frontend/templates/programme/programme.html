@@ -19,7 +19,6 @@
                  data-project-id="{{ project.id }}">
             <div class="panel-header programme-page-header">
                 <div>
-                    <p class="eyebrow"><a href="/app/projects/{{ project.id }}">{{ project.code }}</a> / Programme</p>
                     <h1 class="page-title">Programme</h1>
                     <p class="programme-revision-line">
                         <span class="programme-revision-chip">Revision {{ revision.revision_code }}</span>
@@ -105,7 +104,6 @@
                 </p>
             {% else %}
                 <div class="empty-state programme-empty-state" data-programme-empty-panel>
-                    <p class="eyebrow">Build the delivery sequence</p>
                     <h2>No programme activities yet</h2>
                     <p>Add the first task or milestone to start planning this project’s delivery sequence.</p>
                     <div class="form-actions">

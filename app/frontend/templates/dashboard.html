@@ -7,7 +7,6 @@
 {% block content %}
     <section class="dashboard-hero" aria-labelledby="dashboard-title">
         <div>
-            <p class="eyebrow">Portfolio control / {{ company_name }}</p>
             <h1 class="page-title" id="dashboard-title">Project control</h1>
             <p>See delivery exceptions first, then review the complete project portfolio.</p>
         </div>
@@ -20,18 +19,20 @@
         {% if overview.attention_project_health_rows %}
             <ol class="attention-list">
                 {% for row in overview.attention_project_health_rows %}
-                    <li class="attention-row attention-row--{{ row.overall_health.key }}">
-                        <a class="attention-project" href="/app/projects/{{ row.project.id }}">
+                    <li>
+                        <a class="attention-row attention-row--{{ row.overall_health.key }}" href="/app/projects/{{ row.project.id }}">
+                        <span class="attention-project">
                             <span class="mono">{{ row.project.code }}</span>
                             <strong>{{ row.project.name }}</strong>
-                        </a>
+                        </span>
                         <dl class="attention-signals">
                             <div><dt>Overall</dt><dd><span class="badge {{ row.overall_health.css_class }}">{{ row.overall_health.label }}</span></dd></div>
                             <div><dt>Design</dt><dd>{{ row.design_health.label }}</dd></div>
                             <div><dt>Programme</dt><dd>{{ row.programme_health.label }}</dd></div>
                             <div><dt>Data</dt><dd>{{ row.data_completeness }}%</dd></div>
                         </dl>
-                        <a class="attention-open" href="/app/projects/{{ row.project.id }}">View project <span aria-hidden="true">→</span></a>
+                        <span class="attention-open">View project <span aria-hidden="true">→</span></span>
+                        </a>
                     </li>
                 {% endfor %}
             </ol>

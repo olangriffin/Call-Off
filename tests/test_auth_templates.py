@@ -53,6 +53,7 @@ class AuthTemplateTestCase(unittest.TestCase):
         self.assertIn('name="csrf_token"', body)
         self.assertIn('href="/login"', body)
         self.assertIn('<header class="site-nav">', body)
+        self.assertIn("<h1>Create account</h1>", body)
 
         for field_name in ("name", "email", "password", "confirm_password"):
             self.assertIn(f'name="{field_name}"', body)
@@ -66,6 +67,7 @@ class AuthTemplateTestCase(unittest.TestCase):
         self.assertIn("login-mark", body)
         self.assertIn("auth-kicker", body)
         self.assertIn("Registration unavailable", body)
+        self.assertIn("<h1>Registration unavailable</h1>", body)
         self.assertIn('href="/login"', body)
         self.assertNotIn('<form method="post" action="/register"', body)
 

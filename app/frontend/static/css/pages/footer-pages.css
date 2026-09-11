@@ -54,7 +54,6 @@ body.marketing .skip-link {
   transform: translateY(-160%);
 }
 
-.pricing-kicker,
 .error-code {
   color: rgba(var(--ink-rgb), 0.58);
   font-family: var(--font-mono);
