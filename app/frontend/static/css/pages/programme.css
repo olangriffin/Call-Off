@@ -180,6 +180,7 @@ body.app-interface .programme-table thead th {
   height: 62px;
   padding-block: 10px;
   background: var(--sidebar);
+  color: rgba(247, 248, 245, 0.76);
 }
 
 body.app-interface .programme-table tbody tr:hover > * {
@@ -636,4 +637,3 @@ textarea:focus-visible {
   outline-offset: 2px;
   box-shadow: 0 0 0 4px var(--accent);
 }
-

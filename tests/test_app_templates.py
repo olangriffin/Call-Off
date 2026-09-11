@@ -481,8 +481,28 @@ class AppTemplateTestCase(unittest.TestCase):
             "body.app-interface .panel",
             "body.app-interface .form-field input",
             "body.app-interface .table-container",
+            "body.app-interface .metric-grid",
+            "border-bottom-color: var(--accent)",
         ):
             self.assertIn(expected, source)
+
+        base_source = (self.template_root / "base.html").read_text()
+        self.assertNotIn("calloff-squircle", base_source)
+        self.assertNotIn("filter: url(\"#calloff-squircle\")", source)
+        self.assertNotIn("transition: all", source)
+        self.assertIn(
+            ':root[data-theme="dark"] body.app-interface .primary-button',
+            source,
+        )
+
+        programme_css = (
+            css_dir / "pages" / "programme.css"
+        ).read_text()
+        programme_header_rule = programme_css.split(
+            "body.app-interface .programme-table thead th {",
+            maxsplit=1,
+        )[1].split("}", maxsplit=1)[0]
+        self.assertIn("color: rgba(247, 248, 245, 0.76)", programme_header_rule)
 
     def test_auth_pages_keep_their_marketing_shell_overrides(self) -> None:
         for template_name in ("auth/login.html", "auth/register.html"):
@@ -511,6 +531,19 @@ class AppTemplateTestCase(unittest.TestCase):
             ".site-nav-menu-marketing .site-nav-menu-toggle",
             responsive_source,
         )
+
+    def test_dark_marketing_login_action_has_visible_contrast(self) -> None:
+        navigation_source = Path(
+            "app/frontend/static/css/navigation/site-nav.css"
+        ).read_text()
+
+        dark_login_rule = navigation_source.split(
+            ':root[data-theme="dark"] .site-nav .ghost-button {',
+            maxsplit=1,
+        )[1].split("}", maxsplit=1)[0]
+        self.assertIn("border-color: #111315", dark_login_rule)
+        self.assertIn("background: #111315", dark_login_rule)
+        self.assertIn("color: #f7f8f5", dark_login_rule)
 
     def test_programme_uses_operational_register_and_timeline(self) -> None:
         # programme.html pulls its thead/add-row/edit-row markup in from

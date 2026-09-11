@@ -19,6 +19,10 @@
 
 body.app-interface {
   min-height: 100vh;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 212, 0, 0.055), transparent 26rem),
+    radial-gradient(circle at 88% 30%, rgba(var(--ink-rgb), 0.035), transparent 32rem),
+    var(--background);
   background: var(--background);
   font-family: "Inter", var(--font-body);
   font-size: 15px;
@@ -33,29 +37,31 @@ body.app-interface h4 {
 
 body.app-interface .main-content {
   width: 100%;
-  max-width: 1500px;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: 36px clamp(24px, 4vw, 64px) 64px;
+  padding: 42px clamp(24px, 4vw, 56px) 80px;
 }
 
 body.app-interface .page-content {
-  gap: 24px;
+  gap: 28px;
 }
 
 body.app-interface .page-title {
   margin: 4px 0 0;
-  font-size: clamp(1.55rem, 2.5vw, 2.15rem);
+  font-size: clamp(2rem, 4vw, 3.15rem);
   font-weight: 700;
-  line-height: 1.06;
-  letter-spacing: -0.025em;
+  line-height: 1;
+  letter-spacing: -0.035em;
 }
 
 body.app-interface .eyebrow {
   color: rgba(var(--ink-rgb), 0.54);
   font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.11em;
+  line-height: 1.4;
+  text-transform: uppercase;
 }
 
 body.app-interface .panel {
@@ -63,7 +69,9 @@ body.app-interface .panel {
   border: 1px solid var(--card-border);
   border-radius: var(--radius-panel);
   background: var(--card-gradient);
-  box-shadow: var(--card-shadow);
+  box-shadow:
+    inset 0 1px 0 rgba(var(--paper-rgb), 0.5),
+    0 16px 44px rgba(var(--ink-rgb), 0.055);
 }
 
 body.app-interface .panel::before,
@@ -76,12 +84,24 @@ body.app-interface .record-meta div {
   border: 1px solid var(--card-border);
   border-radius: var(--radius-card);
   background: var(--card-gradient);
-  box-shadow: 0 12px 30px rgba(17, 19, 21, 0.05);
+  box-shadow: none;
+}
+
+body.app-interface form.form-grid {
+  max-width: 920px;
 }
 
 body.app-interface .dashboard-metrics .metric-card {
   align-items: center;
   text-align: center;
+}
+
+body.app-interface .site-nav-account-name {
+  color: var(--text);
+}
+
+body.app-interface .site-nav-account-org {
+  color: var(--muted);
 }
 
 body.app-interface .form-grid {
@@ -187,23 +207,21 @@ body.app-interface .breadcrumbs a:hover {
 
 body.app-interface .workspace-nav {
   display: flex;
-  gap: 4px;
+  gap: 24px;
   overflow-x: auto;
-  padding: 5px;
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-action);
-  background: rgba(255, 255, 255, 0.4);
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--card-border);
+  border-radius: 0;
+  background: transparent;
   scrollbar-width: thin;
-}
-
-:root[data-theme="dark"] body.app-interface .workspace-nav {
-  background: rgba(255, 255, 255, 0.03);
 }
 
 body.app-interface .workspace-nav a {
   flex: 0 0 auto;
-  padding: 8px 14px;
-  border-radius: calc(var(--radius-action) - 3px);
+  padding: 10px 2px 12px;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
   color: rgba(var(--ink-rgb), 0.7);
   font-size: 0.82rem;
   font-weight: 700;
@@ -211,8 +229,9 @@ body.app-interface .workspace-nav a {
 
 body.app-interface .workspace-nav a:hover,
 body.app-interface .workspace-nav a[aria-current="page"] {
-  background: var(--text);
-  color: var(--background);
+  border-bottom-color: var(--accent);
+  background: transparent;
+  color: var(--text);
 }
 
 body.app-interface .dashboard-hero {
@@ -434,6 +453,10 @@ body.app-interface .project-programme-summary .app-section-content {
 
   body.app-interface .dashboard-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.app-interface .dashboard-metrics .metric-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
 }
 
