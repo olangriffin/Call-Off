@@ -20,6 +20,15 @@
 body.app-interface {
   min-height: 100vh;
   background: var(--background);
+  font-family: "Inter", var(--font-body);
+  font-size: 15px;
+}
+
+body.app-interface h1,
+body.app-interface h2,
+body.app-interface h3,
+body.app-interface h4 {
+  font-family: "IBM Plex Sans", var(--font-heading);
 }
 
 body.app-interface .main-content {
@@ -212,6 +221,220 @@ body.app-interface .dashboard-hero {
   justify-content: space-between;
   gap: 24px;
   padding: 8px 2px;
+}
+
+body.app-interface .dashboard-hero .eyebrow,
+body.app-interface .project-hero .eyebrow {
+  margin: 0 0 10px;
+}
+
+body.app-interface .dashboard-attention .app-section-surface {
+  border: 1px solid rgba(var(--ink-rgb), 0.13);
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: none;
+  filter: none;
+}
+
+:root[data-theme="dark"] body.app-interface .dashboard-attention .app-section-surface {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+body.app-interface .attention-list {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+body.app-interface .attention-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.65fr) minmax(420px, 1.35fr) auto;
+  align-items: center;
+  gap: 24px;
+  min-width: 0;
+  padding: 16px 18px 16px 15px;
+  border: 1px solid var(--card-border);
+  border-left: 3px solid rgba(var(--ink-rgb), 0.28);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.52);
+}
+
+:root[data-theme="dark"] body.app-interface .attention-row {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+body.app-interface .attention-row--critical {
+  border-left-color: var(--critical);
+}
+
+body.app-interface .attention-row--at_risk {
+  border-left-color: var(--warning);
+}
+
+body.app-interface .attention-project {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+body.app-interface .attention-project .mono {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+body.app-interface .attention-project strong {
+  overflow: hidden;
+  font-size: 0.92rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.app-interface .attention-signals {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(76px, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+
+body.app-interface .attention-signals div {
+  display: grid;
+  gap: 5px;
+}
+
+body.app-interface .attention-signals dt {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+body.app-interface .attention-signals dd {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+body.app-interface .attention-open {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+body.app-interface .attention-row:hover .attention-open,
+body.app-interface .attention-row:focus-within .attention-open {
+  color: var(--text);
+}
+
+body.app-interface .attention-clear {
+  padding: 20px;
+  border: 1px solid rgba(35, 134, 54, 0.24);
+  border-left: 3px solid var(--success);
+  border-radius: var(--radius-control);
+  background: rgba(35, 134, 54, 0.06);
+}
+
+body.app-interface .attention-clear p {
+  margin: 5px 0 0;
+  color: var(--muted);
+}
+
+body.app-interface .dashboard-metrics {
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+}
+
+body.app-interface .dashboard-metrics .metric-card {
+  min-height: 104px;
+  padding: 16px 18px;
+  box-shadow: none;
+}
+
+body.app-interface .dashboard-supporting .app-section-content {
+  padding-block: 22px;
+}
+
+body.app-interface .project-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 12px 2px 4px;
+}
+
+body.app-interface .project-hero > div > p:last-child {
+  margin: 10px 0 0;
+  color: var(--muted);
+}
+
+body.app-interface .project-status {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-action);
+  background: rgba(255, 255, 255, 0.46);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+:root[data-theme="dark"] body.app-interface .project-status {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body.app-interface .project-metrics .metric-card {
+  min-height: 110px;
+  box-shadow: none;
+}
+
+body.app-interface .project-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body.app-interface .project-programme-summary .app-section-surface {
+  box-shadow: none;
+}
+
+body.app-interface .project-programme-summary .app-section-content {
+  padding-block: 22px;
+}
+
+@media (max-width: 900px) {
+  body.app-interface .attention-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  body.app-interface .attention-signals {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  body.app-interface .attention-open {
+    display: none;
+  }
+
+  body.app-interface .dashboard-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  body.app-interface .project-hero {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  body.app-interface .attention-signals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.app-interface .dashboard-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 body.app-interface .dashboard-hero p:last-child {

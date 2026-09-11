@@ -10,10 +10,10 @@
   margin: 16px auto 0;
   font-size: clamp(2.35rem, 5vw, 4.25rem);
   line-height: 0.98;
-  letter-spacing: 0;
+  letter-spacing: -0.035em;
 }
 
-.early-access-hero p {
+.early-access-hero > p:not(.page-kicker) {
   max-width: 640px;
   margin: 22px auto 0;
   color: rgba(var(--ink-rgb), 0.62);
@@ -54,15 +54,9 @@
   gap: 22px;
   padding: 28px;
   border: 1px solid rgba(var(--ink-rgb), 0.1);
-  border-radius: 20px;
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 255, 255, 0.58) 100%
-  );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.72),
-    0 18px 46px rgba(var(--ink-rgb), 0.06);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
 }
 
 :root[data-theme="dark"] .early-access-form-card {
@@ -157,7 +151,7 @@ fieldset.early-access-field {
   min-height: 46px;
   padding: 0 14px;
   border: 1px solid rgba(var(--ink-rgb), 0.14);
-  border-radius: 16px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.72);
   color: var(--text);
   outline: none;
@@ -212,7 +206,7 @@ fieldset.early-access-field {
   gap: 9px;
   padding: 0 14px;
   border: 1px solid rgba(var(--ink-rgb), 0.12);
-  border-radius: 999px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.58);
 }
 
@@ -304,4 +298,3 @@ fieldset.early-access-field {
   height: 1px;
   overflow: hidden;
 }
-
