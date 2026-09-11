@@ -121,21 +121,20 @@ class AppTemplateTestCase(unittest.TestCase):
                     'class="page-title"' in source or "section_header(" in source
                 )
 
-    def test_dashboard_renders_portfolio_health_and_not_attention_queue(self) -> None:
+    def test_dashboard_prioritises_attention_and_portfolio_health(self) -> None:
         source = (self.template_root / "dashboard.html").read_text()
 
         for expected in (
             "Project health distribution",
-            "Delivery health by project",
-            "Project portfolio health",
+            "Needs attention",
+            "Project portfolio",
+            "overview.attention_project_health_rows",
             "overview.health_counts.on_track",
             "row.data_completeness",
             "Procurement",
         ):
             self.assertIn(expected, source)
 
-        self.assertNotIn("Requires attention", source)
-        self.assertNotIn("attention_items", source)
         self.assertNotIn("overdue_deadline_count", source)
 
         request = Request(
@@ -185,6 +184,7 @@ class AppTemplateTestCase(unittest.TestCase):
             ),
             project_health_rows=[row],
             active_project_health_rows=[row],
+            attention_project_health_rows=[row],
         )
         response = self.templates.TemplateResponse(
             request=request,
@@ -198,9 +198,63 @@ class AppTemplateTestCase(unittest.TestCase):
         )
         body = response.body.decode("utf-8")
         self.assertIn("LON15", body)
+        self.assertIn("Needs attention", body)
+        self.assertIn("View project", body)
         self.assertIn("98%", body)
         self.assertIn("Procurement", body)
         self.assertIn("Incomplete", body)
+        self.assertIn("Delivery health by project", body)
+
+    def test_project_overview_renders_controls_and_work_packages(self) -> None:
+        request = Request(
+            {
+                "type": "http",
+                "method": "GET",
+                "path": "/app/projects/project-1",
+                "headers": [],
+                "router": self.application.router,
+            }
+        )
+        project = SimpleNamespace(
+            id="project-1",
+            code="P100",
+            name="Riverside Commercial",
+            client_name="Turner Construction",
+            status="in_progress",
+            planned_start=date(2026, 1, 12),
+            planned_finish=date(2027, 3, 19),
+        )
+        work_package = SimpleNamespace(
+            id="package-1",
+            code="WP-01",
+            name="Facade",
+            package_type="design_package",
+            status="in_progress",
+            planned_start=date(2026, 2, 1),
+            planned_finish=None,
+            required_on_site_date=date(2026, 8, 20),
+        )
+
+        response = self.templates.TemplateResponse(
+            request=request,
+            name="project/project_detail.html",
+            context={
+                "project": project,
+                "work_packages": [work_package],
+                "page_title": "Riverside Commercial",
+                "company_name": "Call-Off",
+            },
+        )
+        body = response.body.decode("utf-8")
+
+        self.assertIn("Riverside Commercial", body)
+        self.assertIn("In Progress", body)
+        self.assertIn('datetime="2026-01-12"', body)
+        self.assertIn('datetime="2027-03-19"', body)
+        self.assertIn('/app/projects/project-1/programme', body)
+        self.assertIn('/app/projects/project-1/work-packages/package-1', body)
+        self.assertIn("Design Package", body)
+        self.assertIn('datetime="2026-08-20"', body)
 
     def test_missing_project_state_keeps_primary_heading(self) -> None:
         request = Request(

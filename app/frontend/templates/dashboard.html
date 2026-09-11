@@ -7,12 +7,46 @@
 {% block content %}
     <section class="dashboard-hero" aria-labelledby="dashboard-title">
         <div>
-            <h1 class="page-title" id="dashboard-title">Call-Off Project Control Dashboard</h1>
+            <p class="eyebrow">Portfolio control / {{ company_name }}</p>
+            <h1 class="page-title" id="dashboard-title">Project control</h1>
+            <p>See delivery exceptions first, then review the complete project portfolio.</p>
         </div>
         {% if can_create_projects %}
             {{ primary_button("New project", href="/app/projects/new") }}
         {% endif %}
     </section>
+    {% call section(labelledby="attention-title", section_class="dashboard-attention") %}
+        {{ section_header("Needs attention", description="Active projects with critical, at-risk or incomplete controls.", title_id="attention-title") }}
+        {% if overview.attention_project_health_rows %}
+            <ol class="attention-list">
+                {% for row in overview.attention_project_health_rows %}
+                    <li class="attention-row attention-row--{{ row.overall_health.key }}">
+                        <a class="attention-project" href="/app/projects/{{ row.project.id }}">
+                            <span class="mono">{{ row.project.code }}</span>
+                            <strong>{{ row.project.name }}</strong>
+                        </a>
+                        <dl class="attention-signals">
+                            <div><dt>Overall</dt><dd><span class="badge {{ row.overall_health.css_class }}">{{ row.overall_health.label }}</span></dd></div>
+                            <div><dt>Design</dt><dd>{{ row.design_health.label }}</dd></div>
+                            <div><dt>Programme</dt><dd>{{ row.programme_health.label }}</dd></div>
+                            <div><dt>Data</dt><dd>{{ row.data_completeness }}%</dd></div>
+                        </dl>
+                        <a class="attention-open" href="/app/projects/{{ row.project.id }}">View project <span aria-hidden="true">→</span></a>
+                    </li>
+                {% endfor %}
+            </ol>
+        {% elif overview.active_project_count %}
+            <div class="attention-clear" role="status">
+                <strong>No active project exceptions</strong>
+                <p>All assessable active projects are currently on track.</p>
+            </div>
+        {% else %}
+            <div class="empty-state compact-empty-state">
+                <h3>No active projects to assess</h3>
+                <p>Project exceptions will appear here when an active project is available.</p>
+            </div>
+        {% endif %}
+    {% endcall %}
     <section aria-labelledby="portfolio-summary-title">
         <h2 id="portfolio-summary-title" class="visually-hidden">Portfolio health summary</h2>
         <div class="metric-grid dashboard-metrics">
@@ -23,7 +57,44 @@
             {{ metric_card("Incomplete", value=overview.health_counts.incomplete) }}
         </div>
     </section>
-    {% call section(labelledby="portfolio-distribution-title") %}
+    {% call section(labelledby="portfolio-register-title") %}
+        {{ section_header("Project portfolio", description="Health and data coverage across every project.", title_id="portfolio-register-title") }}
+        {% if overview.project_health_rows %}
+            <div class="table-container"
+                 tabindex="0"
+                 aria-label="Project portfolio health register">
+                <table>
+                    <caption class="visually-hidden">Project portfolio health for {{ company_name }}</caption>
+                    <thead>
+                        <tr><th>Project</th><th>Overall</th><th>Design</th><th>Programme</th><th>Procurement</th><th>Data</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for row in overview.project_health_rows %}
+                            <tr>
+                                <th scope="row"><a href="/app/projects/{{ row.project.id }}"><strong>{{ row.project.code }}</strong><span class="table-secondary">{{ row.project.name }}</span></a></th>
+                                <td><span class="badge {{ row.overall_health.css_class }}">{{ row.overall_health.label }}</span></td>
+                                <td><span class="badge {{ row.design_health.css_class }}">{{ row.design_health.label }}</span></td>
+                                <td><span class="badge {{ row.programme_health.css_class }}">{{ row.programme_health.label }}</span></td>
+                                <td><span class="badge {{ row.procurement_health.css_class }}">{{ row.procurement_health.label }}</span></td>
+                                <td>{{ row.data_completeness }}%</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h3>No projects yet</h3>
+                {% if can_create_projects %}
+                    <p>Create the first project for {{ company_name }} to begin managing delivery health.</p>
+                    {{ primary_button("Create first project", href="/app/projects/new") }}
+                {% else %}
+                    <p>No projects are available to your organisation yet. A project administrator or owner can create the first one.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endcall %}
+    {% call section(labelledby="portfolio-distribution-title", section_class="dashboard-supporting") %}
         {{ section_header("Project health distribution", title_id="portfolio-distribution-title") }}
         {% if overview.active_project_count %}
             <div class="portfolio-distribution"
@@ -62,14 +133,13 @@
             </div>
         {% endif %}
     {% endcall %}
-    {% call section(labelledby="delivery-health-title") %}
-        {{ section_header("Delivery health by project", title_id="delivery-health-title") }}
+    {% call section(labelledby="delivery-health-title", section_class="dashboard-supporting") %}
+        {{ section_header("Delivery health by project", description="Work package health across active projects.", title_id="delivery-health-title") }}
         {% if overview.active_project_health_rows %}
             <ul class="delivery-health-list">
                 {% for row in overview.active_project_health_rows %}
                     <li class="delivery-health-row">
-                        <a class="delivery-health-project"
-                           href="/app/projects/{{ row.project.id }}">
+                        <a class="delivery-health-project" href="/app/projects/{{ row.project.id }}">
                             <strong>{{ row.project.code }}</strong>
                             <span>{{ row.project.name }}</span>
                         </a>
@@ -90,55 +160,6 @@
             <div class="empty-state compact-empty-state">
                 <h3>No delivery health to assess</h3>
                 <p>Delivery health will appear here when an active project has work packages.</p>
-            </div>
-        {% endif %}
-    {% endcall %}
-    {% call section(labelledby="portfolio-register-title") %}
-        {{ section_header("Project portfolio health", title_id="portfolio-register-title") }}
-        {% if overview.project_health_rows %}
-            <div class="table-container"
-                 tabindex="0"
-                 aria-label="Project portfolio health register">
-                <table>
-                    <caption class="visually-hidden">Project portfolio health for {{ company_name }}</caption>
-                    <thead>
-                        <tr>
-                            <th>Project</th>
-                            <th>Overall</th>
-                            <th>Design</th>
-                            <th>Programme</th>
-                            <th>Procurement</th>
-                            <th>Data</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in overview.project_health_rows %}
-                            <tr>
-                                <th scope="row">
-                                    <a href="/app/projects/{{ row.project.id }}">
-                                        <strong>{{ row.project.code }}</strong>
-                                        <span class="table-secondary">{{ row.project.name }}</span>
-                                    </a>
-                                </th>
-                                <td><span class="badge {{ row.overall_health.css_class }}">{{ row.overall_health.label }}</span></td>
-                                <td><span class="badge {{ row.design_health.css_class }}">{{ row.design_health.label }}</span></td>
-                                <td><span class="badge {{ row.programme_health.css_class }}">{{ row.programme_health.label }}</span></td>
-                                <td><span class="badge {{ row.procurement_health.css_class }}">{{ row.procurement_health.label }}</span></td>
-                                <td>{{ row.data_completeness }}%</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <div class="empty-state">
-                <h3>No projects yet</h3>
-                {% if can_create_projects %}
-                    <p>Create the first project for {{ company_name }} to begin managing delivery health.</p>
-                    {{ primary_button("Create first project", href="/app/projects/new") }}
-                {% else %}
-                    <p>No projects are available to your organisation yet. A project administrator or owner can create the first one.</p>
-                {% endif %}
             </div>
         {% endif %}
     {% endcall %}
