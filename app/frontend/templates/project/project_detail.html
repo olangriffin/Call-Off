@@ -36,6 +36,7 @@
         {% call section(section_id="work-packages", labelledby="work-packages-title") %}
             {% call section_header("Work packages", description="Package scope, programme dates and required-on-site commitments.", title_id="work-packages-title") %}
                 {% if work_packages %}{{ primary_button("New work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}{% endif %}
+                {{ primary_button("New work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}
             {% endcall %}
             {% if work_packages %}
                 <div class="table-container" tabindex="0" aria-label="{{ project.code }} work packages">

@@ -23,6 +23,7 @@ body.app-interface {
     radial-gradient(circle at 12% 12%, rgba(255, 212, 0, 0.055), transparent 26rem),
     radial-gradient(circle at 88% 30%, rgba(var(--ink-rgb), 0.035), transparent 32rem),
     var(--background);
+  background: var(--background);
   font-family: "Inter", var(--font-body);
   font-size: 15px;
 }
