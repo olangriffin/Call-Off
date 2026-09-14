@@ -1,10 +1,11 @@
-/* Continuous swooped shoulders for the shared top navigation.
-   This deliberately is not a normal rounded corner. Each shoulder uses two
-   cubic Bézier segments with the same tangent at their join, producing the
-   original concave-to-convex "swoop" without the visible flat/kink that came
-   from combining a clipped corner with a separate border radius. */
+/* Long S-curve shoulders for the shared top navigation.
+   The shoulder is intentionally much wider than the bar height so it reads
+   as a sweep rather than a rounded corner. The path changes curvature through
+   the middle and eases horizontally into the navbar bottom edge. */
 
 .site-nav-links {
+  --site-nav-swoop-width: 96px;
+
   overflow: visible;
   border-radius: 0;
   box-shadow: none;
@@ -18,10 +19,10 @@
   top: 0;
   z-index: 0;
   display: block;
-  width: 52px;
+  width: var(--site-nav-swoop-width);
   height: var(--site-nav-links-height);
   background: var(--nav-surface);
-  clip-path: path("M 0 0 H 52 C 52 12 52 20 40 24 C 28 28 28 42 0 42 Z");
+  clip-path: path("M 0 0 H 96 C 92 2 88 7 87 14 C 86 22 81 30 69 36 C 56 41 35 42 0 42 Z");
   pointer-events: none;
 }
 
