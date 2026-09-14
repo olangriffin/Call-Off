@@ -7,7 +7,7 @@ from datetime import date, datetime, timezone
 
 import httpx
 from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.backend.core.auth import (
@@ -22,6 +22,7 @@ from app.backend.models.package.package import WorkPackage
 from app.backend.models.package.revision import DeliverableRevision
 from app.backend.models.programme.programme import Programme
 from app.backend.models.programme.programme_activity import ProgrammeActivity
+from app.backend.models.programme.programme_dependency import ProgrammeDependency
 from app.backend.models.programme.programme_revision import ProgrammeRevision
 from app.backend.models.project import Project
 from app.backend.schemas.auth import AuthenticatedUser, OrganisationAccessContext
@@ -61,6 +62,7 @@ TABLES = [
     Programme.__table__,
     ProgrammeRevision.__table__,
     ProgrammeActivity.__table__,
+    ProgrammeDependency.__table__,
 ]
 
 
@@ -376,6 +378,8 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_cross_tenant_operations_return_404(self) -> None:
+        self.current_access = access_for("org-a").model_copy(update={"role": "owner"})
+        type(self).current_access = self.current_access
         project_b = f"/projects/{PROJECT_B_ID}"
         package_b = f"{project_b}/work-packages"
         activity_b = f"{project_b}/programme/activities"
@@ -456,7 +460,7 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
                 response = await self.client.get(path)
                 self.assertEqual(response.status_code, 404, response.text)
 
-    async def test_same_tenant_hierarchy_remains_accessible(self) -> None:
+    async def test_same_tenant_hierarchy_is_readable_by_every_supported_role(self) -> None:
         paths = [
             f"/projects/{PROJECT_A_ID}",
             f"/projects/{PROJECT_A_ID}/work-packages/{PACKAGE_A_ID}",
@@ -476,10 +480,243 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
             f"/projects/{PROJECT_A_ID}/programme/activities/{ACTIVITY_A_ID}",
         ]
 
-        for path in paths:
-            with self.subTest(path=path):
+        for role in ("owner", "project_manager", "member"):
+            self.current_access = access_for("org-a")
+            self.current_access = self.current_access.model_copy(update={"role": role})
+            type(self).current_access = self.current_access
+            for path in paths:
+                with self.subTest(role=role, path=path):
+                    response = await self.client.get(path)
+                    self.assertEqual(response.status_code, 200, response.text)
+
+    async def test_frontend_mutation_actions_match_role_capabilities(self) -> None:
+        pages_and_actions = (
+            (
+                f"/app/projects/{PROJECT_A_ID}",
+                ("/work-packages/new",),
+            ),
+            (
+                f"/app/projects/{PROJECT_A_ID}/work-packages/{PACKAGE_A_ID}",
+                ("/deliverables/new",),
+            ),
+            (
+                f"/app/projects/{PROJECT_A_ID}/work-packages/{PACKAGE_A_ID}"
+                f"/deliverables/{DELIVERABLE_A_ID}",
+                ("/revisions/new", "/approvals/new", "/respond"),
+            ),
+            (
+                f"/app/projects/{PROJECT_A_ID}/programme",
+                ("data-programme-add-trigger", "data-programme-edit-trigger"),
+            ),
+        )
+
+        for role, can_write, can_delete in (
+            ("owner", True, True),
+            ("project_manager", True, False),
+            ("member", False, False),
+        ):
+            self.current_access = access_for("org-a").model_copy(update={"role": role})
+            type(self).current_access = self.current_access
+            for path, actions in pages_and_actions:
                 response = await self.client.get(path)
                 self.assertEqual(response.status_code, 200, response.text)
+                for action in actions:
+                    with self.subTest(role=role, path=path, action=action):
+                        self.assertEqual(action in response.text, can_write)
+
+                if path.endswith("/programme"):
+                    self.assertEqual(
+                        "programme-delete-button" in response.text,
+                        can_delete,
+                    )
+
+    async def test_owner_can_complete_standard_operational_writes(self) -> None:
+        self.current_access = access_for("org-a").model_copy(update={"role": "owner"})
+        type(self).current_access = self.current_access
+        project = await self.client.post(
+            "/projects", json={"code": "OWNER", "name": "Owner project"}
+        )
+        self.assertEqual(project.status_code, 201, project.text)
+        project_id = project.json()["id"]
+        self.assertEqual(
+            (await self.client.patch(f"/projects/{project_id}", json={"name": "Updated"})).status_code,
+            200,
+        )
+
+        package_path = f"/projects/{project_id}/work-packages"
+        package = await self.client.post(
+            package_path, json={"code": "WP", "name": "Package"}
+        )
+        self.assertEqual(package.status_code, 201, package.text)
+        package_id = package.json()["id"]
+        self.assertEqual(
+            (await self.client.patch(f"{package_path}/{package_id}", json={"name": "Updated"})).status_code,
+            200,
+        )
+
+        deliverable_path = f"{package_path}/{package_id}/deliverables"
+        deliverable = await self.client.post(
+            deliverable_path,
+            json={"reference": "D1", "name": "Deliverable", "deliverable_type": "drawing"},
+        )
+        self.assertEqual(deliverable.status_code, 201, deliverable.text)
+        deliverable_id = deliverable.json()["id"]
+        self.assertEqual(
+            (await self.client.patch(f"{deliverable_path}/{deliverable_id}", json={"name": "Updated"})).status_code,
+            200,
+        )
+
+        revision_path = f"{deliverable_path}/{deliverable_id}/revisions"
+        revision = await self.client.post(revision_path, json={"revision_code": "P01"})
+        self.assertEqual(revision.status_code, 201, revision.text)
+        revision_id = revision.json()["id"]
+        self.assertEqual(
+            (await self.client.patch(f"{revision_path}/{revision_id}", json={"notes": "Updated"})).status_code,
+            200,
+        )
+
+        approval_path = f"{revision_path}/{revision_id}/approvals"
+        approval = await self.client.post(approval_path, json={})
+        self.assertEqual(approval.status_code, 201, approval.text)
+        approval_id = approval.json()["id"]
+        self.assertEqual(
+            (
+                await self.client.patch(
+                    f"{approval_path}/{approval_id}",
+                    json={"status": "approved", "response_received_date": "2026-09-14"},
+                )
+            ).status_code,
+            200,
+        )
+
+        activity_path = f"/projects/{project_id}/programme/activities"
+        activity = await self.client.post(activity_path, json={"name": "Activity"})
+        self.assertEqual(activity.status_code, 201, activity.text)
+        activity_id = activity.json()["id"]
+        self.assertEqual(
+            (await self.client.patch(f"{activity_path}/{activity_id}", json={"name": "Updated"})).status_code,
+            200,
+        )
+
+    async def test_owner_can_delete_each_operational_resource(self) -> None:
+        self.current_access = access_for("org-a").model_copy(update={"role": "owner"})
+        type(self).current_access = self.current_access
+
+        project = await self.client.post(
+            "/projects", json={"code": "DELETE", "name": "Delete project"}
+        )
+        project_id = project.json()["id"]
+        self.assertEqual((await self.client.delete(f"/projects/{project_id}")).status_code, 204)
+
+        package_path = f"/projects/{PROJECT_A_ID}/work-packages"
+        package = await self.client.post(package_path, json={"code": "DEL", "name": "Delete"})
+        package_id = package.json()["id"]
+        self.assertEqual(
+            (await self.client.delete(f"{package_path}/{package_id}")).status_code,
+            204,
+        )
+
+        deliverable_path = f"{package_path}/{PACKAGE_A_ID}/deliverables"
+        deliverable = await self.client.post(
+            deliverable_path,
+            json={"reference": "DEL", "name": "Delete", "deliverable_type": "drawing"},
+        )
+        deliverable_id = deliverable.json()["id"]
+        self.assertEqual(
+            (await self.client.delete(f"{deliverable_path}/{deliverable_id}")).status_code,
+            204,
+        )
+
+        revision_path = f"{deliverable_path}/{DELIVERABLE_A_ID}/revisions"
+        revision = await self.client.post(revision_path, json={"revision_code": "DEL"})
+        revision_id = revision.json()["id"]
+        self.assertEqual(
+            (await self.client.delete(f"{revision_path}/{revision_id}")).status_code,
+            204,
+        )
+
+        approval_path = f"{revision_path}/{REVISION_A_ID}/approvals"
+        approval = await self.client.post(approval_path, json={})
+        approval_id = approval.json()["id"]
+        self.assertEqual(
+            (await self.client.delete(f"{approval_path}/{approval_id}")).status_code,
+            204,
+        )
+
+        activity_path = f"/projects/{PROJECT_A_ID}/programme/activities"
+        activity = await self.client.post(activity_path, json={"name": "Delete activity"})
+        activity_id = activity.json()["id"]
+        self.assertEqual(
+            (await self.client.delete(f"{activity_path}/{activity_id}")).status_code,
+            204,
+        )
+
+    async def test_project_manager_can_complete_standard_operational_writes(self) -> None:
+        project = await self.client.post(
+            "/projects", json={"code": "PM", "name": "Manager project"}
+        )
+        self.assertEqual(project.status_code, 201, project.text)
+        project_id = project.json()["id"]
+        self.assertEqual(
+            (await self.client.patch(f"/projects/{project_id}", json={"name": "Updated"})).status_code,
+            200,
+        )
+
+        package_path = f"/projects/{project_id}/work-packages"
+        package = await self.client.post(package_path, json={"code": "WP", "name": "Package"})
+        self.assertEqual(package.status_code, 201, package.text)
+        package_id = package.json()["id"]
+        self.assertEqual(
+            (await self.client.patch(f"{package_path}/{package_id}", json={"name": "Updated"})).status_code,
+            200,
+        )
+
+        deliverable_path = f"{package_path}/{package_id}/deliverables"
+        deliverable = await self.client.post(
+            deliverable_path,
+            json={"reference": "D1", "name": "Deliverable", "deliverable_type": "drawing"},
+        )
+        self.assertEqual(deliverable.status_code, 201, deliverable.text)
+        deliverable_id = deliverable.json()["id"]
+        self.assertEqual(
+            (await self.client.patch(f"{deliverable_path}/{deliverable_id}", json={"name": "Updated"})).status_code,
+            200,
+        )
+
+        revision_path = f"{deliverable_path}/{deliverable_id}/revisions"
+        revision = await self.client.post(revision_path, json={"revision_code": "P01"})
+        self.assertEqual(revision.status_code, 201, revision.text)
+        revision_id = revision.json()["id"]
+        self.assertEqual(
+            (await self.client.patch(f"{revision_path}/{revision_id}", json={"notes": "Updated"})).status_code,
+            200,
+        )
+
+        approval_path = f"{revision_path}/{revision_id}/approvals"
+        approval = await self.client.post(approval_path, json={})
+        self.assertEqual(approval.status_code, 201, approval.text)
+        approval_id = approval.json()["id"]
+        self.assertEqual(
+            (
+                await self.client.patch(
+                    f"{approval_path}/{approval_id}",
+                    json={"status": "approved", "response_received_date": "2026-09-14"},
+                )
+            ).status_code,
+            200,
+        )
+
+        activity_path = f"/projects/{project_id}/programme/activities"
+        activity = await self.client.post(activity_path, json={"name": "Activity"})
+        self.assertEqual(activity.status_code, 201, activity.text)
+        self.assertEqual(
+            (
+                await self.client.patch(
+                    f"{activity_path}/{activity.json()['id']}", json={"name": "Updated"}
+                )
+            ).status_code,
+            200,
+        )
 
     async def test_frontend_approval_response_updates_only_nested_record(
         self,

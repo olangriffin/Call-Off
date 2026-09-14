@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, Request, status
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
@@ -113,6 +113,9 @@ def create_app() -> FastAPI:
             status.HTTP_404_NOT_FOUND,
         }:
             is_not_found = error.status_code == status.HTTP_404_NOT_FOUND
+            is_csrf_failure = error.detail == (
+                "The form expired or could not be verified. Please try again."
+            )
             return templates.TemplateResponse(
                 request=request,
                 name="marketing/error.html",
@@ -122,7 +125,11 @@ def create_app() -> FastAPI:
                     (
                         "The page you requested does not exist or may have moved."
                         if is_not_found
-                        else "The form expired or could not be verified. Please try again."
+                        else (
+                            "The form expired or could not be verified. Please try again."
+                            if is_csrf_failure
+                            else "You do not have permission to complete this action."
+                        )
                     ),
                 ),
                 status_code=error.status_code,

@@ -13,7 +13,11 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
-from app.backend.core.auth import CurrentOrganisationAccess
+from app.backend.core.auth import (
+    CurrentOrganisationAccess,
+    DestructiveOperationAccess,
+    OperationalWriteAccess,
+)
 from app.backend.database.session import get_db
 from app.backend.models.package.deliverable import Deliverable
 from app.backend.models.package.package import WorkPackage
@@ -136,7 +140,7 @@ def create_deliverable_revision_route(
     deliverable_id: uuid.UUID,
     revision_data: DeliverableRevisionCreate,
     database: DatabaseSession,
-    access: CurrentOrganisationAccess,
+    access: OperationalWriteAccess,
 ) -> DeliverableRevisionRead:
     deliverable = require_deliverable(
         database,
@@ -234,7 +238,7 @@ def update_deliverable_revision_route(
     revision_id: uuid.UUID,
     revision_data: DeliverableRevisionUpdate,
     database: DatabaseSession,
-    access: CurrentOrganisationAccess,
+    access: OperationalWriteAccess,
 ) -> DeliverableRevisionRead:
     require_deliverable(
         database,
@@ -284,7 +288,7 @@ def delete_deliverable_revision_route(
     deliverable_id: uuid.UUID,
     revision_id: uuid.UUID,
     database: DatabaseSession,
-    access: CurrentOrganisationAccess,
+    access: DestructiveOperationAccess,
 ) -> Response:
     require_deliverable(
         database,

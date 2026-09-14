@@ -18,6 +18,10 @@ from app.backend.schemas.auth import (
 
 CALL_OFF_SESSION_COOKIE = "calloff_session"
 CALL_OFF_SESSION_NAME_COOKIE = "calloff_session_name"
+READ_ROLES = frozenset({"owner", "project_manager", "member"})
+OPERATIONAL_WRITE_ROLES = frozenset({"owner", "project_manager"})
+DESTRUCTIVE_OPERATION_ROLES = frozenset({"owner"})
+APPROVAL_RESPONSE_ROLES = frozenset({"owner", "project_manager"})
 
 _COOKIE_NAME_PATTERN = re.compile(r"^[A-Za-z0-9._-]+$")
 
@@ -147,7 +151,6 @@ async def require_organisation_access(
     )
 
     user_values = neon_session["user"]
-    session_values = neon_session["session"]
 
     user_id = user_values.get("id")
 
@@ -203,6 +206,13 @@ async def require_organisation_access(
             detail="The organisation does not exist.",
         )
 
+    role = str(membership.role or "").strip().lower()
+    if role not in READ_ROLES:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The membership role is not supported.",
+        )
+
     return OrganisationAccessContext(
         user=AuthenticatedUser(
             id=auth_user.id,
@@ -211,7 +221,7 @@ async def require_organisation_access(
             email_verified=auth_user.email_verified,
         ),
         membership_id=str(membership.id),
-        role=membership.role.lower(),
+        role=role,
         organization_id=organisation.id,
         organization_name=organisation.name,
         organization_slug=organisation.slug,
@@ -223,13 +233,27 @@ CurrentOrganisationAccess = Annotated[
     Depends(require_organisation_access),
 ]
 
-PROJECT_CREATOR_ROLES = frozenset({"owner", "project_manager"})
+
+def _enforce_roles(
+    access: OrganisationAccessContext,
+    allowed_roles: frozenset[str],
+    detail: str,
+) -> OrganisationAccessContext:
+    """Return access when its server-derived role grants a capability."""
+
+    if access.role not in allowed_roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=detail,
+        )
+
+    return access
 
 
 def can_create_projects(access: OrganisationAccessContext) -> bool:
     """Return whether the authenticated membership may create projects."""
 
-    return access.role in PROJECT_CREATOR_ROLES
+    return access.role in OPERATIONAL_WRITE_ROLES
 
 
 def enforce_project_creation_access(
@@ -237,13 +261,85 @@ def enforce_project_creation_access(
 ) -> OrganisationAccessContext:
     """Enforce the shared project-creation capability rule."""
 
-    if not can_create_projects(access):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only owners and project managers can create projects.",
-        )
+    return enforce_operational_write_access(access)
 
-    return access
+
+def can_operational_write(access: OrganisationAccessContext) -> bool:
+    return access.role in OPERATIONAL_WRITE_ROLES
+
+
+def enforce_operational_write_access(
+    access: OrganisationAccessContext,
+) -> OrganisationAccessContext:
+    return _enforce_roles(
+        access,
+        OPERATIONAL_WRITE_ROLES,
+        "Only owners and project managers can modify operational data.",
+    )
+
+
+def require_operational_write_access(
+    access: CurrentOrganisationAccess,
+) -> OrganisationAccessContext:
+    return enforce_operational_write_access(access)
+
+
+OperationalWriteAccess = Annotated[
+    OrganisationAccessContext,
+    Depends(require_operational_write_access),
+]
+
+
+def can_destructive_operations(access: OrganisationAccessContext) -> bool:
+    return access.role in DESTRUCTIVE_OPERATION_ROLES
+
+
+def enforce_destructive_operation_access(
+    access: OrganisationAccessContext,
+) -> OrganisationAccessContext:
+    return _enforce_roles(
+        access,
+        DESTRUCTIVE_OPERATION_ROLES,
+        "Only owners can delete operational data.",
+    )
+
+
+def require_destructive_operation_access(
+    access: CurrentOrganisationAccess,
+) -> OrganisationAccessContext:
+    return enforce_destructive_operation_access(access)
+
+
+DestructiveOperationAccess = Annotated[
+    OrganisationAccessContext,
+    Depends(require_destructive_operation_access),
+]
+
+
+def can_respond_to_approvals(access: OrganisationAccessContext) -> bool:
+    return access.role in APPROVAL_RESPONSE_ROLES
+
+
+def enforce_approval_response_access(
+    access: OrganisationAccessContext,
+) -> OrganisationAccessContext:
+    return _enforce_roles(
+        access,
+        APPROVAL_RESPONSE_ROLES,
+        "Only owners and project managers can respond to approvals.",
+    )
+
+
+def require_approval_response_access(
+    access: CurrentOrganisationAccess,
+) -> OrganisationAccessContext:
+    return enforce_approval_response_access(access)
+
+
+ApprovalResponseAccess = Annotated[
+    OrganisationAccessContext,
+    Depends(require_approval_response_access),
+]
 
 
 def require_project_creation_access(
@@ -293,4 +389,40 @@ def require_frontend_project_creation_access(
 FrontendProjectCreationAccess = Annotated[
     OrganisationAccessContext,
     Depends(require_frontend_project_creation_access),
+]
+
+
+def require_frontend_operational_write_access(
+    access: FrontendOrganisationAccess,
+) -> OrganisationAccessContext:
+    return enforce_operational_write_access(access)
+
+
+FrontendOperationalWriteAccess = Annotated[
+    OrganisationAccessContext,
+    Depends(require_frontend_operational_write_access),
+]
+
+
+def require_frontend_destructive_operation_access(
+    access: FrontendOrganisationAccess,
+) -> OrganisationAccessContext:
+    return enforce_destructive_operation_access(access)
+
+
+FrontendDestructiveOperationAccess = Annotated[
+    OrganisationAccessContext,
+    Depends(require_frontend_destructive_operation_access),
+]
+
+
+def require_frontend_approval_response_access(
+    access: FrontendOrganisationAccess,
+) -> OrganisationAccessContext:
+    return enforce_approval_response_access(access)
+
+
+FrontendApprovalResponseAccess = Annotated[
+    OrganisationAccessContext,
+    Depends(require_frontend_approval_response_access),
 ]

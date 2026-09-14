@@ -26,9 +26,11 @@
                         <span>{{ workspace.date_range_label }}</span>
                     </p>
                 </div>
-                <a href="/app/projects/{{ project.id }}/programme/new"
-                   class="primary-button"
-                   data-programme-add-trigger>New activity</a>
+                {% if can_operational_write %}
+                    <a href="/app/projects/{{ project.id }}/programme/new"
+                       class="primary-button"
+                       data-programme-add-trigger>New activity</a>
+                {% endif %}
             </div>
             {% if error_message %}
                 <div class="form-alert" role="alert">
@@ -107,18 +109,22 @@
                     <h2>No programme activities yet</h2>
                     <p>Add the first task or milestone to start planning this project’s delivery sequence.</p>
                     <div class="form-actions">
-                        <a href="/app/projects/{{ project.id }}/programme/new"
-                           class="primary-button"
-                           data-programme-add-trigger>Add first activity</a>
+                        {% if can_operational_write %}
+                            <a href="/app/projects/{{ project.id }}/programme/new"
+                               class="primary-button"
+                               data-programme-add-trigger>Add first activity</a>
+                        {% endif %}
                         {{ secondary_button("Back to project", href="/app/projects/" ~ project.id, button_class="ghost-button-sm") }}
                     </div>
                 </div>
             {% endif %}
-            <form id="programme-add-form" data-programme-add-form novalidate hidden>
-            </form>
-            <form id="programme-edit-form" data-programme-edit-form novalidate hidden>
-            </form>
-            {% include "partials/programme/activity_edit_row_template.html" %}
+            {% if can_operational_write %}
+                <form id="programme-add-form" data-programme-add-form novalidate hidden>
+                </form>
+                <form id="programme-edit-form" data-programme-edit-form novalidate hidden>
+                </form>
+                {% include "partials/programme/activity_edit_row_template.html" %}
+            {% endif %}
             <div class="table-container programme-table-container"
                  tabindex="0"
                  aria-label="{{ project.code }} programme register and timeline"
@@ -133,7 +139,7 @@
                     </caption>
                     {% include "partials/programme/table_head.html" %}
                     <tbody>
-                        {% include "partials/programme/activity_add_row.html" %}
+                        {% if can_operational_write %}{% include "partials/programme/activity_add_row.html" %}{% endif %}
                         {% for row in workspace.rows %}
                             <tr class="programme-row{% if row.is_summary %} is-summary{% endif %}"
                                 data-programme-row
@@ -180,15 +186,19 @@
                                 </td>
                                 <td class="programme-duration-column">{{ row.duration_label }}</td>
                                 <td class="programme-actions-column">
-                                    <a href="/app/projects/{{ project.id }}/programme/{{ row.activity.id }}/edit"
-                                       data-programme-edit-trigger>Edit</a>
-                                    <form class="inline-form"
-                                          method="post"
-                                          action="/app/projects/{{ project.id }}/programme/{{ row.activity.id }}/delete"
-                                          data-confirm="Delete this activity?">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
-                                        <button type="submit" class="programme-delete-button">Delete</button>
-                                    </form>
+                                    {% if can_operational_write %}
+                                        <a href="/app/projects/{{ project.id }}/programme/{{ row.activity.id }}/edit"
+                                           data-programme-edit-trigger>Edit</a>
+                                    {% endif %}
+                                    {% if can_destructive_operation %}
+                                        <form class="inline-form"
+                                              method="post"
+                                              action="/app/projects/{{ project.id }}/programme/{{ row.activity.id }}/delete"
+                                              data-confirm="Delete this activity?">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+                                            <button type="submit" class="programme-delete-button">Delete</button>
+                                        </form>
+                                    {% endif %}
                                 </td>
                                 <td class="programme-timeline-column">
                                     <span class="visually-hidden">
