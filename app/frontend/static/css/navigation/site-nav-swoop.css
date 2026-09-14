@@ -7,6 +7,7 @@
   --site-nav-swoop-width: 96px;
 
   overflow: visible;
+  padding-inline: 0;
   border-radius: 0;
   box-shadow: none;
   filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.12));
@@ -22,7 +23,10 @@
   width: var(--site-nav-swoop-width);
   height: var(--site-nav-links-height);
   background: var(--nav-surface);
-  clip-path: path("M 0 0 H 96 C 92 2 88 7 87 14 C 86 22 81 30 69 36 C 56 41 35 42 0 42 Z");
+  /* Two tangent-matched cubic segments create a stronger S: the shoulder
+     drops steeply from the top edge, pinches inward, then opens into a long
+     horizontal sweep at the navbar's lower edge. */
+  clip-path: path("M 0 0 H 96 C 96 20 80 10 74 23 C 68 36 54 42 0 42 Z");
   pointer-events: none;
 }
 
@@ -41,4 +45,14 @@
 .site-nav-links > a {
   position: relative;
   z-index: 1;
+}
+
+/* Keep the spacing between navigation items unchanged while bringing the
+   first and last labels closer to the visible navbar shoulders. */
+.site-nav-links > a:first-of-type {
+  padding-left: 8px;
+}
+
+.site-nav-links > a:last-of-type {
+  padding-right: 8px;
 }
