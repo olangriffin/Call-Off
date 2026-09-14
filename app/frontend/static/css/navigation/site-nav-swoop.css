@@ -1,7 +1,7 @@
-/* Single-curve shoulders for the shared top navigation.
-   Each side is one quarter ellipse. There is no second radius or clipped
-   path meeting it, so the curve stays continuous from the top edge into the
-   flat bottom edge of the central navigation bar. */
+/* Continuous shoulders for the shared top navigation.
+   The central bar stays rectangular. Each side is a single cubic Bézier
+   wedge that extends the top edge outward and returns smoothly to the
+   bottom corner, avoiding joins between multiple radii. */
 
 .site-nav-links {
   overflow: visible;
@@ -15,22 +15,26 @@
   content: "";
   position: absolute;
   top: 0;
-  z-index: -1;
+  z-index: 0;
   display: block;
   width: var(--site-nav-links-height);
   height: var(--site-nav-links-height);
   background: var(--nav-surface);
-  clip-path: none;
+  clip-path: path("M 0 0 H 42 C 42 23.196 23.196 42 0 42 Z");
   pointer-events: none;
-  transform: none;
 }
 
 .site-nav-links::before {
-  left: calc(var(--site-nav-links-height) * -1);
-  border-bottom-left-radius: 100%;
+  right: 100%;
+  transform: scaleX(-1);
+  transform-origin: center;
 }
 
 .site-nav-links::after {
-  right: calc(var(--site-nav-links-height) * -1);
-  border-bottom-right-radius: 100%;
+  left: 100%;
+}
+
+.site-nav-links > a {
+  position: relative;
+  z-index: 1;
 }
