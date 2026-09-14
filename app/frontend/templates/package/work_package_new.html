@@ -47,12 +47,13 @@
                            required>
                 </div>
                 <div class="form-field">
-                    <label for="package_type">Package type</label>
+                    <label for="package_type">Package classification</label>
                     <input id="package_type"
                            name="package_type"
                            type="text"
                            maxlength="100"
                            value="{{ form_values.package_type if form_values else '' }}">
+                    <small>Use your organisation's existing classification; no Area + Scope structure is assumed.</small>
                 </div>
                 <div class="form-field">
                     <label for="status">Status</label>
@@ -79,6 +80,7 @@
                     <label for="description">Description</label>
                     <textarea id="description" name="description" rows="4">{{ form_values.description if form_values else '' }}</textarea>
                 </div>
+                <p class="form-field form-field-full form-help">Package dates are manually recorded in the current build; they are not yet derived from or synchronised with Programme activities.</p>
                 <div class="form-field">
                     <label for="planned_start">Planned start</label>
                     <input id="planned_start"

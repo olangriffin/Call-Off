@@ -215,9 +215,8 @@ class DashboardServiceTestCase(TestCase):
 
         row = overview.project_health_rows[0]
         self.assertEqual(row.overall_health.key, "on_track")
-        self.assertEqual(row.design_health.key, "on_track")
+        self.assertEqual(row.deliverable_health.key, "on_track")
         self.assertEqual(row.programme_health.key, "on_track")
-        self.assertEqual(row.procurement_health.key, "incomplete")
         self.assertEqual(row.data_completeness, 100)
         self.assertEqual(overview.health_counts.on_track, 1)
         self.assertEqual(overview.attention_project_health_rows, ())
@@ -250,7 +249,7 @@ class DashboardServiceTestCase(TestCase):
 
         row = overview.project_health_rows[0]
         self.assertEqual(row.overall_health.key, "incomplete")
-        self.assertEqual(row.design_health.key, "incomplete")
+        self.assertEqual(row.deliverable_health.key, "not_configured")
         self.assertEqual(row.programme_health.key, "incomplete")
         self.assertGreaterEqual(row.data_completeness, 0)
         self.assertLessEqual(row.data_completeness, 100)
@@ -499,7 +498,7 @@ class DashboardServiceTestCase(TestCase):
         self.assertEqual(overview.active_project_count, 1)
         self.assertEqual(overview.health_counts.critical, 1)
         self.assertEqual(
-            overview.project_health_rows[0].design_health.key,
+            overview.project_health_rows[0].deliverable_health.key,
             "critical",
         )
 

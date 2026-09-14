@@ -8,7 +8,7 @@
     <section class="dashboard-hero" aria-labelledby="dashboard-title">
         <div>
             <h1 class="page-title" id="dashboard-title">Project control</h1>
-            <p>See delivery exceptions first, then review the complete project portfolio.</p>
+            <p>See current control exceptions first. These signals are not yet calculated Programme position.</p>
         </div>
         {% if can_create_projects %}
             {{ primary_button("New project", href="/app/projects/new") }}
@@ -27,7 +27,7 @@
                         </span>
                         <dl class="attention-signals">
                             <div><dt>Overall</dt><dd><span class="badge {{ row.overall_health.css_class }}">{{ row.overall_health.label }}</span></dd></div>
-                            <div><dt>Design</dt><dd>{{ row.design_health.label }}</dd></div>
+                            <div><dt>Deliverables</dt><dd>{{ row.deliverable_health.label }}</dd></div>
                             <div><dt>Programme</dt><dd>{{ row.programme_health.label }}</dd></div>
                             <div><dt>Data</dt><dd>{{ row.data_completeness }}%</dd></div>
                         </dl>
@@ -67,16 +67,15 @@
                 <table>
                     <caption class="visually-hidden">Project portfolio health for {{ company_name }}</caption>
                     <thead>
-                        <tr><th>Project</th><th>Overall</th><th>Design</th><th>Programme</th><th>Procurement</th><th>Data</th></tr>
+                        <tr><th>Project</th><th>Current control</th><th>Deliverables</th><th>Programme</th><th>Data</th></tr>
                     </thead>
                     <tbody>
                         {% for row in overview.project_health_rows %}
                             <tr>
                                 <th scope="row"><a href="/app/projects/{{ row.project.id }}"><strong>{{ row.project.code }}</strong><span class="table-secondary">{{ row.project.name }}</span></a></th>
                                 <td><span class="badge {{ row.overall_health.css_class }}">{{ row.overall_health.label }}</span></td>
-                                <td><span class="badge {{ row.design_health.css_class }}">{{ row.design_health.label }}</span></td>
+                                <td><span class="badge {{ row.deliverable_health.css_class }}">{{ row.deliverable_health.label }}</span></td>
                                 <td><span class="badge {{ row.programme_health.css_class }}">{{ row.programme_health.label }}</span></td>
-                                <td><span class="badge {{ row.procurement_health.css_class }}">{{ row.procurement_health.label }}</span></td>
                                 <td>{{ row.data_completeness }}%</td>
                             </tr>
                         {% endfor %}
@@ -135,7 +134,7 @@
         {% endif %}
     {% endcall %}
     {% call section(labelledby="delivery-health-title", section_class="dashboard-supporting") %}
-        {{ section_header("Delivery health by project", description="Work package health across active projects.", title_id="delivery-health-title") }}
+        {{ section_header("Recorded deliverable readiness", description="Recorded deliverables against Package required-on-site dates; this is not whole-Package readiness.", title_id="delivery-health-title") }}
         {% if overview.active_project_health_rows %}
             <ul class="delivery-health-list">
                 {% for row in overview.active_project_health_rows %}
@@ -145,7 +144,7 @@
                             <span>{{ row.project.name }}</span>
                         </a>
                         {% if row.delivery_health %}
-                            <div class="delivery-health-segments" role="img" aria-label="{{ row.project.code }} delivery health: {% for segment in row.delivery_health %}{{ segment.package.code }} {{ segment.health.label }}{% if not loop.last %}, {% endif %}{% endfor %}">
+                            <div class="delivery-health-segments" role="img" aria-label="{{ row.project.code }} recorded deliverable readiness: {% for segment in row.delivery_health %}{{ segment.package.code }} {{ segment.health.label }}{% if not loop.last %}, {% endif %}{% endfor %}">
                                 {% for segment in row.delivery_health %}
                                     <span class="delivery-health-segment delivery-health-segment--{{ segment.health.key }}"
                                           title="{{ segment.package.code }}: {{ segment.health.label }}"></span>

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import uuid
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -8,12 +10,27 @@ from app.backend.models.programme.programme_revision import ProgrammeRevision
 from app.backend.models.project import Project
 
 
-def get_or_create_current_revision(
+def get_current_revision(
+    database: Session,
+    project_id: uuid.UUID,
+) -> ProgrammeRevision | None:
+    """Return the current Programme revision without changing database state."""
+
+    return database.scalar(
+        select(ProgrammeRevision)
+        .join(Programme)
+        .where(
+            Programme.project_id == project_id,
+            ProgrammeRevision.is_current.is_(True),
+        )
+    )
+
+
+def ensure_current_revision(
     database: Session,
     project: Project,
 ) -> ProgrammeRevision:
-    """Return the project's current, freely-editable programme revision,
-    creating the programme and its first revision if neither exists yet."""
+    """Return an editable Programme revision, creating it on an explicit write path."""
 
     programme = database.scalar(
         select(Programme).where(Programme.project_id == project.id)
@@ -41,7 +58,6 @@ def get_or_create_current_revision(
         )
         database.add(current_revision)
 
-    database.commit()
-    database.refresh(current_revision)
+    database.flush()
 
     return current_revision

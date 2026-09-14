@@ -43,12 +43,24 @@ Check:
 - responsive behaviour
 - important interactive behaviour
 
+For Programme/Package changes, also verify that:
+
+- Programme setup and activity reads do not mutate database state
+- Programme hierarchy and timeline rendering remain intact
+- Package-first paths do not obscure the intended Programme-first workflow
+- control/readiness labels state the data they actually measure
+- unimplemented workstreams are not rendered as fabricated health states
+
 ## Database changes
 For schema changes:
 - verify migration upgrade
 - verify application compatibility
 - verify downgrade where practical
 - test affected queries and relationships
+
+The current single-Package link on `ProgrammeActivity` is transitional. Any
+replacement must test many-to-many cardinality, same-project enforcement,
+Programme-revision behaviour, migration of existing links and downgrade limits.
 
 ## Test scope
 Prefer targeted tests during development.

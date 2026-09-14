@@ -1,7 +1,10 @@
 # Product Rules
 
 ## Product objective
-Call-Off should help specialist subcontractors manage pre-construction delivery with less spreadsheet dependency, clearer accountability and earlier visibility of risk.
+
+Call-Off helps specialist subcontractors translate a project Programme into
+understandable delivery requirements and continuously understand whether delivery
+is ahead of, aligned with, or behind that Programme.
 
 ## Core principles
 1. User-first data entry
@@ -12,16 +15,59 @@ Call-Off should help specialist subcontractors manage pre-construction delivery 
 6. Minimal administrative overhead
 7. Existing tracker data should be importable where practical
 
-## Product boundaries
-Call-Off is not intended to reproduce every capability of large construction platforms.
+## Operational sequence
 
-Prioritise workflows around:
-- design management
-- commercial coordination
-- procurement readiness
-- project communication
-- programme dependencies
-- package delivery
+1. Create the Project context.
+2. Import or manually create the Programme.
+3. Identify Packages from project scope and Programme requirements.
+4. Coordinate each Package through the organisation's enabled workstreams.
+5. Record readiness, delivery and later site progress.
+6. Explain Package and project position against the Programme.
+
+Packages should normally follow Programme establishment. This is a workflow
+default, not yet a hard data constraint, because imports, legacy projects and
+package-identification rules still need product decisions.
+
+## Product boundaries
+
+Call-Off is not intended to reproduce every capability of large construction platforms or scheduling tools.
+
+Prioritise workflows that translate Programme requirements into Package delivery
+decisions. Do not build a full planning suite, commercial system, procurement
+system, or generic workflow builder without a validated operational need.
+
+## Package rules
+
+- Package is the primary operational delivery object. `WorkPackage` is its
+  current persistence name.
+- A Package describes what is being delivered, where it is being delivered and
+  when it is required.
+- Area + Scope is a useful default for some organisations, not a universal data
+  model. Classification must eventually be organisation-configurable.
+- Programme Activity and Package relationships are many-to-many in the target
+  model. Do not assume one-to-one or extend the current single-Package activity
+  link.
+
+## Workstream rules
+
+- Workstreams are organisation-configurable functions supporting Package
+  delivery, such as Design, Commercial, Procurement, Logistics, HSEQ, Quality or
+  Site Delivery.
+- Do not hard-code a universal Design → Commercial → Procurement → Site flow.
+- Configurability must use strong defaults and remain operationally clear; do not
+  create a generic workflow-builder experience.
+- Existing Deliverable → Revision → Approval behaviour is retained as the
+  current technical/design-information capability.
+
+## Programme-position rules
+
+- Risk should ultimately express delivery position against Programme
+  requirements: ahead, on programme, approaching risk, or off programme/late.
+- Current date and readiness checks are control signals only. Do not label them
+  as calculated Programme position until activity/package linkage, progress and
+  date authority support that conclusion.
+- Do not infer health from an unimplemented workstream or fabricate an
+  "Incomplete" status for it.
 
 ## UX rules
 Users should not need to understand the underlying data model.

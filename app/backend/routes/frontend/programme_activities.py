@@ -18,7 +18,7 @@ from app.backend.schemas.programme_activity import (
     ProgrammeActivityCreate,
     ProgrammeActivityUpdate,
 )
-from app.backend.services.programme import get_or_create_current_revision
+from app.backend.services.programme import ensure_current_revision, get_current_revision
 from app.backend.services.programme_activity import (
     InvalidProgrammeActivityUpdateError,
     ProgrammeActivityCodeConflictError,
@@ -121,13 +121,12 @@ def new_programme_activity_page(
         limit=None,
     )
 
-    revision = get_or_create_current_revision(database, project)
+    revision = get_current_revision(database, project.id)
 
-    activities = list_activities(
-        database,
-        revision.id,
-        offset=0,
-        limit=None,
+    activities = (
+        list_activities(database, revision.id, offset=0, limit=None)
+        if revision is not None
+        else []
     )
 
     parent_options = [
@@ -215,13 +214,17 @@ async def create_programme_activity_page(
         limit=None,
     )
 
-    revision_for_options = get_or_create_current_revision(database, project)
+    revision_for_options = get_current_revision(database, project.id)
 
-    existing_activities = list_activities(
-        database,
-        revision_for_options.id,
-        offset=0,
-        limit=None,
+    existing_activities = (
+        list_activities(
+            database,
+            revision_for_options.id,
+            offset=0,
+            limit=None,
+        )
+        if revision_for_options is not None
+        else []
     )
 
     parent_options = [
@@ -237,7 +240,7 @@ async def create_programme_activity_page(
             activity_values,
         )
 
-        revision = get_or_create_current_revision(database, project)
+        revision = ensure_current_revision(database, project)
 
         create_activity(
             database,
@@ -335,9 +338,13 @@ def edit_programme_activity_page(
             status_code=404,
         )
 
-    revision = get_or_create_current_revision(database, project)
+    revision = get_current_revision(database, project.id)
 
-    activity = get_activity(database, activity_id, revision.id)
+    activity = (
+        get_activity(database, activity_id, revision.id)
+        if revision is not None
+        else None
+    )
 
     if activity is None:
         return templates.TemplateResponse(
@@ -420,9 +427,13 @@ async def update_programme_activity_page(
             status_code=404,
         )
 
-    revision = get_or_create_current_revision(database, project)
+    revision = get_current_revision(database, project.id)
 
-    activity = get_activity(database, activity_id, revision.id)
+    activity = (
+        get_activity(database, activity_id, revision.id)
+        if revision is not None
+        else None
+    )
 
     if activity is None:
         return templates.TemplateResponse(
@@ -585,12 +596,20 @@ async def delete_programme_activity_page(
             status_code=404,
         )
 
-    revision = get_or_create_current_revision(database, project)
+    revision = get_current_revision(database, project.id)
 
-    activity = get_activity(database, activity_id, revision.id)
+    activity = (
+        get_activity(database, activity_id, revision.id)
+        if revision is not None
+        else None
+    )
 
     if activity is None:
-        activities = list_activities(database, revision.id, offset=0, limit=None)
+        activities = (
+            list_activities(database, revision.id, offset=0, limit=None)
+            if revision is not None
+            else []
+        )
         activity_rows = build_activity_tree(activities)
 
         return templates.TemplateResponse(

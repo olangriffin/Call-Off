@@ -1,10 +1,10 @@
 # Call-Off
 
-Call-Off is a FastAPI, Jinja and SQLAlchemy application for specialist
-subcontractor delivery coordination. The public website provides product,
-indicative pricing, privacy and controlled early-access pages. The authenticated
-application retains its existing project, package, deliverable, approval and
-programme routes.
+Call-Off is a FastAPI, Jinja and SQLAlchemy construction delivery application for
+specialist subcontractors. It translates project Programme requirements into
+manageable Packages and operational delivery controls. The current build includes
+project/package management, an editable Programme timeline, and technical
+deliverable/revision/approval workflows.
 
 ## Local setup
 
@@ -15,8 +15,8 @@ programme routes.
    pip install -r requirements.txt
    ```
 
-   For development and template linting, install `requirements-dev.txt`
-   instead.
+   Template linting is optional and requires `djlint`, which is not pinned in
+   the runtime requirements.
 
 3. Create `.env` from `.env.example` and replace local database and authentication
    values.
@@ -132,18 +132,19 @@ client IP addresses.
 
 ## Verification
 
-Run the automated public-site suite:
+Run the automated application suite:
 
 ```bash
-python -m unittest discover -s tests -v
+.venv/bin/python -m unittest discover -s tests -v
 ```
 
 Run source and template checks:
 
 ```bash
-python -m compileall -q app migrations tests
+.venv/bin/python -m compileall -q app migrations tests
 djlint app/frontend/templates --lint
-node --check app/frontend/static/js/early-access.js
-node --check app/frontend/static/js/marketing-nav-menu.js
-node --check app/frontend/static/js/smooth-inputs.js
+node --check app/frontend/static/js/programme/workspace.js
+node --check app/frontend/static/js/marketing/early-access.js
+node --check app/frontend/static/js/core/nav-menu.js
+node --check app/frontend/static/js/core/smooth-inputs.js
 ```

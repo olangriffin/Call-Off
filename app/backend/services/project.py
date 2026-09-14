@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.backend.models.organisation import Organisation
+from app.backend.models.programme.programme import Programme
 from app.backend.models.project import Project
 from app.backend.schemas.project import ProjectCreate, ProjectUpdate
 
@@ -25,6 +26,10 @@ class ProjectCodeConflictError(ProjectServiceError):
 
 class InvalidProjectUpdateError(ProjectServiceError):
     """Raised when a project update is invalid."""
+
+
+class ProjectBootstrapError(ProjectServiceError):
+    """Raised when the Project and Programme container cannot be created."""
 
 
 def create_project(
@@ -51,13 +56,27 @@ def create_project(
     database.add(project)
 
     try:
+        database.flush()
+        programme = Programme(project_id=project.id)
+        database.add(programme)
         database.commit()
     except IntegrityError as error:
         database.rollback()
 
-        raise ProjectCodeConflictError(
-            f"Project code '{project_data.code}' already exists "
-            "for this organisation."
+        existing_project = database.scalar(
+            select(Project.id).where(
+                Project.organization_id == organization_id,
+                Project.code == project_data.code,
+            )
+        )
+        if existing_project is not None:
+            raise ProjectCodeConflictError(
+                f"Project code '{project_data.code}' already exists "
+                "for this organisation."
+            ) from error
+
+        raise ProjectBootstrapError(
+            "The project Programme could not be initialised."
         ) from error
 
     database.refresh(project)

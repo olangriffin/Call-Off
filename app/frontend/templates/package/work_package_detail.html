@@ -13,7 +13,7 @@
             <div>
                 <div class="readiness-title">
                     <span class="badge {{ readiness.css_class }}">{{ readiness.label }}</span>
-                    <strong>{{ readiness.completion_percentage }}% complete</strong>
+                    <strong>{{ readiness.completion_percentage }}% recorded deliverables complete</strong>
                 </div>
                 <p>{{ readiness.description }}</p>
             </div>
@@ -106,8 +106,8 @@
                                                 <div class="empty-state">
                                                     <h3>No deliverables</h3>
                                                     <p>
-                                                        Add the design, approval and call-off records required to make this
-                                                        package site-ready.
+                                                        Add the deliverable and approval records currently used for this
+                                                        control. This does not yet assess every Package workstream.
                                                     </p>
                                                     {% if can_operational_write %}{{ primary_button("Create first deliverable", href="/app/projects/" ~ project.id ~ "/work-packages/" ~ work_package.id ~ "/deliverables/new") }}{% endif %}
                                                 </div>

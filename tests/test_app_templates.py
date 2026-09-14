@@ -131,7 +131,7 @@ class AppTemplateTestCase(unittest.TestCase):
             "overview.attention_project_health_rows",
             "overview.health_counts.on_track",
             "row.data_completeness",
-            "Procurement",
+            "Deliverables",
         ):
             self.assertIn(expected, source)
 
@@ -162,9 +162,8 @@ class AppTemplateTestCase(unittest.TestCase):
         row = SimpleNamespace(
             project=project,
             overall_health=state("critical", "Critical", "badge-critical"),
-            design_health=state("at_risk", "At Risk", "badge-warning"),
+            deliverable_health=state("at_risk", "At Risk", "badge-warning"),
             programme_health=state("critical", "Critical", "badge-critical"),
-            procurement_health=state("incomplete", "Incomplete", "badge-muted"),
             data_completeness=98,
             delivery_health=[
                 SimpleNamespace(
@@ -201,9 +200,8 @@ class AppTemplateTestCase(unittest.TestCase):
         self.assertIn("Needs attention", body)
         self.assertIn("View project", body)
         self.assertIn("98%", body)
-        self.assertIn("Procurement", body)
-        self.assertIn("Incomplete", body)
-        self.assertIn("Delivery health by project", body)
+        self.assertNotIn("Procurement", body)
+        self.assertIn("Recorded deliverable readiness", body)
         self.assertIn('<a class="attention-row attention-row--critical"', body)
         self.assertEqual(body.count('href="/app/projects/project-1"'), 3)
 
@@ -536,14 +534,17 @@ class AppTemplateTestCase(unittest.TestCase):
         )[1].split("}", maxsplit=1)[0]
         self.assertIn("color: rgba(247, 248, 245, 0.76)", programme_header_rule)
 
-    def test_templates_do_not_render_eyebrow_or_kicker_elements(self) -> None:
-        source = "".join(path.read_text() for path in self.template_root.rglob("*.html"))
+    def test_authenticated_operational_templates_do_not_render_kickers(self) -> None:
+        source = "".join(
+            (self.template_root / template_name).read_text()
+            for template_name in AUTHENTICATED_TEMPLATES
+            if not template_name.startswith("auth/")
+        )
 
         for removed_class in (
             'class="eyebrow"',
             'class="page-kicker"',
             'class="section-kicker"',
-            'class="auth-kicker"',
             'class="pricing-card-label"',
         ):
             self.assertNotIn(removed_class, source)

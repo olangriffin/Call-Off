@@ -28,6 +28,7 @@ HEALTH_LABELS = {
     "critical": "Critical",
     "incomplete": "Incomplete",
     "inactive": "Inactive",
+    "not_configured": "Not configured",
 }
 
 HEALTH_CSS_CLASSES = {
@@ -36,6 +37,7 @@ HEALTH_CSS_CLASSES = {
     "critical": "badge-critical",
     "incomplete": "badge-muted",
     "inactive": "badge-muted",
+    "not_configured": "badge-muted",
 }
 
 
@@ -56,9 +58,8 @@ class DeliveryHealthSegment:
 class ProjectHealthRow:
     project: Project
     overall_health: HealthState
-    design_health: HealthState
+    deliverable_health: HealthState
     programme_health: HealthState
-    procurement_health: HealthState
     data_completeness: int
     delivery_health: tuple[DeliveryHealthSegment, ...]
 
@@ -171,7 +172,7 @@ def _activity_due_date(activity: ProgrammeActivity) -> date | None:
     return _as_date(activity.planned_finish) or _as_date(activity.planned_start)
 
 
-def _design_health(
+def _deliverable_health(
     project: Project,
     *,
     today: date,
@@ -183,7 +184,7 @@ def _design_health(
         for deliverable in package.deliverables
     ]
     if not deliverables:
-        return "incomplete"
+        return "not_configured"
 
     health_keys: list[str] = []
     incomplete = False
@@ -267,11 +268,8 @@ def _programme_health(
 def _data_completeness(project: Project) -> int:
     """Measure the recorded fields needed to control a live project."""
 
-    required_fields = 5
-    completed_fields = sum(
-        value is not None
-        for value in (project.planned_start, project.planned_finish)
-    )
+    required_fields = 2
+    completed_fields = 0
 
     packages = list(project.work_packages)
     if packages:
@@ -290,15 +288,8 @@ def _data_completeness(project: Project) -> int:
         completed_fields += 1
 
     for package in packages:
-        required_fields += 3
-        completed_fields += sum(
-            value is not None
-            for value in (
-                package.planned_start,
-                package.planned_finish,
-                package.required_on_site_date,
-            )
-        )
+        required_fields += 1
+        completed_fields += int(package.required_on_site_date is not None)
 
     for deliverable in deliverables:
         required_fields += 2
@@ -365,14 +356,13 @@ def _project_health_row(
         return ProjectHealthRow(
             project=project,
             overall_health=inactive,
-            design_health=inactive,
+            deliverable_health=inactive,
             programme_health=inactive,
-            procurement_health=inactive,
             data_completeness=_data_completeness(project),
             delivery_health=(),
         )
 
-    design_key = _design_health(
+    deliverable_key = _deliverable_health(
         project,
         today=today,
         upcoming_cutoff=upcoming_cutoff,
@@ -383,20 +373,19 @@ def _project_health_row(
         upcoming_cutoff=upcoming_cutoff,
     )
     completeness = _data_completeness(project)
-    overall_key = _worst_health(
-        design_key,
+    overall_inputs = [
         programme_key,
         "incomplete" if completeness < 100 else "on_track",
-    )
+    ]
+    if deliverable_key != "not_configured":
+        overall_inputs.append(deliverable_key)
+    overall_key = _worst_health(*overall_inputs)
 
     return ProjectHealthRow(
         project=project,
         overall_health=_health_state(overall_key),
-        design_health=_health_state(design_key),
+        deliverable_health=_health_state(deliverable_key),
         programme_health=_health_state(programme_key),
-        # Procurement has no source model today, so it is honest unknown data,
-        # not a fabricated risk signal. Completeness covers assessable data.
-        procurement_health=_health_state("incomplete"),
         data_completeness=completeness,
         delivery_health=_delivery_health(project, today=today),
     )
@@ -438,7 +427,7 @@ def get_dashboard_overview(
     )
     counts = {
         key: sum(row.overall_health.key == key for row in rows)
-        for key in HEALTH_LABELS
+        for key in ("on_track", "at_risk", "critical", "incomplete", "inactive")
     }
 
     return DashboardOverview(

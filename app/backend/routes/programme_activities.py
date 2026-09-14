@@ -24,7 +24,7 @@ from app.backend.schemas.programme_activity import (
     ProgrammeActivityRead,
     ProgrammeActivityUpdate,
 )
-from app.backend.services.programme import get_or_create_current_revision
+from app.backend.services.programme import ensure_current_revision, get_current_revision
 from app.backend.services.programme_activity import (
     InvalidProgrammeActivityUpdateError,
     ProgrammeActivityCodeConflictError,
@@ -52,6 +52,8 @@ def require_project_and_revision(
     database: Session,
     project_id: uuid.UUID,
     organization_id: str,
+    *,
+    create_if_missing: bool = False,
 ):
     project = get_project(database, project_id, organization_id)
 
@@ -61,7 +63,11 @@ def require_project_and_revision(
             detail="Project was not found.",
         )
 
-    return get_or_create_current_revision(database, project)
+    revision = get_current_revision(database, project.id)
+    if revision is None and create_if_missing:
+        revision = ensure_current_revision(database, project)
+
+    return revision
 
 
 @router.post(
@@ -79,6 +85,7 @@ def create_activity_route(
         database,
         project_id,
         access.organization_id,
+        create_if_missing=True,
     )
 
     try:
@@ -115,6 +122,9 @@ def list_activities_route(
         access.organization_id,
     )
 
+    if revision is None:
+        return []
+
     return list_activities(database, revision.id, offset=offset, limit=limit)
 
 
@@ -134,7 +144,11 @@ def get_activity_route(
         access.organization_id,
     )
 
-    activity = get_activity(database, activity_id, revision.id)
+    activity = (
+        get_activity(database, activity_id, revision.id)
+        if revision is not None
+        else None
+    )
 
     if activity is None:
         raise HTTPException(
@@ -162,7 +176,11 @@ def update_activity_route(
         access.organization_id,
     )
 
-    activity = get_activity(database, activity_id, revision.id)
+    activity = (
+        get_activity(database, activity_id, revision.id)
+        if revision is not None
+        else None
+    )
 
     if activity is None:
         raise HTTPException(
@@ -205,7 +223,11 @@ def delete_activity_route(
         access.organization_id,
     )
 
-    activity = get_activity(database, activity_id, revision.id)
+    activity = (
+        get_activity(database, activity_id, revision.id)
+        if revision is not None
+        else None
+    )
 
     if activity is None:
         raise HTTPException(

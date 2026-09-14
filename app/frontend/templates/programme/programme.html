@@ -21,7 +21,7 @@
                 <div>
                     <h1 class="page-title">Programme</h1>
                     <p class="programme-revision-line">
-                        <span class="programme-revision-chip">Revision {{ revision.revision_code }}</span>
+                        {% if revision %}<span class="programme-revision-chip">Revision {{ revision.revision_code }}</span>{% endif %}
                         <span>{{ workspace.activity_count }} activities</span>
                         <span>{{ workspace.date_range_label }}</span>
                     </p>
@@ -107,7 +107,11 @@
             {% else %}
                 <div class="empty-state programme-empty-state" data-programme-empty-panel>
                     <h2>No programme activities yet</h2>
-                    <p>Add the first task or milestone to start planning this project’s delivery sequence.</p>
+                    {% if can_operational_write %}
+                        <p>Create the first task or milestone manually to establish this project’s delivery sequence. Programme import will be added later.</p>
+                    {% else %}
+                        <p>An owner or project manager must establish this Programme before activities can be reviewed.</p>
+                    {% endif %}
                     <div class="form-actions">
                         {% if can_operational_write %}
                             <a href="/app/projects/{{ project.id }}/programme/new"
@@ -135,7 +139,7 @@
                        style="--programme-timeline-width: {{ workspace.timeline_width_px }}px;
                               --programme-week-width: {{ workspace.week_width_px }}px">
                     <caption class="visually-hidden">
-                        Programme activities for {{ project.code }}, revision {{ revision.revision_code }}.
+                        Programme activities for {{ project.code }}{% if revision %}, revision {{ revision.revision_code }}{% endif %}.
                     </caption>
                     {% include "partials/programme/table_head.html" %}
                     <tbody>

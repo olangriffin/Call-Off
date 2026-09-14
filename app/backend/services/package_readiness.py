@@ -152,7 +152,7 @@ def calculate_package_readiness(
             key="setup_required",
             label="Setup required",
             description=(
-                "Add a required-on-site date and deliverables to assess readiness."
+                "Add a required-on-site date and deliverables to assess this control."
             ),
             css_class="badge-muted",
             total_deliverables=total_deliverables,
@@ -181,7 +181,7 @@ def calculate_package_readiness(
         return PackageReadinessSummary(
             key="critical",
             label="Critical",
-            description="The package is required on site and remains incomplete.",
+            description="The required-on-site date has passed while recorded deliverables remain incomplete.",
             css_class="badge-critical",
             total_deliverables=total_deliverables,
             complete_deliverables=complete_deliverables,
@@ -195,7 +195,7 @@ def calculate_package_readiness(
         return PackageReadinessSummary(
             key="at_risk",
             label="At risk",
-            description="One or more design or approval dates are overdue.",
+            description="One or more deliverable issue or approval dates are overdue.",
             css_class="badge-warning",
             total_deliverables=total_deliverables,
             complete_deliverables=complete_deliverables,
@@ -211,7 +211,7 @@ def calculate_package_readiness(
             key="approaching",
             label="Approaching",
             description=(
-                "The required-on-site date is within 14 days and work remains."
+                "The required-on-site date is within 14 days and recorded deliverables remain."
             ),
             css_class="badge-warning",
             total_deliverables=total_deliverables,
@@ -225,7 +225,7 @@ def calculate_package_readiness(
     return PackageReadinessSummary(
         key="in_progress",
         label="In progress",
-        description="No overdue recorded dates, but the package is not yet ready.",
+        description="No recorded deliverable dates are overdue, but deliverables remain.",
         css_class="badge-muted",
         total_deliverables=total_deliverables,
         complete_deliverables=complete_deliverables,

@@ -100,11 +100,31 @@ When implementation establishes a durable architectural or product rule, update 
 
 ## Call-Off application boundaries
 
-Primary operational hierarchy:
+Primary operational flow:
 
-> Organisation → Project → Work Package → Deliverable → Deliverable Revision → Approval
+> Organisation → Project → Programme → Package Identification → Delivery Packages → Configurable Delivery Workstreams → Readiness / Delivery → Site Progress → Programme Position
 
-Programme data is project-scoped.
+The Project establishes context. The Programme establishes the required delivery
+timeline. Packages translate Programme requirements into manageable operational
+delivery objects. Workstreams coordinate the work needed to make each Package
+deliverable. Call-Off ultimately explains delivery position against the Programme.
+
+Current implementation constraints:
+
+* `WorkPackage` is the persisted Package model; do not introduce a competing
+  Package concept merely to change terminology.
+* `Deliverable → Deliverable Revision → Approval` is a working technical/design
+  information capability. Preserve it and treat it as one current workstream,
+  not as the universal definition of Package delivery.
+* `ProgrammeActivity.work_package_id` is a provisional one-Package link. The
+  intended relationship is many-to-many. Do not extend reliance on that column
+  or migrate it until revision persistence and link metadata are decided.
+* Project, Package and Programme dates currently coexist. Programme activity
+  dates are the schedule record; other dates remain explicit manual context or
+  commitments until derivation and override semantics are decided. Do not make
+  users duplicate dates merely to satisfy completeness reporting.
+* Do not hard-code Area + Scope, Design → Commercial → Procurement → Site,
+  or any single organisation's terminology as the universal model.
 
 Application structure:
 
@@ -120,20 +140,14 @@ Do not treat template changes as the complete frontend when the rendered data or
 
 ---
 
-## Specialist roles
+## Review lenses
 
-Use specialists where they materially improve implementation or verification.
+Apply architecture, backend, frontend, QA, security and construction-workflow UX
+lenses where they materially improve implementation or verification. These are
+review responsibilities, not separate sources of product truth or files that must
+exist in the repository.
 
-* Architecture and cross-system design → `/agents/architect.md`
-* Backend, API, services, database → `/agents/backend.md`
-* Server-rendered frontend, templates, CSS, JavaScript → `/agents/frontend.md`
-* Testing and regression verification → `/agents/qa.md`
-* Authentication, authorisation and tenant security → `/agents/security.md`
-* User experience and construction workflow usability → `/agents/ux.md`
-
-The lead agent remains responsible for final decisions.
-
-Specialist recommendations are inputs, not automatically authoritative decisions.
+The lead agent remains responsible for final decisions and verification.
 
 ---
 

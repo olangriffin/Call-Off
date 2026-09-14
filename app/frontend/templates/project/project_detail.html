@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
 {% from "partials/components/section_header.html" import section_header %}
-{% from "partials/components/button.html" import primary_button %}
+{% from "partials/components/button.html" import primary_button, secondary_button %}
 {% from "partials/components/section.html" import section %}
 {% from "partials/components/metric_card.html" import metric_card %}
 {% block title %}{% if project %}{{ project.code }} | Call-Off{% else %}Project not found | Call-Off{% endif %}{% endblock %}
@@ -17,7 +17,7 @@
             <span class="project-status">{{ project.status|replace('_', ' ')|title }}</span>
         </header>
         {% call section(labelledby="project-controls-title") %}
-            {{ section_header("Project controls", description="Controlling dates for this project.", title_id="project-controls-title") }}
+            {{ section_header("Project reference dates", description="Manually recorded project context; the Programme owns the delivery schedule.", title_id="project-controls-title") }}
             <div class="metric-grid project-metrics">
                 {% call metric_card("Planned start", supporting_text="Project start") %}
                     {% if project.planned_start %}<time datetime="{{ project.planned_start.isoformat() }}">{{ project.planned_start.strftime("%d %b %Y") }}</time>{% else %}<span class="missing-value">Not set</span>{% endif %}
@@ -28,12 +28,12 @@
             </div>
         {% endcall %}
         {% call section(section_id="programme", labelledby="project-programme-title", section_class="project-programme-summary") %}
-            {% call section_header("Project programme", description="Review activities, milestones and the dates that protect delivery.", title_id="project-programme-title") %}
-                {{ primary_button("View programme", href="/app/projects/" ~ project.id ~ "/programme") }}
+            {% call section_header("Project programme", description="Establish the required delivery timeline before identifying and coordinating Packages.", title_id="project-programme-title") %}
+                {{ primary_button("Open programme", href="/app/projects/" ~ project.id ~ "/programme") }}
             {% endcall %}
         {% endcall %}
         {% call section(section_id="work-packages", labelledby="work-packages-title") %}
-            {% call section_header("Work packages", description="Package scope, programme dates and required-on-site commitments.", title_id="work-packages-title") %}
+            {% call section_header("Delivery packages", description="Organise Package scope and delivery dates after reviewing the Programme requirements.", title_id="work-packages-title") %}
                 {% if can_operational_write and work_packages %}{{ primary_button("New work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}{% endif %}
             {% endcall %}
             {% if work_packages %}
@@ -69,8 +69,11 @@
             {% else %}
                 <div class="empty-state">
                     <h3>No work packages</h3>
-                    <p>Add the first package to organise deliverables, approval deadlines and required-on-site dates.</p>
-                    {% if can_operational_write %}{{ primary_button("Create first work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}{% endif %}
+                    <p>Review the Programme first, then create Packages from the delivery requirements it establishes.</p>
+                    <div class="form-actions">
+                        {{ primary_button("Review programme", href="/app/projects/" ~ project.id ~ "/programme") }}
+                        {% if can_operational_write %}{{ secondary_button("Create package", href="/app/projects/" ~ project.id ~ "/work-packages/new", button_class="ghost-button-sm") }}{% endif %}
+                    </div>
                 </div>
             {% endif %}
         {% endcall %}

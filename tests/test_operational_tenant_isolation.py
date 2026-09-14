@@ -7,6 +7,8 @@ from datetime import date, datetime, timezone
 
 import httpx
 from sqlalchemy import create_engine, select
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -22,7 +24,16 @@ from app.backend.models.package.package import WorkPackage
 from app.backend.models.package.revision import DeliverableRevision
 from app.backend.models.programme.programme import Programme
 from app.backend.models.programme.programme_activity import ProgrammeActivity
+from app.backend.models.programme.programme_baseline import ProgrammeBaseline
+from app.backend.models.programme.programme_baseline_activity import (
+    ProgrammeBaselineActivity,
+)
+from app.backend.models.programme.programme_calendar import ProgrammeCalendar
+from app.backend.models.programme.programme_calendar_exception import (
+    ProgrammeCalendarException,
+)
 from app.backend.models.programme.programme_dependency import ProgrammeDependency
+from app.backend.models.programme.programme_import import ProgrammeImport
 from app.backend.models.programme.programme_revision import ProgrammeRevision
 from app.backend.models.project import Project
 from app.backend.schemas.auth import AuthenticatedUser, OrganisationAccessContext
@@ -52,6 +63,11 @@ ACTIVITY_A_ID = uuid.UUID("10000000-0000-0000-0000-000000000008")
 ACTIVITY_B_ID = uuid.UUID("20000000-0000-0000-0000-000000000008")
 
 
+@compiles(JSONB, "sqlite")
+def compile_jsonb_for_sqlite(_type, _compiler, **_kwargs) -> str:
+    return "JSON"
+
+
 TABLES = [
     Organisation.__table__,
     Project.__table__,
@@ -63,6 +79,11 @@ TABLES = [
     ProgrammeRevision.__table__,
     ProgrammeActivity.__table__,
     ProgrammeDependency.__table__,
+    ProgrammeBaseline.__table__,
+    ProgrammeBaselineActivity.__table__,
+    ProgrammeImport.__table__,
+    ProgrammeCalendar.__table__,
+    ProgrammeCalendarException.__table__,
 ]
 
 

@@ -24,9 +24,9 @@
     <nav class="workspace-nav" aria-label="{{ project.code }} workspace">
         <a href="/app/projects/{{ project.id }}"
            {% if active_area == 'overview' %} aria-current="page"{% endif %}>Overview</a>
-        <a href="/app/projects/{{ project.id }}#work-packages"
-           {% if active_area == 'packages' %} aria-current="page"{% endif %}>Packages</a>
         <a href="/app/projects/{{ project.id }}/programme"
            {% if active_area == 'programme' %} aria-current="page"{% endif %}>Programme</a>
+        <a href="/app/projects/{{ project.id }}#work-packages"
+           {% if active_area == 'packages' %} aria-current="page"{% endif %}>Packages</a>
     </nav>
 {%- endmacro %}

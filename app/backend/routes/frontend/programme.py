@@ -9,7 +9,7 @@ from app.backend.routes.frontend.common import (
     authenticated_template_context,
     templates,
 )
-from app.backend.services.programme import get_or_create_current_revision
+from app.backend.services.programme import get_current_revision
 from app.backend.services.programme_activity import (
     build_activity_tree,
     list_activities,
@@ -52,13 +52,12 @@ def programme_page(
             status_code=404,
         )
 
-    revision = get_or_create_current_revision(database, project)
+    revision = get_current_revision(database, project.id)
 
-    activities = list_activities(
-        database,
-        revision.id,
-        offset=0,
-        limit=None,
+    activities = (
+        list_activities(database, revision.id, offset=0, limit=None)
+        if revision is not None
+        else []
     )
 
     activity_rows = build_activity_tree(activities)
