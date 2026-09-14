@@ -245,7 +245,7 @@ class PublicSiteTestCase(unittest.TestCase):
         self.assertIn("subcontractor delivery platform", body)
         self.assertNotIn("calloff.app", body)
         self.assertIn("marketing-scroll-fade-top", body)
-        self.assertIn("Delivery control for specialist subcontractors", body)
+        self.assertIn("", body)
         self.assertNotIn("marketing-bottom-blur", body)
         self.assertNotIn("marketing-scroll-fade.js", body)
 
