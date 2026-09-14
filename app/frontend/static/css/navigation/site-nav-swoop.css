@@ -1,7 +1,7 @@
 /* Long S-curve shoulders for the shared top navigation.
    The shoulder is intentionally much wider than the bar height so it reads
-   as a sweep rather than a rounded corner. The path changes curvature through
-   the middle and eases horizontally into the navbar bottom edge. */
+   as a sweep rather than a rounded corner. Both sides use the exact same
+   geometry; the left side is only a mirrored copy of the right side. */
 
 .site-nav-links {
   --site-nav-swoop-width: 96px;
@@ -26,13 +26,8 @@
   pointer-events: none;
 }
 
-/* Keep the inner seam fixed to the navbar while giving the left shoulder a
-   few extra pixels of horizontal run. This corrects the slight visual bias
-   to the right without introducing a gap at the join. */
 .site-nav-links::before {
   right: 100%;
-  width: 100px;
-  clip-path: path("M 0 0 H 100 C 96 2 92 7 91 14 C 90 22 84 30 72 36 C 58 41 36 42 0 42 Z");
   transform: scaleX(-1);
   transform-origin: center;
 }
