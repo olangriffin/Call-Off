@@ -1,1 +1,49 @@
-Generic single-database configuration.
+# Call-Off database migrations
+
+Call-Off migrations manage the application tables and store their revision in
+`public.calloff_alembic_version`. They do not own Neon Auth's tables or any
+`public.alembic_version` table used by another system.
+
+## Provisioning order
+
+Before running `alembic upgrade head`, provision Neon Auth so that these
+externally managed objects exist in the same PostgreSQL database:
+
+- `public.organization`, including its `id` primary key;
+- `neon_auth.user`, including its `id` primary key.
+
+Call-Off maps those objects and creates foreign keys to them, but intentionally
+does not create, alter, seed, or delete them.
+
+After Neon Auth has created an organisation and user, create the first Call-Off
+membership explicitly with the real identifiers from that system:
+
+```sql
+INSERT INTO public.memberships (
+    id,
+    user_id,
+    organization_id,
+    role,
+    status
+)
+VALUES (
+    gen_random_uuid(),
+    '<neon-auth-user-uuid>',
+    '<neon-auth-organization-id>',
+    'owner',
+    'active'
+);
+```
+
+Run this statement only after `alembic upgrade head`. It is an explicit tenant
+bootstrap operation, not part of schema migration. Use identifiers that already
+exist in the Neon-managed tables and do not run it for an organisation that has
+already been bootstrapped.
+
+## Verification
+
+The PostgreSQL migration matrix is implemented in
+`tests/test_migrations_postgresql.py`. It is destructive and therefore refuses
+to run unless both `MIGRATION_TEST_DATABASE_URL` and
+`ALLOW_MIGRATION_TEST_DATABASE_RESET=1` are set. Always point it at a disposable
+database.

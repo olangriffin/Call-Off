@@ -63,20 +63,6 @@ def upgrade() -> None:
         unique=False,
     )
 
-    op.execute(
-        """
-        INSERT INTO memberships (id, user_id, organization_id, role, status)
-        VALUES (
-            gen_random_uuid(),
-            '9d530e5b-9bae-4337-8e8a-a04b2203a0bb',
-            'KBYBmC68tnIxyYhC0x4ckE3iRRm9Vm8q',
-            'owner',
-            'active'
-        )
-        """
-    )
-
-
 def downgrade() -> None:
     """Downgrade schema."""
     op.drop_index(op.f("ix_memberships_organization_id"), table_name="memberships")

@@ -4,7 +4,10 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import ValidationError
 
-from app.backend.core.auth import FrontendOrganisationAccess
+from app.backend.core.auth import (
+    FrontendOperationalWriteAccess,
+    FrontendOrganisationAccess,
+)
 from app.backend.core.csrf import verified_form
 from app.backend.routes.frontend.common import (
     DatabaseSession,
@@ -40,7 +43,7 @@ def new_work_package_page(
     request: Request,
     project_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendOperationalWriteAccess,
 ) -> HTMLResponse:
     project = get_project(
         database,
@@ -81,7 +84,7 @@ async def create_work_package_page(
     request: Request,
     project_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendOperationalWriteAccess,
 ):
     project = get_project(
         database,

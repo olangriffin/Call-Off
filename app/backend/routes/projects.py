@@ -8,6 +8,8 @@ from sqlalchemy.orm import Session
 
 from app.backend.core.auth import (
     CurrentOrganisationAccess,
+    DestructiveOperationAccess,
+    OperationalWriteAccess,
     ProjectCreationAccess,
 )
 from app.backend.database.session import get_db
@@ -113,7 +115,7 @@ def update_project_route(
     project_id: uuid.UUID,
     project_data: ProjectUpdate,
     database: DatabaseSession,
-    access: CurrentOrganisationAccess,
+    access: OperationalWriteAccess,
 ) -> ProjectRead:
     project = get_project(
         database,
@@ -152,7 +154,7 @@ def update_project_route(
 def delete_project_route(
     project_id: uuid.UUID,
     database: DatabaseSession,
-    access: CurrentOrganisationAccess,
+    access: DestructiveOperationAccess,
 ) -> Response:
     project = get_project(
         database,

@@ -34,7 +34,7 @@
         {% endcall %}
         {% call section(section_id="work-packages", labelledby="work-packages-title") %}
             {% call section_header("Work packages", description="Package scope, programme dates and required-on-site commitments.", title_id="work-packages-title") %}
-                {% if work_packages %}{{ primary_button("New work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}{% endif %}
+                {% if can_operational_write and work_packages %}{{ primary_button("New work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}{% endif %}
             {% endcall %}
             {% if work_packages %}
                 <div class="table-container" tabindex="0" aria-label="{{ project.code }} work packages">
@@ -70,7 +70,7 @@
                 <div class="empty-state">
                     <h3>No work packages</h3>
                     <p>Add the first package to organise deliverables, approval deadlines and required-on-site dates.</p>
-                    {{ primary_button("Create first work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}
+                    {% if can_operational_write %}{{ primary_button("Create first work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}{% endif %}
                 </div>
             {% endif %}
         {% endcall %}

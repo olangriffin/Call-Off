@@ -4,7 +4,10 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import ValidationError
 
-from app.backend.core.auth import FrontendOrganisationAccess
+from app.backend.core.auth import (
+    FrontendDestructiveOperationAccess,
+    FrontendOperationalWriteAccess,
+)
 from app.backend.core.csrf import verified_form
 from app.backend.routes.frontend.common import (
     DatabaseSession,
@@ -89,7 +92,7 @@ def new_programme_activity_page(
     request: Request,
     project_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendOperationalWriteAccess,
 ) -> HTMLResponse:
     project = get_project(
         database,
@@ -157,7 +160,7 @@ async def create_programme_activity_page(
     request: Request,
     project_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendOperationalWriteAccess,
 ):
     project = get_project(
         database,
@@ -308,7 +311,7 @@ def edit_programme_activity_page(
     project_id: uuid.UUID,
     activity_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendOperationalWriteAccess,
 ) -> HTMLResponse:
     project = get_project(
         database,
@@ -393,7 +396,7 @@ async def update_programme_activity_page(
     project_id: uuid.UUID,
     activity_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendOperationalWriteAccess,
 ):
     project = get_project(
         database,
@@ -560,7 +563,7 @@ async def delete_programme_activity_page(
     project_id: uuid.UUID,
     activity_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendDestructiveOperationAccess,
 ):
     await verified_form(request)
     project = get_project(

@@ -6,7 +6,11 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import ValidationError
 
-from app.backend.core.auth import FrontendOrganisationAccess
+from app.backend.core.auth import (
+    FrontendApprovalResponseAccess,
+    FrontendOperationalWriteAccess,
+    FrontendOrganisationAccess,
+)
 from app.backend.core.csrf import verified_form
 from app.backend.routes.frontend.common import (
     DatabaseSession,
@@ -97,7 +101,7 @@ def new_deliverable_page(
     project_id: uuid.UUID,
     work_package_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendOperationalWriteAccess,
 ) -> HTMLResponse:
     project, work_package = _resolve_project_and_package(
         database,
@@ -141,7 +145,7 @@ async def create_deliverable_page(
     project_id: uuid.UUID,
     work_package_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendOperationalWriteAccess,
 ):
     project, work_package = _resolve_project_and_package(
         database,
@@ -312,7 +316,7 @@ def new_revision_page(
     work_package_id: uuid.UUID,
     deliverable_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendOperationalWriteAccess,
 ) -> HTMLResponse:
     project, work_package = _resolve_project_and_package(
         database,
@@ -367,7 +371,7 @@ async def create_revision_page(
     work_package_id: uuid.UUID,
     deliverable_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendOperationalWriteAccess,
 ):
     project, work_package = _resolve_project_and_package(
         database,
@@ -523,7 +527,7 @@ def approval_response_page(
     revision_id: uuid.UUID,
     approval_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendApprovalResponseAccess,
 ) -> HTMLResponse:
     project, work_package, deliverable, revision, approval = (
         _resolve_approval_hierarchy(
@@ -585,7 +589,7 @@ async def update_approval_response_page(
     revision_id: uuid.UUID,
     approval_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendApprovalResponseAccess,
 ):
     project, work_package, deliverable, revision, approval = (
         _resolve_approval_hierarchy(
@@ -677,7 +681,7 @@ def new_approval_page(
     deliverable_id: uuid.UUID,
     revision_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendOperationalWriteAccess,
 ) -> HTMLResponse:
     project, work_package = _resolve_project_and_package(
         database,
@@ -739,7 +743,7 @@ async def create_approval_page(
     deliverable_id: uuid.UUID,
     revision_id: uuid.UUID,
     database: DatabaseSession,
-    access: FrontendOrganisationAccess,
+    access: FrontendOperationalWriteAccess,
 ):
     project, work_package = _resolve_project_and_package(
         database,

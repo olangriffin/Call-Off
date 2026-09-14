@@ -13,7 +13,11 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
-from app.backend.core.auth import CurrentOrganisationAccess
+from app.backend.core.auth import (
+    CurrentOrganisationAccess,
+    DestructiveOperationAccess,
+    OperationalWriteAccess,
+)
 from app.backend.database.session import get_db
 from app.backend.schemas.programme_activity import (
     ProgrammeActivityCreate,
@@ -69,7 +73,7 @@ def create_activity_route(
     project_id: uuid.UUID,
     activity_data: ProgrammeActivityCreate,
     database: DatabaseSession,
-    access: CurrentOrganisationAccess,
+    access: OperationalWriteAccess,
 ) -> ProgrammeActivityRead:
     revision = require_project_and_revision(
         database,
@@ -150,7 +154,7 @@ def update_activity_route(
     activity_id: uuid.UUID,
     activity_data: ProgrammeActivityUpdate,
     database: DatabaseSession,
-    access: CurrentOrganisationAccess,
+    access: OperationalWriteAccess,
 ) -> ProgrammeActivityRead:
     revision = require_project_and_revision(
         database,
@@ -193,7 +197,7 @@ def delete_activity_route(
     project_id: uuid.UUID,
     activity_id: uuid.UUID,
     database: DatabaseSession,
-    access: CurrentOrganisationAccess,
+    access: DestructiveOperationAccess,
 ) -> Response:
     revision = require_project_and_revision(
         database,

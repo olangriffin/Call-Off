@@ -20,13 +20,19 @@ programme routes.
 
 3. Create `.env` from `.env.example` and replace local database and authentication
    values.
-4. Apply migrations:
+4. Provision Neon Auth in the target PostgreSQL database. The externally managed
+   `public.organization` and `neon_auth.user` tables must exist before Call-Off
+   migrations run; see `migrations/README`.
+5. Apply migrations:
 
    ```bash
    alembic upgrade head
    ```
 
-5. Start the application:
+6. Create the initial organisation membership explicitly as described in
+   `migrations/README`. Schema migrations never create application-specific users,
+   organisations or memberships.
+7. Start the application:
 
    ```bash
    uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
@@ -76,6 +82,12 @@ Apply all migrations before starting a new release:
 ```bash
 alembic upgrade head
 ```
+
+Neon Auth owns its authentication schema and `public.organization`. Provision
+those objects before running Call-Off migrations. Call-Off tracks migrations in
+`public.calloff_alembic_version` and does not manage an external
+`public.alembic_version` table. Initial owner membership is an explicit bootstrap
+step documented in `migrations/README`, not migration seed data.
 
 Check the active revision:
 

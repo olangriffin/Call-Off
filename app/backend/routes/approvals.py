@@ -13,7 +13,12 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
-from app.backend.core.auth import CurrentOrganisationAccess
+from app.backend.core.auth import (
+    ApprovalResponseAccess,
+    CurrentOrganisationAccess,
+    DestructiveOperationAccess,
+    OperationalWriteAccess,
+)
 from app.backend.database.session import get_db
 from app.backend.models.package.deliverable import Deliverable
 from app.backend.models.package.package import WorkPackage
@@ -172,7 +177,7 @@ def create_approval_route(
     revision_id: uuid.UUID,
     approval_data: ApprovalCreate,
     database: DatabaseSession,
-    access: CurrentOrganisationAccess,
+    access: OperationalWriteAccess,
 ) -> ApprovalRead:
     revision = require_revision(
         database,
@@ -270,7 +275,7 @@ def update_approval_route(
     approval_id: uuid.UUID,
     approval_data: ApprovalUpdate,
     database: DatabaseSession,
-    access: CurrentOrganisationAccess,
+    access: ApprovalResponseAccess,
 ) -> ApprovalRead:
     require_revision(
         database,
@@ -317,7 +322,7 @@ def delete_approval_route(
     revision_id: uuid.UUID,
     approval_id: uuid.UUID,
     database: DatabaseSession,
-    access: CurrentOrganisationAccess,
+    access: DestructiveOperationAccess,
 ) -> Response:
     require_revision(
         database,

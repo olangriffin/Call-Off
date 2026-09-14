@@ -74,6 +74,23 @@ This rule applies consistently to server-rendered HTML routes, JSON API routes,
 and the visibility of project-creation actions in the interface. Tenant
 ownership must still be derived from the authenticated membership.
 
+### Operational capabilities
+
+Call-Off recognises only `owner`, `project_manager`, and `member` memberships;
+unknown roles fail closed.
+
+- All three supported roles may read tenant-scoped operational data.
+- `owner` and `project_manager` may create and edit operational data and create
+  approval requests.
+- `owner` and `project_manager` may record approval responses through the
+  separately enforced approval-response capability.
+- Only `owner` may permanently delete operational data. This is containment
+  pending a future archive and audit workflow.
+
+These capabilities must be enforced consistently by JSON and server-rendered
+routes. Template action visibility mirrors the backend policy but is not an
+authorisation control.
+
 ## Frontend architecture
 Server-rendered Jinja templates are the default.
 

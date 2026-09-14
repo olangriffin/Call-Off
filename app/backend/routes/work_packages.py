@@ -13,7 +13,11 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
-from app.backend.core.auth import CurrentOrganisationAccess
+from app.backend.core.auth import (
+    CurrentOrganisationAccess,
+    DestructiveOperationAccess,
+    OperationalWriteAccess,
+)
 from app.backend.database.session import get_db
 from app.backend.models.project import Project
 from app.backend.schemas.work_package import (
@@ -69,7 +73,7 @@ def create_work_package_route(
     project_id: uuid.UUID,
     work_package_data: WorkPackageCreate,
     database: DatabaseSession,
-    access: CurrentOrganisationAccess,
+    access: OperationalWriteAccess,
 ) -> WorkPackageRead:
     project = require_project(
         database,
@@ -155,7 +159,7 @@ def update_work_package_route(
     work_package_id: uuid.UUID,
     work_package_data: WorkPackageUpdate,
     database: DatabaseSession,
-    access: CurrentOrganisationAccess,
+    access: OperationalWriteAccess,
 ) -> WorkPackageRead:
     require_project(
         database,
@@ -201,7 +205,7 @@ def delete_work_package_route(
     project_id: uuid.UUID,
     work_package_id: uuid.UUID,
     database: DatabaseSession,
-    access: CurrentOrganisationAccess,
+    access: DestructiveOperationAccess,
 ) -> Response:
     require_project(
         database,

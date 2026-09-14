@@ -141,6 +141,24 @@ class RequireOrganisationAccessTestCase(IsolatedAsyncioTestCase):
 
         self.assertEqual(raised.exception.status_code, status.HTTP_403_FORBIDDEN)
 
+    async def test_inactive_membership_remains_denied(self) -> None:
+        # The database query excludes inactive memberships, yielding no access row.
+        database = authenticated_database([])
+
+        with self.assertRaises(HTTPException) as raised:
+            await self.call_dependency(database)
+
+        self.assertEqual(raised.exception.status_code, status.HTTP_403_FORBIDDEN)
+
+    async def test_revoked_membership_remains_denied(self) -> None:
+        # The database query excludes revoked memberships, yielding no access row.
+        database = authenticated_database([])
+
+        with self.assertRaises(HTTPException) as raised:
+            await self.call_dependency(database)
+
+        self.assertEqual(raised.exception.status_code, status.HTTP_403_FORBIDDEN)
+
     async def test_multiple_active_memberships_preserve_one_organisation_rule(self) -> None:
         first = active_membership()
         second = active_membership()
@@ -153,6 +171,17 @@ class RequireOrganisationAccessTestCase(IsolatedAsyncioTestCase):
 
         self.assertEqual(raised.exception.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn("one organisation", raised.exception.detail)
+
+    async def test_unknown_membership_role_fails_closed(self) -> None:
+        membership = active_membership()
+        membership.role = "unexpected_role"
+        database = authenticated_database([membership])
+
+        with self.assertRaises(HTTPException) as raised:
+            await self.call_dependency(database)
+
+        self.assertEqual(raised.exception.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn("not supported", raised.exception.detail)
 
 
 class ProjectCreationCapabilityTestCase(TestCase):
