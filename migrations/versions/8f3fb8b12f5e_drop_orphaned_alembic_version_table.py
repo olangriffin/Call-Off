@@ -8,8 +8,6 @@ Create Date: 2026-07-26 21:41:59.097652
 
 from collections.abc import Sequence
 
-from alembic import op
-
 # revision identifiers, used by Alembic.
 revision: str = "8f3fb8b12f5e"
 down_revision: str | Sequence[str] | None = "d9aae884c197"
@@ -18,14 +16,8 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    """Upgrade schema."""
-    op.drop_table("alembic_version")
+    """Leave the externally managed Alembic table unchanged."""
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
-    raise NotImplementedError(
-        "This migration drops an orphaned, unused legacy tracking table. "
-        "No data was lost — Call-Off's migrations are tracked via "
-        "calloff_alembic_version, not this table."
-    )
+    """No-op because this revision no longer changes external state."""
