@@ -24,20 +24,21 @@
   height: var(--site-nav-links-height);
   background: var(--nav-surface);
   /* One cubic Bezier gives a clean sigmoid/S-curve with horizontal tangents
-     at both ends, matching the intended hand-drawn profile more closely. */
-  clip-path: path("M 0 0 H 96 C 72 0 78 42 0 42 Z");
+     at both ends. The control points are pulled toward the middle to make
+     the transition slightly steeper while preserving a smooth profile. */
+  clip-path: path("M 0 0 H 96 C 80 0 68 42 0 42 Z");
   pointer-events: none;
 }
 
 .site-nav-links::before {
   left: auto;
-  right: 100%;
+  right: calc(100% - 1px);
   transform: scaleX(-1);
   transform-origin: center;
 }
 
 .site-nav-links::after {
-  left: 100%;
+  left: calc(100% - 1px);
   right: auto;
 }
 
