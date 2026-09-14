@@ -23,10 +23,9 @@
   width: var(--site-nav-swoop-width);
   height: var(--site-nav-links-height);
   background: var(--nav-surface);
-  /* Two tangent-matched cubic segments create a stronger S: the shoulder
-     drops steeply from the top edge, pinches inward, then opens into a long
-     horizontal sweep at the navbar's lower edge. */
-  clip-path: path("M 0 0 H 96 C 96 70 80 10 74 23 C 68 36 54 42 0 42 Z");
+  /* One cubic Bezier gives a clean sigmoid/S-curve with horizontal tangents
+     at both ends, matching the intended hand-drawn profile more closely. */
+  clip-path: path("M 0 0 H 96 C 72 0 78 42 0 42 Z");
   pointer-events: none;
 }
 
