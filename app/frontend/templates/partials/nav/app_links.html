@@ -1,4 +1,18 @@
 <nav class="site-nav-links" aria-label="Application">
+    <svg class="site-nav-swoop site-nav-swoop-left"
+         viewBox="0 0 42 42"
+         preserveAspectRatio="none"
+         aria-hidden="true"
+         focusable="false">
+        <path d="M0 0H42C31.5 3.78 29.17 11.55 29.17 19.32C29.17 32.55 19.13 42 0 42Z" />
+    </svg>
     <a href="/app"
        {% if request.url.path == "/app" or request.url.path.startswith("/app/projects") %}aria-current="page"{% endif %}>Dashboard</a>
+    <svg class="site-nav-swoop site-nav-swoop-right"
+         viewBox="0 0 42 42"
+         preserveAspectRatio="none"
+         aria-hidden="true"
+         focusable="false">
+        <path d="M0 0H42C31.5 3.78 29.17 11.55 29.17 19.32C29.17 32.55 19.13 42 0 42Z" />
+    </svg>
 </nav>
