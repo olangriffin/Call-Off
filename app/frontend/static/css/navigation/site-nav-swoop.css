@@ -1,8 +1,7 @@
-/* Continuous SVG shoulders for the shared top navigation.
-   The previous shape combined a 22px bottom radius with separate clipped
-   pseudo-elements, which created a visible change in curvature where the two
-   geometries met. Each shoulder is now one Bézier path spanning the full nav
-   height, so the outer edge flows continuously into the bottom edge. */
+/* Single-curve shoulders for the shared top navigation.
+   Each side is one quarter ellipse. There is no second radius or clipped
+   path meeting it, so the curve stays continuous from the top edge into the
+   flat bottom edge of the central navigation bar. */
 
 .site-nav-links {
   overflow: visible;
@@ -13,30 +12,25 @@
 
 .site-nav-links::before,
 .site-nav-links::after {
-  display: none;
-}
-
-.site-nav-swoop {
+  content: "";
   position: absolute;
   top: 0;
   z-index: -1;
   display: block;
   width: var(--site-nav-links-height);
   height: var(--site-nav-links-height);
-  color: var(--nav-surface);
+  background: var(--nav-surface);
+  clip-path: none;
   pointer-events: none;
+  transform: none;
 }
 
-.site-nav-swoop path {
-  fill: currentColor;
+.site-nav-links::before {
+  left: calc(var(--site-nav-links-height) * -1);
+  border-bottom-left-radius: 100% 100%;
 }
 
-.site-nav-swoop-left {
-  right: 100%;
-  transform: scaleX(-1);
-  transform-origin: center;
-}
-
-.site-nav-swoop-right {
-  left: 100%;
+.site-nav-links::after {
+  right: calc(var(--site-nav-links-height) * -1);
+  border-bottom-right-radius: 100% 100%;
 }
