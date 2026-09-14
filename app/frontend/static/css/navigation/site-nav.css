@@ -229,7 +229,7 @@ main {
   width: var(--site-nav-corner-size);
   height: var(--site-nav-corner-size);
   background: var(--nav-surface);
-  clip-path: path("M 0 0 L 20 0 C 8.954 0 0 8.954 0 20 Z");
+  clip-path: path("M 0 0 L 22 0 C 9.850 0 0 9.850 0 22 Z");
   pointer-events: none;
 }
 
