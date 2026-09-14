@@ -27,10 +27,10 @@
 
 .site-nav-links::before {
   left: calc(var(--site-nav-links-height) * -1);
-  border-bottom-left-radius: 100% 100%;
+  border-bottom-left-radius: 100%;
 }
 
 .site-nav-links::after {
   right: calc(var(--site-nav-links-height) * -1);
-  border-bottom-right-radius: 100% 100%;
+  border-bottom-right-radius: 100%;
 }
