@@ -56,6 +56,10 @@ class ProgrammeActivity(Base):
         index=True,
     )
 
+    # Transitional compatibility link only. The target Programme Activity ↔
+    # Package relationship is many-to-many and revision-aware. New package-
+    # identification logic must not treat this column as the canonical
+    # relationship or assume an Activity can inform only one Package.
     work_package_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid(as_uuid=True),
         ForeignKey("work_packages.id", ondelete="SET NULL"),

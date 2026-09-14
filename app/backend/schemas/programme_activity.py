@@ -6,13 +6,23 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
+_TRANSITIONAL_PACKAGE_LINK_DESCRIPTION = (
+    "Compatibility field for the current single-Package Programme Activity link. "
+    "New Package-identification workflows must not treat this as canonical; the "
+    "target relationship is many-to-many."
+)
+
+
 class ProgrammeActivityBase(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     activity_code: str = Field(min_length=1, max_length=100)
     name: str = Field(min_length=1, max_length=250)
     activity_type: str = Field(default="task", min_length=1, max_length=50)
-    work_package_id: uuid.UUID | None = None
+    work_package_id: uuid.UUID | None = Field(
+        default=None,
+        description=_TRANSITIONAL_PACKAGE_LINK_DESCRIPTION,
+    )
     parent_activity_id: uuid.UUID | None = None
     planned_start: datetime | None = None
     planned_finish: datetime | None = None
@@ -60,7 +70,10 @@ class ProgrammeActivityUpdate(BaseModel):
     activity_code: str | None = Field(default=None, min_length=1, max_length=100)
     name: str | None = Field(default=None, min_length=1, max_length=250)
     activity_type: str | None = Field(default=None, min_length=1, max_length=50)
-    work_package_id: uuid.UUID | None = None
+    work_package_id: uuid.UUID | None = Field(
+        default=None,
+        description=_TRANSITIONAL_PACKAGE_LINK_DESCRIPTION,
+    )
     parent_activity_id: uuid.UUID | None = None
     planned_start: datetime | None = None
     planned_finish: datetime | None = None

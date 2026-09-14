@@ -70,6 +70,25 @@ it with an explicit neutral association only after deciding whether links persis
 across Programme revisions and what purpose/source metadata the association needs.
 Do not add new behaviour that assumes one Activity has only one Package.
 
+### Package identification boundary
+
+Package identification is a reviewable interpretation layer between the Programme
+and durable operational Packages; it is not a synonym for the Programme hierarchy.
+
+- A Package has stable project-scoped identity across Programme revisions.
+- Programme Activities are revision-scoped schedule evidence and may be renamed,
+  split, merged or replaced in later revisions.
+- Deterministic, explainable signals should be used before semantic/AI assistance.
+- Ambiguous identification should produce candidates for user review rather than
+  silently creating Packages.
+- Area + Scope is one possible classification pattern, not a universal rule.
+- The current single `work_package_id` link is compatibility state only and must
+  not become the basis of new Package-identification logic.
+
+The detailed contract, signal inventory, revision behaviour, WorkPackage field
+classification and recommended next build are defined in
+`docs/package-identification.md`.
+
 ### Date authority
 
 Programme Activity dates are the authoritative schedule record in the current

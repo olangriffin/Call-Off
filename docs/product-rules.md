@@ -48,6 +48,29 @@ system, or generic workflow builder without a validated operational need.
   model. Do not assume one-to-one or extend the current single-Package activity
   link.
 
+## Package identification rules
+
+- Package identification starts from the current Programme revision and produces
+  reviewable candidates before durable Package creation when the interpretation is
+  ambiguous.
+- A Package is durable project-scoped operational identity; Programme Activities
+  are revision-scoped schedule evidence. Do not make Package identity depend on
+  one Activity database row or UUID.
+- Prefer explainable deterministic evidence first: imported classification,
+  external IDs, hierarchy, repeated labels/codes and previously confirmed mapping
+  evidence.
+- User confirmation is required for ambiguous groupings, split/merge cases,
+  unclear classification and one-Activity-to-many-Package interpretation.
+- AI/semantic matching may later rank or explain candidates but must not silently
+  become authoritative for Package identity, dates or Programme relationships.
+- A revised Programme should reconcile against existing Packages and propose link
+  changes; it should not create duplicate Packages simply because Activities have
+  new database IDs.
+- `ProgrammeActivity.work_package_id` is transitional compatibility state. New
+  identification functionality must not extend its one-Package assumption.
+- The detailed identification contract is maintained in
+  `docs/package-identification.md`.
+
 ## Workstream rules
 
 - Workstreams are organisation-configurable functions supporting Package
