@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import uuid
 from dataclasses import dataclass, field
 from datetime import date, datetime
@@ -21,6 +22,7 @@ class PackageIdentificationEvidence:
 @dataclass(frozen=True, slots=True)
 class PackageIdentificationCandidate:
     anchor_activity_id: uuid.UUID
+    proposed_code: str
     proposed_name: str
     what_label: str
     where_label: str | None
@@ -32,6 +34,7 @@ class PackageIdentificationCandidate:
     linked_package_codes: tuple[str, ...]
     fully_linked: bool
     partially_linked: bool
+    already_confirmed: bool
 
     @property
     def activity_count(self) -> int:
@@ -53,6 +56,9 @@ class _CandidateGroup:
     evidence: list[PackageIdentificationEvidence] = field(default_factory=list)
 
 
+_PACKAGE_CODE_CLEANUP = re.compile(r"[^A-Z0-9_-]+")
+
+
 def _as_date(value: date | datetime | None) -> date | None:
     if isinstance(value, datetime):
         return value.date()
@@ -67,6 +73,15 @@ def _activity_window(activity: ProgrammeActivity) -> tuple[date | None, date | N
     # one date. Use that point for both sides of the preview window rather than
     # inventing duration.
     return start or finish, finish or start
+
+
+def _proposed_package_code(activity: ProgrammeActivity) -> str:
+    source = _PACKAGE_CODE_CLEANUP.sub(
+        "-",
+        activity.activity_code.upper().strip(),
+    ).strip("-_")
+    source = source or str(activity.id).split("-")[0].upper()
+    return f"PKG-{source}"[:50]
 
 
 def _path_to_activity(
@@ -108,6 +123,8 @@ def _candidate_anchor(
 
 def build_package_identification_preview(
     activities: list[ProgrammeActivity],
+    *,
+    existing_package_codes: set[str] | None = None,
 ) -> PackageIdentificationPreview:
     if not activities:
         return PackageIdentificationPreview(
@@ -117,6 +134,7 @@ def build_package_identification_preview(
             linked_activity_count=0,
         )
 
+    existing_codes = existing_package_codes or set()
     activity_by_id = {activity.id: activity for activity in activities}
     children_by_parent: dict[uuid.UUID | None, list[ProgrammeActivity]] = {}
     for activity in activities:
@@ -178,6 +196,7 @@ def build_package_identification_preview(
             if where_label and where_label != group.anchor.name
             else group.anchor.name
         )
+        proposed_code = _proposed_package_code(group.anchor)
 
         if len(evidence_items) >= 2 and group.anchor.id != evidence_items[0].activity_id:
             evidence_strength = "Structured hierarchy"
@@ -189,6 +208,7 @@ def build_package_identification_preview(
         candidates.append(
             PackageIdentificationCandidate(
                 anchor_activity_id=group.anchor.id,
+                proposed_code=proposed_code,
                 proposed_name=proposed_name,
                 what_label=group.anchor.name,
                 where_label=where_label,
@@ -204,6 +224,7 @@ def build_package_identification_preview(
                 linked_package_codes=linked_codes,
                 fully_linked=fully_linked,
                 partially_linked=partially_linked,
+                already_confirmed=proposed_code in existing_codes,
             )
         )
 
