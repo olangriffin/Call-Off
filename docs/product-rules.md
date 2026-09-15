@@ -24,9 +24,10 @@ is ahead of, aligned with, or behind that Programme.
 5. Record readiness, delivery and later site progress.
 6. Explain Package and project position against the Programme.
 
-Packages should normally follow Programme establishment. This is a workflow
-default, not yet a hard data constraint, because imports, legacy projects and
-package-identification rules still need product decisions.
+New Package creation requires the current Programme revision to contain at least
+one Activity. Existing legacy Packages remain viewable even where a Programme has
+not yet been established, so migration and historical data are not hidden or
+deleted.
 
 ## Product boundaries
 
