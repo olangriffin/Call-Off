@@ -23,6 +23,7 @@ from app.backend.services.package_readiness import (
     latest_approval,
     latest_revision,
 )
+from app.backend.services.programme import is_programme_established
 from app.backend.services.project import get_project
 from app.backend.services.work_package import (
     WorkPackageCodeConflictError,
@@ -64,6 +65,12 @@ def new_work_package_page(
             status_code=404,
         )
 
+    if not is_programme_established(database, project.id):
+        return RedirectResponse(
+            url=f"/app/projects/{project.id}/programme",
+            status_code=303,
+        )
+
     return templates.TemplateResponse(
         request=request,
         name="package/work_package_new.html",
@@ -103,6 +110,12 @@ async def create_work_package_page(
                 "form_values": {},
             },
             status_code=404,
+        )
+
+    if not is_programme_established(database, project.id):
+        return RedirectResponse(
+            url=f"/app/projects/{project.id}/programme",
+            status_code=303,
         )
 
     form = await verified_form(request)
