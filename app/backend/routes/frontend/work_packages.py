@@ -18,12 +18,20 @@ from app.backend.schemas.work_package import WorkPackageCreate
 from app.backend.services.deliverable import (
     list_deliverables_with_review_history,
 )
+from app.backend.services.package_identification import (
+    build_package_identification_preview,
+    find_package_identification_candidate,
+)
 from app.backend.services.package_readiness import (
     calculate_package_readiness,
     latest_approval,
     latest_revision,
 )
-from app.backend.services.programme import is_programme_established
+from app.backend.services.programme import (
+    get_current_revision,
+    is_programme_established,
+)
+from app.backend.services.programme_activity import list_activities
 from app.backend.services.project import get_project
 from app.backend.services.work_package import (
     WorkPackageCodeConflictError,
@@ -34,6 +42,44 @@ from app.backend.services.work_package import (
 router = APIRouter(
     include_in_schema=False,
 )
+
+
+def _candidate_prefill(database, project_id: uuid.UUID, raw_candidate_id: str | None):
+    if not raw_candidate_id:
+        return {}, None
+
+    try:
+        candidate_id = uuid.UUID(raw_candidate_id)
+    except ValueError:
+        return {}, None
+
+    revision = get_current_revision(database, project_id)
+    if revision is None:
+        return {}, None
+
+    activities = list_activities(database, revision.id, offset=0, limit=None)
+    preview = build_package_identification_preview(activities)
+    candidate = find_package_identification_candidate(preview, candidate_id)
+    if candidate is None:
+        return {}, None
+
+    return (
+        {
+            "code": "",
+            "name": candidate.proposed_name,
+            "package_type": "",
+            "description": "",
+            "status": "planning",
+            "planned_start": (
+                candidate.start_date.isoformat() if candidate.start_date else ""
+            ),
+            "planned_finish": (
+                candidate.finish_date.isoformat() if candidate.finish_date else ""
+            ),
+            "required_on_site_date": "",
+        },
+        candidate,
+    )
 
 
 @router.get(
@@ -61,6 +107,7 @@ def new_work_package_page(
                 "page_title": "Project not found",
                 "project": None,
                 "form_values": {},
+                "candidate_context": None,
             },
             status_code=404,
         )
@@ -71,6 +118,12 @@ def new_work_package_page(
             status_code=303,
         )
 
+    form_values, candidate_context = _candidate_prefill(
+        database,
+        project.id,
+        request.query_params.get("candidate"),
+    )
+
     return templates.TemplateResponse(
         request=request,
         name="package/work_package_new.html",
@@ -78,7 +131,8 @@ def new_work_package_page(
             **authenticated_template_context(access),
             "page_title": "New work package",
             "project": project,
-            "form_values": {},
+            "form_values": form_values,
+            "candidate_context": candidate_context,
         },
     )
 
@@ -108,6 +162,7 @@ async def create_work_package_page(
                 "page_title": "Project not found",
                 "project": None,
                 "form_values": {},
+                "candidate_context": None,
             },
             status_code=404,
         )
@@ -165,6 +220,7 @@ async def create_work_package_page(
                 "page_title": "New work package",
                 "project": project,
                 "form_values": form_values,
+                "candidate_context": None,
                 "error_message": error.errors()[0]["msg"],
             },
             status_code=422,
@@ -179,6 +235,7 @@ async def create_work_package_page(
                 "page_title": "New work package",
                 "project": project,
                 "form_values": form_values,
+                "candidate_context": None,
                 "error_message": str(error),
             },
             status_code=409,
