@@ -35,7 +35,7 @@
                 </div>
 
                 <p class="form-help">
-                    This preview uses the first two meaningful Programme hierarchy levels as an explainable grouping heuristic. It does not assume that Area + Scope, or any other hierarchy, is universally correct.
+                    This first pass uses the Programme hierarchy as an explainable grouping heuristic. It does not assume that Area + Scope, or any other hierarchy, is universally correct. Confirmed candidates retain a deterministic Package code so the preview can recognise that they are already represented without introducing a permanent Activity relationship yet.
                 </p>
             {% endif %}
         {% endcall %}
@@ -58,7 +58,7 @@
                                 <th>WHERE / context</th>
                                 <th>Programme window</th>
                                 <th>Evidence</th>
-                                <th>Existing links</th>
+                                <th>Existing representation</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -67,6 +67,7 @@
                                 <tr>
                                     <td>
                                         <strong>{{ candidate.proposed_name }}</strong>
+                                        <small class="mono">{{ candidate.proposed_code }}</small>
                                         <small>{{ candidate.evidence_strength }}</small>
                                     </td>
                                     <td>{{ candidate.what_label }}</td>
@@ -101,7 +102,10 @@
                                         </details>
                                     </td>
                                     <td>
-                                        {% if candidate.linked_package_codes %}
+                                        {% if candidate.already_confirmed %}
+                                            <strong>Confirmed</strong>
+                                            <small class="mono">{{ candidate.proposed_code }}</small>
+                                        {% elif candidate.linked_package_codes %}
                                             {% for package_code in candidate.linked_package_codes %}
                                                 <span class="mono">{{ package_code }}</span>{% if not loop.last %}, {% endif %}
                                             {% endfor %}
@@ -111,10 +115,10 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if candidate.fully_linked %}
+                                        {% if candidate.already_confirmed or candidate.fully_linked %}
                                             <span>Already represented</span>
                                         {% elif can_operational_write %}
-                                            <a href="/app/projects/{{ project.id }}/work-packages/new?candidate={{ candidate.anchor_activity_id }}">Review &amp; create</a>
+                                            <a href="/app/projects/{{ project.id }}/work-packages/new?candidate={{ candidate.anchor_activity_id }}">Review &amp; confirm</a>
                                         {% else %}
                                             <span>Review only</span>
                                         {% endif %}
