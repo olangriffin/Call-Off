@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
+{% from "partials/components/button.html" import primary_button, secondary_button %}
+{% from "partials/components/metric_card.html" import metric_card %}
+{% from "partials/components/section.html" import section %}
+{% from "partials/components/section_header.html" import section_header %}
+{% block title %}
+    {% if project %}
+        Package identification | {{ project.code }} | Calloff
+    {% else %}
+        Project not found | Calloff
+    {% endif %}
+{% endblock %}
+{% block content %}
+    {% if project %}
+        {{ breadcrumbs(project=project, current_label="Package identification") }}
+        {{ project_workspace_nav(project, "programme") }}
+
+        {% call section(labelledby="package-identification-title") %}
+            {% call section_header(
+                "Package identification",
+                description="Review deterministic Package candidates derived from the current Programme hierarchy. Nothing is created automatically.",
+                heading_level=1,
+                title_id="package-identification-title"
+            ) %}
+                {{ secondary_button("Back to programme", href="/app/projects/" ~ project.id ~ "/programme", button_class="ghost-button-sm") }}
+            {% endcall %}
+
+            {% if revision and preview.source_activity_count %}
+                <div class="metric-grid project-metrics">
+                    {{ metric_card("Candidate packages", preview.candidates|length, "Hierarchy-derived suggestions") }}
+                    {{ metric_card("Programme activities", preview.source_activity_count, "Current revision") }}
+                    {{ metric_card("Activities represented", preview.candidate_activity_count, "Leaf activity evidence") }}
+                    {{ metric_card("Legacy links", preview.linked_activity_count, "Existing activity-to-package links") }}
+                </div>
+
+                <p class="form-help">
+                    This preview uses the first two meaningful Programme hierarchy levels as an explainable grouping heuristic. It does not assume that Area + Scope, or any other hierarchy, is universally correct.
+                </p>
+            {% endif %}
+        {% endcall %}
+
+        {% if revision and preview.candidates %}
+            {% call section(labelledby="candidate-packages-title") %}
+                {{ section_header(
+                    "Candidate packages",
+                    description="Check WHAT, WHERE/context and the Programme evidence before creating a durable Package.",
+                    title_id="candidate-packages-title"
+                ) }}
+
+                <div class="table-container" tabindex="0" aria-label="Package identification candidates">
+                    <table>
+                        <caption class="visually-hidden">Candidate Packages derived from {{ project.code }} Programme revision {{ revision.revision_code }}</caption>
+                        <thead>
+                            <tr>
+                                <th>Candidate</th>
+                                <th>WHAT</th>
+                                <th>WHERE / context</th>
+                                <th>Programme window</th>
+                                <th>Evidence</th>
+                                <th>Existing links</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for candidate in preview.candidates %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ candidate.proposed_name }}</strong>
+                                        <small>{{ candidate.evidence_strength }}</small>
+                                    </td>
+                                    <td>{{ candidate.what_label }}</td>
+                                    <td>
+                                        {% if candidate.where_label %}
+                                            {{ candidate.where_label }}
+                                        {% else %}
+                                            <span class="missing-value">Needs review</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if candidate.start_date or candidate.finish_date %}
+                                            {% if candidate.start_date %}<time datetime="{{ candidate.start_date.isoformat() }}">{{ candidate.start_date.strftime("%d %b %Y") }}</time>{% else %}—{% endif %}
+                                            <span aria-hidden="true">→</span>
+                                            {% if candidate.finish_date %}<time datetime="{{ candidate.finish_date.isoformat() }}">{{ candidate.finish_date.strftime("%d %b %Y") }}</time>{% else %}—{% endif %}
+                                        {% else %}
+                                            <span class="missing-value">Dates not set</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <details>
+                                            <summary>{{ candidate.activity_count }} activit{% if candidate.activity_count == 1 %}y{% else %}ies{% endif %}</summary>
+                                            <ul>
+                                                {% for item in candidate.evidence %}
+                                                    <li>
+                                                        <span class="mono">{{ item.activity_code }}</span>
+                                                        {{ item.activity_name }}
+                                                        <small>{{ item.hierarchy_path }}</small>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </details>
+                                    </td>
+                                    <td>
+                                        {% if candidate.linked_package_codes %}
+                                            {% for package_code in candidate.linked_package_codes %}
+                                                <span class="mono">{{ package_code }}</span>{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                            {% if candidate.partially_linked %}<small>Partial legacy mapping</small>{% endif %}
+                                        {% else %}
+                                            <span class="missing-value">None</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if candidate.fully_linked %}
+                                            <span>Already represented</span>
+                                        {% elif can_operational_write %}
+                                            <a href="/app/projects/{{ project.id }}/work-packages/new?candidate={{ candidate.anchor_activity_id }}">Review &amp; create</a>
+                                        {% else %}
+                                            <span>Review only</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="7"><small>{{ candidate.rationale }}</small></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endcall %}
+        {% else %}
+            {% call section() %}
+                <div class="empty-state">
+                    {% if not revision or not preview.source_activity_count %}
+                        <h2>Programme required</h2>
+                        <p>Add or import Programme activities before Call-Off can identify Package candidates.</p>
+                        {% if can_operational_write %}
+                            {{ primary_button("Establish programme", href="/app/projects/" ~ project.id ~ "/programme") }}
+                        {% else %}
+                            {{ secondary_button("View programme", href="/app/projects/" ~ project.id ~ "/programme", button_class="ghost-button-sm") }}
+                        {% endif %}
+                    {% else %}
+                        <h2>No candidates identified</h2>
+                        <p>The current Programme hierarchy does not provide enough deterministic structure for this preview.</p>
+                        {{ secondary_button("Review programme", href="/app/projects/" ~ project.id ~ "/programme", button_class="ghost-button-sm") }}
+                    {% endif %}
+                </div>
+            {% endcall %}
+        {% endif %}
+    {% else %}
+        {% call section() %}
+            <div class="empty-state">
+                <h1 class="page-title">Project not found</h1>
+                <p>The requested project does not exist or is unavailable.</p>
+                <a href="/app">Return to dashboard</a>
+            </div>
+        {% endcall %}
+    {% endif %}
+{% endblock %}
