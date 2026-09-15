@@ -82,6 +82,7 @@ class PackageIdentificationPreviewTestCase(unittest.TestCase):
         self.assertEqual(len(preview.candidates), 1)
         candidate = preview.candidates[0]
         self.assertEqual(candidate.anchor_activity_id, walls.id)
+        self.assertEqual(candidate.proposed_code, "PKG-A110")
         self.assertEqual(candidate.proposed_name, "DH1 — Walls")
         self.assertEqual(candidate.what_label, "Walls")
         self.assertEqual(candidate.where_label, "DH1")
@@ -89,6 +90,7 @@ class PackageIdentificationPreviewTestCase(unittest.TestCase):
         self.assertEqual(candidate.finish_date, date(2026, 10, 20))
         self.assertEqual(candidate.activity_count, 3)
         self.assertEqual(candidate.evidence_strength, "Structured hierarchy")
+        self.assertFalse(candidate.already_confirmed)
         self.assertEqual(preview.source_activity_count, 8)
         self.assertEqual(preview.candidate_activity_count, 3)
 
@@ -109,6 +111,22 @@ class PackageIdentificationPreviewTestCase(unittest.TestCase):
             [candidate.proposed_name for candidate in preview.candidates],
             ["DH1 — Walls", "DH2 — Walls"],
         )
+        self.assertEqual(
+            [candidate.proposed_code for candidate in preview.candidates],
+            ["PKG-A110", "PKG-B110"],
+        )
+
+    def test_existing_deterministic_package_code_marks_candidate_confirmed(self) -> None:
+        area = _activity(23, "A200", "DH3")
+        ceilings = _activity(24, "A210", "Ceilings", parent=area)
+        install = _activity(25, "A211", "Install ceilings", parent=ceilings)
+
+        preview = build_package_identification_preview(
+            [area, ceilings, install],
+            existing_package_codes={"PKG-A210"},
+        )
+
+        self.assertTrue(preview.candidates[0].already_confirmed)
 
     def test_legacy_activity_links_are_evidence_not_candidate_identity(self) -> None:
         area = _activity(30, "A100", "Area A")
@@ -147,6 +165,7 @@ class PackageIdentificationPreviewTestCase(unittest.TestCase):
         preview = build_package_identification_preview([milestone])
         candidate = preview.candidates[0]
 
+        self.assertEqual(candidate.proposed_code, "PKG-M100")
         self.assertEqual(candidate.proposed_name, "Plant room handover")
         self.assertIsNone(candidate.where_label)
         self.assertEqual(candidate.start_date, date(2026, 11, 12))
