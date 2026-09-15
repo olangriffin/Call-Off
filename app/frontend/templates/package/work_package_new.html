@@ -16,12 +16,24 @@
         {{ project_workspace_nav(project, "packages") }}
         {% call section() %}
             {% call section_header("New work package", heading_level=1) %}
-                <a href="/app/projects/{{ project.id }}">Back to project</a>
+                {% if candidate_context %}
+                    <a href="/app/projects/{{ project.id }}/programme/package-identification">Back to package identification</a>
+                {% else %}
+                    <a href="/app/projects/{{ project.id }}">Back to project</a>
+                {% endif %}
             {% endcall %}
             {% if error_message %}
                 <div class="form-alert" role="alert">
                     <strong>Unable to create work package</strong>
                     <p>{{ error_message }}</p>
+                </div>
+            {% endif %}
+            {% if candidate_context %}
+                <div class="form-alert" role="status">
+                    <strong>Programme candidate: {{ candidate_context.proposed_name }}</strong>
+                    <p>
+                        This form is pre-filled from a deterministic Programme hierarchy suggestion. Review the values before creating the Package. The proposed start and finish show the candidate Programme window only; creating this Package does not create an ongoing date sync or permanent Activity link.
+                    </p>
                 </div>
             {% endif %}
             <form method="post"
@@ -80,7 +92,7 @@
                     <label for="description">Description</label>
                     <textarea id="description" name="description" rows="4">{{ form_values.description if form_values else '' }}</textarea>
                 </div>
-                <p class="form-field form-field-full form-help">Package dates are manually recorded in the current build; they are not yet derived from or synchronised with Programme activities.</p>
+                <p class="form-field form-field-full form-help">Package dates are manually recorded in the current build. Candidate values may be pre-filled from the Programme for review, but they are not yet derived or synchronised after creation.</p>
                 <div class="form-field">
                     <label for="planned_start">Planned start</label>
                     <input id="planned_start"
@@ -101,10 +113,15 @@
                            name="required_on_site_date"
                            type="date"
                            value="{{ form_values.required_on_site_date if form_values else '' }}">
+                    <small>Not inferred automatically until the driving Programme requirement is defined.</small>
                 </div>
                 <div class="form-actions form-field-full">
                     {{ primary_button("Create work package", type="submit") }}
-                    {{ secondary_button("Cancel", href="/app/projects/" ~ project.id, button_class="ghost-button-sm") }}
+                    {% if candidate_context %}
+                        {{ secondary_button("Cancel", href="/app/projects/" ~ project.id ~ "/programme/package-identification", button_class="ghost-button-sm") }}
+                    {% else %}
+                        {{ secondary_button("Cancel", href="/app/projects/" ~ project.id, button_class="ghost-button-sm") }}
+                    {% endif %}
                 </div>
             </form>
         {% endcall %}
