@@ -13,4 +13,12 @@
       : "light");
 
   document.documentElement.dataset.theme = theme;
+
+  const favicon = document.getElementById("site-favicon");
+  if (favicon) {
+    const href =
+      theme === "dark" ? favicon.dataset.darkHref : favicon.dataset.lightHref;
+
+    if (href) favicon.setAttribute("href", href);
+  }
 })();
