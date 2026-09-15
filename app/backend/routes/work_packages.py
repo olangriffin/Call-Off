@@ -25,6 +25,7 @@ from app.backend.schemas.work_package import (
     WorkPackageRead,
     WorkPackageUpdate,
 )
+from app.backend.services.programme import is_programme_established
 from app.backend.services.project import get_project
 from app.backend.services.work_package import (
     InvalidWorkPackageUpdateError,
@@ -80,6 +81,12 @@ def create_work_package_route(
         project_id,
         access.organization_id,
     )
+
+    if not is_programme_established(database, project.id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Establish the Programme before creating work packages.",
+        )
 
     try:
         return create_work_package(
