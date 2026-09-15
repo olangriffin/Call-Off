@@ -15,6 +15,7 @@ from app.backend.services.package_identification import (
 from app.backend.services.programme import get_current_revision
 from app.backend.services.programme_activity import list_activities
 from app.backend.services.project import get_project
+from app.backend.services.work_package import list_work_packages
 
 router = APIRouter(
     include_in_schema=False,
@@ -57,7 +58,16 @@ def package_identification_preview_page(
         if revision is not None
         else []
     )
-    preview = build_package_identification_preview(activities)
+    existing_packages = list_work_packages(
+        database,
+        project.id,
+        offset=0,
+        limit=None,
+    )
+    preview = build_package_identification_preview(
+        activities,
+        existing_package_codes={package.code for package in existing_packages},
+    )
 
     return templates.TemplateResponse(
         request=request,
