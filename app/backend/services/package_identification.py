@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime
 
 from app.backend.models.programme.programme_activity import ProgrammeActivity
@@ -46,6 +46,13 @@ class PackageIdentificationPreview:
     linked_activity_count: int
 
 
+@dataclass(slots=True)
+class _CandidateGroup:
+    anchor: ProgrammeActivity
+    context: ProgrammeActivity | None
+    evidence: list[PackageIdentificationEvidence] = field(default_factory=list)
+
+
 def _as_date(value: date | datetime | None) -> date | None:
     if isinstance(value, datetime):
         return value.date()
@@ -85,25 +92,18 @@ def _path_to_activity(
 
 def _candidate_anchor(
     path: list[ProgrammeActivity],
-    wrapper_root_id: uuid.UUID | None,
 ) -> tuple[ProgrammeActivity, ProgrammeActivity | None]:
-    meaningful_path = path
-    if wrapper_root_id is not None and path and path[0].id == wrapper_root_id:
-        meaningful_path = path[1:]
-
-    if not meaningful_path:
-        meaningful_path = path
-
-    # The first two meaningful hierarchy levels are used only as an explainable
-    # preview heuristic. When there are at least three levels, the second level
-    # becomes the candidate Package and the first level becomes its context.
-    # Shallower programmes fall back conservatively to their parent branch or
-    # individual activity. This does not establish universal Area + Scope rules.
-    if len(meaningful_path) >= 3:
-        return meaningful_path[1], meaningful_path[0]
-    if len(meaningful_path) == 2:
-        return meaningful_path[0], None
-    return meaningful_path[0], None
+    # The first two hierarchy levels are used only as an explainable preview
+    # heuristic. With three or more levels, level two becomes the candidate
+    # Package and level one becomes its context. A two-level branch is grouped
+    # under its first level; a flat Programme falls back to the activity itself.
+    # This intentionally does not establish Area + Scope as universal product
+    # truth: the preview exists to validate whether the hierarchy is meaningful.
+    if len(path) >= 3:
+        return path[1], path[0]
+    if len(path) == 2:
+        return path[0], None
+    return path[0], None
 
 
 def build_package_identification_preview(
@@ -122,58 +122,41 @@ def build_package_identification_preview(
     for activity in activities:
         children_by_parent.setdefault(activity.parent_activity_id, []).append(activity)
 
-    root_activities = children_by_parent.get(None, [])
-    wrapper_root_id = (
-        root_activities[0].id
-        if len(root_activities) == 1
-        and children_by_parent.get(root_activities[0].id)
-        else None
-    )
-
     leaf_activities = [
         activity for activity in activities if not children_by_parent.get(activity.id)
     ]
 
-    grouped: dict[
-        uuid.UUID,
-        dict[str, object],
-    ] = {}
+    grouped: dict[uuid.UUID, _CandidateGroup] = {}
 
     for activity in leaf_activities:
         path = _path_to_activity(activity, activity_by_id)
-        anchor, context = _candidate_anchor(path, wrapper_root_id)
+        anchor, context = _candidate_anchor(path)
 
         group = grouped.setdefault(
             anchor.id,
-            {
-                "anchor": anchor,
-                "context": context,
-                "evidence": [],
-            },
+            _CandidateGroup(anchor=anchor, context=context),
         )
 
         start_date, finish_date = _activity_window(activity)
         work_package = getattr(activity, "work_package", None)
         work_package_code = getattr(work_package, "code", None)
 
-        evidence = PackageIdentificationEvidence(
-            activity_id=activity.id,
-            activity_code=activity.activity_code,
-            activity_name=activity.name,
-            hierarchy_path=" › ".join(node.name for node in path),
-            start_date=start_date,
-            finish_date=finish_date,
-            work_package_code=work_package_code,
+        group.evidence.append(
+            PackageIdentificationEvidence(
+                activity_id=activity.id,
+                activity_code=activity.activity_code,
+                activity_name=activity.name,
+                hierarchy_path=" › ".join(node.name for node in path),
+                start_date=start_date,
+                finish_date=finish_date,
+                work_package_code=work_package_code,
+            )
         )
-        group["evidence"].append(evidence)  # type: ignore[union-attr]
 
     candidates: list[PackageIdentificationCandidate] = []
 
     for group in grouped.values():
-        anchor = group["anchor"]
-        context = group["context"]
-        evidence_items = tuple(group["evidence"])
-
+        evidence_items = tuple(group.evidence)
         starts = [item.start_date for item in evidence_items if item.start_date]
         finishes = [item.finish_date for item in evidence_items if item.finish_date]
         linked_codes = tuple(
@@ -189,14 +172,14 @@ def build_package_identification_preview(
         fully_linked = linked_count == len(evidence_items) and bool(evidence_items)
         partially_linked = 0 < linked_count < len(evidence_items)
 
-        where_label = context.name if context is not None else None
+        where_label = group.context.name if group.context is not None else None
         proposed_name = (
-            f"{where_label} — {anchor.name}"
-            if where_label and where_label != anchor.name
-            else anchor.name
+            f"{where_label} — {group.anchor.name}"
+            if where_label and where_label != group.anchor.name
+            else group.anchor.name
         )
 
-        if len(evidence_items) >= 2 and anchor.id != evidence_items[0].activity_id:
+        if len(evidence_items) >= 2 and group.anchor.id != evidence_items[0].activity_id:
             evidence_strength = "Structured hierarchy"
         elif len(evidence_items) >= 2:
             evidence_strength = "Repeated activity grouping"
@@ -205,9 +188,9 @@ def build_package_identification_preview(
 
         candidates.append(
             PackageIdentificationCandidate(
-                anchor_activity_id=anchor.id,
+                anchor_activity_id=group.anchor.id,
                 proposed_name=proposed_name,
-                what_label=anchor.name,
+                what_label=group.anchor.name,
                 where_label=where_label,
                 start_date=min(starts) if starts else None,
                 finish_date=max(finishes) if finishes else None,
