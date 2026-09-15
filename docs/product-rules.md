@@ -54,6 +54,10 @@ system, or generic workflow builder without a validated operational need.
 - Package identification starts from the current Programme revision and produces
   reviewable candidates before durable Package creation when the interpretation is
   ambiguous.
+- The current first-pass Package Identification Preview is deterministic and
+  read-only. It groups leaf-activity evidence using the first two Programme
+  hierarchy levels as an explainable heuristic, and requires user review before
+  any Package is created. The heuristic is not a universal Area + Scope rule.
 - A Package is durable project-scoped operational identity; Programme Activities
   are revision-scoped schedule evidence. Do not make Package identity depend on
   one Activity database row or UUID.
