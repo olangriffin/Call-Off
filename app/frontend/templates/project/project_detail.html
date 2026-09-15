@@ -34,7 +34,7 @@
         {% endcall %}
         {% call section(section_id="work-packages", labelledby="work-packages-title") %}
             {% call section_header("Delivery packages", description="Organise Package scope and delivery dates after reviewing the Programme requirements.", title_id="work-packages-title") %}
-                {% if can_operational_write and work_packages %}{{ primary_button("New work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}{% endif %}
+                {% if can_operational_write and work_packages and programme_established %}{{ primary_button("New work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}{% endif %}
             {% endcall %}
             {% if work_packages %}
                 <div class="table-container" tabindex="0" aria-label="{{ project.code }} work packages">
@@ -66,10 +66,18 @@
                         </tbody>
                     </table>
                 </div>
+            {% elif not programme_established %}
+                <div class="empty-state">
+                    <h3>Programme required</h3>
+                    <p>Establish the Programme before creating Packages. Package delivery should follow the requirements set by the current Programme.</p>
+                    <div class="form-actions">
+                        {{ primary_button("Establish programme", href="/app/projects/" ~ project.id ~ "/programme") }}
+                    </div>
+                </div>
             {% else %}
                 <div class="empty-state">
                     <h3>No work packages</h3>
-                    <p>Review the Programme first, then create Packages from the delivery requirements it establishes.</p>
+                    <p>The Programme is established. Review its delivery requirements, then create the first Package.</p>
                     <div class="form-actions">
                         {{ primary_button("Review programme", href="/app/projects/" ~ project.id ~ "/programme") }}
                         {% if can_operational_write %}{{ secondary_button("Create package", href="/app/projects/" ~ project.id ~ "/work-packages/new", button_class="ghost-button-sm") }}{% endif %}
