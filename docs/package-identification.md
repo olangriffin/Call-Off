@@ -3,9 +3,10 @@
 ## Purpose
 
 This document defines the current architectural contract for turning a Project
-Programme into operational Packages. It is intentionally conservative: it defines
-the boundary and review workflow without implementing AI matching, configurable
-workstreams, backwards scheduling, or a new persistence model.
+Programme into operational Packages. It is intentionally conservative: the first
+implemented identification capability is a deterministic, read-only preview. AI
+matching, configurable workstreams, backwards scheduling and a new persistence
+model remain deferred.
 
 The product objective remains:
 
@@ -38,6 +39,9 @@ The current repository represents Programme information as follows:
 - Baseline, calendar and dependency models are useful Programme foundations but
   must not be treated as complete workflows merely because persistence exists.
 - The Gantt-style workspace renders the current revision hierarchy and dates.
+- The Package Identification Preview reads the current revision and proposes
+  deterministic Package candidates from Programme hierarchy evidence without
+  persisting candidate state or creating permanent Activity links.
 - `ProgrammeActivity.work_package_id` is a transitional compatibility link. It
   can link one Activity to at most one `WorkPackage`; it is not the target
   Package-identification relationship.
@@ -99,6 +103,12 @@ Existing `WorkPackage.planned_start`, `planned_finish` and
 build. They are not currently derived or synchronised. Future derivation must be
 explicit about source, meaning and override behaviour.
 
+The Package Identification Preview may pre-fill a manual Package form with the
+candidate's earliest and latest Programme evidence dates for review. Those values
+remain user-confirmed manual fields and are not an ongoing synchronisation rule.
+The preview does not infer `required_on_site_date` because its driving Programme
+requirement is not yet defined.
+
 ## Identification Signals
 
 ### Available now
@@ -132,6 +142,23 @@ Deterministic logic may use strong, explainable evidence such as:
 
 A deterministic rule must be explainable to the user. A rule should produce a
 candidate, not silently create a Package when the interpretation is ambiguous.
+
+### Current preview heuristic
+
+The first implemented preview deliberately uses one narrow rule so it can be
+validated rather than hidden behind AI:
+
+- leaf Activities are the evidence units;
+- with three or more hierarchy levels, the second Programme level is proposed as
+  the Package identity and the first level is shown as WHERE/context;
+- a two-level branch is grouped under its first level;
+- a flat Programme falls back to one candidate per Activity;
+- candidate dates are the earliest and latest dates in the grouped leaf evidence;
+- existing `work_package_id` values are displayed only as legacy mapping evidence.
+
+This heuristic is a starting hypothesis, not a universal Area + Scope definition.
+Real Programme samples should determine whether organisation or project-level
+classification configuration is required.
 
 ### Requires user confirmation
 
@@ -169,13 +196,16 @@ The intended user/system flow is:
 2. **View Programme** — confirm the current revision, hierarchy and dates are
    usable before deriving operational structure.
 3. **Analyse structure** — Call-Off evaluates deterministic identification
-   signals from the current revision.
+   signals from the current revision. **Implemented in the first preview.**
 4. **Propose candidates** — Call-Off presents candidate Packages and the Activity
    evidence behind each suggestion. Candidates are not yet confirmed Packages.
-5. **Review ambiguity** — the user can rename, regroup, split, merge or reject
-   candidates and resolve Activities that cannot be classified safely.
-6. **Confirm Packages** — confirmation creates or updates durable `WorkPackage`
-   records and establishes the appropriate Programme Activity links.
+   **Implemented in the first preview.**
+5. **Review ambiguity** — the user can currently inspect the candidate evidence
+   and open a pre-filled manual Package form. In-preview rename, regroup, split,
+   merge and reject controls remain future work.
+6. **Confirm Packages** — the current path creates a normal `WorkPackage` only
+   after the user reviews and submits the existing Package form. Permanent
+   Programme Activity links are not created by the preview yet.
 7. **Operate the Package** — enabled workstreams, readiness and delivery tracking
    attach to the confirmed Package rather than to a transient candidate.
 8. **Reconcile revisions** — a revised Programme is compared with existing
@@ -183,7 +213,7 @@ The intended user/system flow is:
    changes rather than creating duplicate Packages automatically.
 
 Manual Package creation remains a valid fallback/legacy path, but the desired
-future default is Programme-led assisted identification.
+default is Programme-led assisted identification.
 
 ## Relationship Model
 
@@ -266,16 +296,22 @@ migration exist.
 
 ## Changes Made
 
-This architecture pass intentionally makes no database migration and no automatic
-Package creation.
+The implemented first pass adds no database migration and no automatic Package
+creation.
 
-Repository alignment for this pass should be limited to:
+Repository alignment now includes:
 
-- making this document the detailed Programme → Package identification contract;
-- referencing the contract from the core architecture/product rules;
-- marking the current one-Package Activity link as transitional in code/API
-  documentation; and
-- preventing future work from treating Area + Scope or the current
+- the detailed Programme → Package identification contract in this document;
+- a deterministic Package Identification Preview for the current Programme
+  revision;
+- candidate WHAT, WHERE/context, Programme window and leaf-Activity evidence;
+- visibility of existing transitional Activity-to-Package links as legacy
+  evidence;
+- a review path from a candidate into the existing manual Package form with
+  candidate name/start/finish pre-filled for confirmation;
+- project workspace navigation that makes Package identification an explicit step;
+- the existing Programme-before-Package creation gate; and
+- continued protection against treating Area + Scope or the current
   `work_package_id` column as universal product truth.
 
 ## Deferred Decisions
@@ -284,8 +320,8 @@ These decisions require real Programme samples and operational validation before
 being hard-coded:
 
 - the best default Package classification dimensions across target sectors;
-- whether candidate suggestions need temporary persistence or can initially be a
-  read model;
+- whether candidate suggestions eventually need temporary persistence beyond the
+  current read model;
 - which Programme Activity or milestone drives each Package date requirement;
 - Package date derivation, override and provenance rules;
 - whether permanent Activity↔Package links need a relationship-purpose field;
@@ -297,14 +333,13 @@ being hard-coded:
 
 ## Recommended Next Build
 
-Build one narrow **Package Identification Preview** against the current Programme
-revision.
+Validate the Package Identification Preview against several real Programme
+structures before adding a new persistence model.
 
-The first version should be read-only and deterministic. It should expose the
-current Activity hierarchy plus the evidence Call-Off could use to form candidate
-Packages, and present candidate groupings for review without creating Packages or
-adding a new database relationship.
+The next implementation should focus on the review workflow: allow a user to
+adjust candidate grouping and labels explicitly, record which candidates are
+accepted or rejected, and prove the minimum semantics needed for the eventual
+many-to-many `ProgrammeActivity` ↔ `WorkPackage` association.
 
-That build should validate the identification signals and review UX using real
-Programme samples. Only after that validation should Call-Off commit to candidate
-persistence, a many-to-many migration, or AI-assisted matching.
+Only after that validation should Call-Off commit to candidate persistence,
+revision reconciliation rules, or AI-assisted matching.
