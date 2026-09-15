@@ -32,7 +32,7 @@
                 <div class="form-alert" role="status">
                     <strong>Programme candidate: {{ candidate_context.proposed_name }}</strong>
                     <p>
-                        This form is pre-filled from a deterministic Programme hierarchy suggestion. Review the values before creating the Package. The proposed start and finish show the candidate Programme window only; creating this Package does not create an ongoing date sync or permanent Activity link.
+                        Suggested code <span class="mono">{{ candidate_context.proposed_code }}</span>. This form is pre-filled from a deterministic Programme hierarchy suggestion. Review the values before creating the Package. The proposed start and finish show the candidate Programme window only; creating this Package does not create an ongoing date sync or permanent Activity link.
                     </p>
                 </div>
             {% endif %}
@@ -40,6 +40,7 @@
                   action="/app/projects/{{ project.id }}/work-packages/new"
                   class="form-grid">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+                {% if candidate_context %}<input type="hidden" name="candidate_id" value="{{ candidate_context.anchor_activity_id }}" />{% endif %}
                 <div class="form-field">
                     <label for="code">Package code</label>
                     <input id="code"
@@ -48,6 +49,7 @@
                            maxlength="50"
                            value="{{ form_values.code if form_values else '' }}"
                            required>
+                    {% if candidate_context %}<small>Keep the suggested code where practical so Call-Off can recognise this candidate as represented without introducing a permanent Activity link yet.</small>{% endif %}
                 </div>
                 <div class="form-field">
                     <label for="name">Package name</label>
@@ -92,7 +94,7 @@
                     <label for="description">Description</label>
                     <textarea id="description" name="description" rows="4">{{ form_values.description if form_values else '' }}</textarea>
                 </div>
-                <p class="form-field form-field-full form-help">Package dates are manually recorded in the current build. Candidate values may be pre-filled from the Programme for review, but they are not yet derived or synchronised after creation.</p>
+                <p class="form-field form-field-full form-help">Package dates are manually confirmed in the current build. Candidate values may be pre-filled from the Programme for review, but they are not yet synchronised after creation.</p>
                 <div class="form-field">
                     <label for="planned_start">Planned start</label>
                     <input id="planned_start"
@@ -116,7 +118,7 @@
                     <small>Not inferred automatically until the driving Programme requirement is defined.</small>
                 </div>
                 <div class="form-actions form-field-full">
-                    {{ primary_button("Create work package", type="submit") }}
+                    {{ primary_button("Confirm package" if candidate_context else "Create work package", type="submit") }}
                     {% if candidate_context %}
                         {{ secondary_button("Cancel", href="/app/projects/" ~ project.id ~ "/programme/package-identification", button_class="ghost-button-sm") }}
                     {% else %}
