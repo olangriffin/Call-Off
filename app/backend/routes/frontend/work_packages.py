@@ -37,6 +37,7 @@ from app.backend.services.work_package import (
     WorkPackageCodeConflictError,
     create_work_package,
     get_work_package,
+    list_work_packages,
 )
 
 router = APIRouter(
@@ -58,14 +59,23 @@ def _candidate_prefill(database, project_id: uuid.UUID, raw_candidate_id: str | 
         return {}, None
 
     activities = list_activities(database, revision.id, offset=0, limit=None)
-    preview = build_package_identification_preview(activities)
+    existing_packages = list_work_packages(
+        database,
+        project_id,
+        offset=0,
+        limit=None,
+    )
+    preview = build_package_identification_preview(
+        activities,
+        existing_package_codes={package.code for package in existing_packages},
+    )
     candidate = find_package_identification_candidate(preview, candidate_id)
     if candidate is None:
         return {}, None
 
     return (
         {
-            "code": "",
+            "code": candidate.proposed_code,
             "name": candidate.proposed_name,
             "package_type": "",
             "description": "",
@@ -124,6 +134,12 @@ def new_work_package_page(
         request.query_params.get("candidate"),
     )
 
+    if candidate_context is not None and candidate_context.already_confirmed:
+        return RedirectResponse(
+            url=f"/app/projects/{project.id}/programme/package-identification",
+            status_code=303,
+        )
+
     return templates.TemplateResponse(
         request=request,
         name="package/work_package_new.html",
@@ -174,6 +190,12 @@ async def create_work_package_page(
         )
 
     form = await verified_form(request)
+    raw_candidate_id = str(form.get("candidate_id", "")).strip() or None
+    _, candidate_context = _candidate_prefill(
+        database,
+        project.id,
+        raw_candidate_id,
+    )
 
     form_values = {
         "code": str(form.get("code", "")).strip(),
@@ -220,7 +242,7 @@ async def create_work_package_page(
                 "page_title": "New work package",
                 "project": project,
                 "form_values": form_values,
-                "candidate_context": None,
+                "candidate_context": candidate_context,
                 "error_message": error.errors()[0]["msg"],
             },
             status_code=422,
@@ -235,14 +257,18 @@ async def create_work_package_page(
                 "page_title": "New work package",
                 "project": project,
                 "form_values": form_values,
-                "candidate_context": None,
+                "candidate_context": candidate_context,
                 "error_message": str(error),
             },
             status_code=409,
         )
 
     return RedirectResponse(
-        url=f"/app/projects/{project.id}",
+        url=(
+            f"/app/projects/{project.id}/programme/package-identification"
+            if candidate_context is not None
+            else f"/app/projects/{project.id}"
+        ),
         status_code=303,
     )
 
