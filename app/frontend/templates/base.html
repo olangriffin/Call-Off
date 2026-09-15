@@ -10,16 +10,19 @@
 
     <title>{% block title %} {{ page_title }} | Call-Off {% endblock %}</title>
 
+    <link
+      id="site-favicon"
+      rel="icon"
+      type="image/svg+xml"
+      href="{{ url_for('static', path='assets/favicon.svg') }}"
+      data-light-href="{{ url_for('static', path='assets/favicon.svg') }}"
+      data-dark-href="{{ url_for('static', path='assets/favicon-dark.svg') }}"
+    />
+
     <!-- Applies the theme before first paint - see core/theme-init.js.
          Must be an external file, not an inline script: the CSP's
          script-src has no 'unsafe-inline'. -->
     <script src="{{ url_for('static', path='js/core/theme-init.js') }}"></script>
-
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="{{ url_for('static', path='assets/favicon.svg') }}"
-    />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
