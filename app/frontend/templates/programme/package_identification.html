@@ -14,7 +14,7 @@
 {% block content %}
     {% if project %}
         {{ breadcrumbs(project=project, current_label="Package identification") }}
-        {{ project_workspace_nav(project, "programme") }}
+        {{ project_workspace_nav(project, "package_identification") }}
 
         {% call section(labelledby="package-identification-title") %}
             {% call section_header(
