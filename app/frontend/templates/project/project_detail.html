@@ -33,8 +33,11 @@
             {% endcall %}
         {% endcall %}
         {% call section(section_id="work-packages", labelledby="work-packages-title") %}
-            {% call section_header("Delivery packages", description="Organise Package scope and delivery dates after reviewing the Programme requirements.", title_id="work-packages-title") %}
-                {% if can_operational_write and work_packages and programme_established %}{{ primary_button("New work package", href="/app/projects/" ~ project.id ~ "/work-packages/new") }}{% endif %}
+            {% call section_header("Delivery packages", description="Translate Programme requirements into reviewable operational Packages.", title_id="work-packages-title") %}
+                {% if programme_established and work_packages %}
+                    {{ primary_button("Identify packages", href="/app/projects/" ~ project.id ~ "/programme/package-identification") }}
+                    {% if can_operational_write %}{{ secondary_button("New work package", href="/app/projects/" ~ project.id ~ "/work-packages/new", button_class="ghost-button-sm") }}{% endif %}
+                {% endif %}
             {% endcall %}
             {% if work_packages %}
                 <div class="table-container" tabindex="0" aria-label="{{ project.code }} work packages">
@@ -77,10 +80,10 @@
             {% else %}
                 <div class="empty-state">
                     <h3>No work packages</h3>
-                    <p>The Programme is established. Review its delivery requirements, then create the first Package.</p>
+                    <p>The Programme is established. Let Call-Off analyse its hierarchy and propose candidate Packages before creating them manually.</p>
                     <div class="form-actions">
-                        {{ primary_button("Review programme", href="/app/projects/" ~ project.id ~ "/programme") }}
-                        {% if can_operational_write %}{{ secondary_button("Create package", href="/app/projects/" ~ project.id ~ "/work-packages/new", button_class="ghost-button-sm") }}{% endif %}
+                        {{ primary_button("Identify packages", href="/app/projects/" ~ project.id ~ "/programme/package-identification") }}
+                        {% if can_operational_write %}{{ secondary_button("Create package manually", href="/app/projects/" ~ project.id ~ "/work-packages/new", button_class="ghost-button-sm") }}{% endif %}
                     </div>
                 </div>
             {% endif %}
