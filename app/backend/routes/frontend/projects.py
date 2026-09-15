@@ -15,6 +15,7 @@ from app.backend.routes.frontend.common import (
     templates,
 )
 from app.backend.schemas.project import ProjectCreate
+from app.backend.services.programme import is_programme_established
 from app.backend.services.project import (
     OrganisationNotFoundError,
     ProjectCodeConflictError,
@@ -117,7 +118,7 @@ async def create_project_page(
             name="project/project_new.html",
             context={
                 **authenticated_template_context(access),
-                "page_title": "New project",
+                "page_title": "Project not found",
                 "form_values": form_values,
                 "error_message": str(error),
             },
@@ -155,6 +156,7 @@ def project_detail_page(
                 "page_title": "Project not found",
                 "project": None,
                 "work_packages": [],
+                "programme_established": False,
             },
             status_code=404,
         )
@@ -165,6 +167,7 @@ def project_detail_page(
         offset=0,
         limit=None,
     )
+    programme_established = is_programme_established(database, project_id)
 
     return templates.TemplateResponse(
         request=request,
@@ -174,5 +177,6 @@ def project_detail_page(
             "page_title": project.name,
             "project": project,
             "work_packages": work_packages,
+            "programme_established": programme_established,
         },
     )
