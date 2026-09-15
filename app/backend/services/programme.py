@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.backend.models.programme.programme import Programme
+from app.backend.models.programme.programme_activity import ProgrammeActivity
 from app.backend.models.programme.programme_revision import ProgrammeRevision
 from app.backend.models.project import Project
 
@@ -24,6 +25,24 @@ def get_current_revision(
             ProgrammeRevision.is_current.is_(True),
         )
     )
+
+
+def is_programme_established(
+    database: Session,
+    project_id: uuid.UUID,
+) -> bool:
+    """Return whether the current Programme has at least one activity."""
+
+    revision = get_current_revision(database, project_id)
+    if revision is None:
+        return False
+
+    activity_id = database.scalar(
+        select(ProgrammeActivity.id)
+        .where(ProgrammeActivity.programme_revision_id == revision.id)
+        .limit(1)
+    )
+    return activity_id is not None
 
 
 def ensure_current_revision(
