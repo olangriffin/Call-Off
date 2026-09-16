@@ -202,7 +202,10 @@ class AppTemplateTestCase(unittest.TestCase):
         self.assertIn("98%", body)
         self.assertNotIn("Procurement", body)
         self.assertRegex(body, r"Recorded deliverable\s+readiness")
-        self.assertIn('<a class="attention-row attention-row--critical"', body)
+        self.assertRegex(
+            body,
+            r'<a\s+class="attention-row attention-row--critical"',
+        )
         self.assertEqual(body.count('href="/app/projects/project-1"'), 3)
 
         for active_count, expected in (
