@@ -13,9 +13,7 @@ from sqlalchemy.pool import StaticPool
 from app.backend.models.organisation import Organisation
 from app.backend.models.programme.programme import Programme
 from app.backend.models.programme.programme_activity import ProgrammeActivity
-from app.backend.models.programme.programme_activity_identity import (
-    ProgrammeActivityIdentity,
-)
+from app.backend.models.programme.programme_activity_identity import ProgrammeActivityIdentity
 from app.backend.models.programme.programme_import import ProgrammeImport
 from app.backend.models.programme.programme_revision import ProgrammeRevision
 from app.backend.models.project import Project
@@ -44,22 +42,13 @@ TABLES = (
 )
 
 
-def programme_xml(*, project_name: str, activity_code: str, activity_name: str) -> bytes:
-    return f"""<Project>
-  <Name>{project_name}</Name>
-  <Tasks>
-    <Task>
-      <UID>1</UID>
-      <ID>1</ID>
-      <WBS>{activity_code}</WBS>
-      <Name>{activity_name}</Name>
-      <OutlineLevel>1</OutlineLevel>
-      <Start>2026-09-14T08:00:00</Start>
-      <Finish>2026-09-18T17:00:00</Finish>
+def programme_xml(activity_code: str, activity_name: str) -> bytes:
+    return f"""<Project><Name>Import Programme</Name><Tasks><Task>
+      <UID>1</UID><ID>1</ID><WBS>{activity_code}</WBS>
+      <Name>{activity_name}</Name><OutlineLevel>1</OutlineLevel>
+      <Start>2026-09-14T08:00:00</Start><Finish>2026-09-18T17:00:00</Finish>
       <PercentComplete>0</PercentComplete>
-    </Task>
-  </Tasks>
-</Project>""".encode()
+    </Task></Tasks></Project>""".encode()
 
 
 class ProgrammeImportCommitTestCase(unittest.TestCase):
@@ -70,10 +59,7 @@ class ProgrammeImportCommitTestCase(unittest.TestCase):
             connect_args={"check_same_thread": False},
             poolclass=StaticPool,
         )
-        cls.session_factory = sessionmaker(
-            bind=cls.engine,
-            expire_on_commit=False,
-        )
+        cls.session_factory = sessionmaker(bind=cls.engine, expire_on_commit=False)
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -85,9 +71,7 @@ class ProgrammeImportCommitTestCase(unittest.TestCase):
         for table in TABLES:
             table.create(self.engine, checkfirst=True)
 
-        # ProgrammeRevision defines its one-current-revision constraint with a
-        # PostgreSQL partial index. SQLite otherwise compiles that as an
-        # unconditional unique index, so mirror the production semantics here.
+        # Mirror ProgrammeRevision's PostgreSQL partial-current index in SQLite.
         with self.engine.begin() as connection:
             connection.exec_driver_sql(
                 "DROP INDEX IF EXISTS uq_programme_revisions_current"
@@ -97,87 +81,74 @@ class ProgrammeImportCommitTestCase(unittest.TestCase):
                 "ON programme_revisions (programme_id) WHERE is_current = 1"
             )
 
-        now = datetime.now(timezone.utc)
         with self.session_factory() as database:
-            database.add(
-                Organisation(
-                    id=ORGANISATION_ID,
-                    name="Import Organisation",
-                    slug="import-organisation",
-                    created_at=now,
-                )
-            )
-            database.add(
-                Project(
-                    id=PROJECT_ID,
-                    organization_id=ORGANISATION_ID,
-                    code="IMPORT",
-                    name="Import Project",
-                )
-            )
-            database.add(
-                Programme(
-                    id=PROGRAMME_ID,
-                    project_id=PROJECT_ID,
-                )
+            database.add_all(
+                [
+                    Organisation(
+                        id=ORGANISATION_ID,
+                        name="Import Organisation",
+                        slug="import-organisation",
+                        created_at=datetime.now(timezone.utc),
+                    ),
+                    Project(
+                        id=PROJECT_ID,
+                        organization_id=ORGANISATION_ID,
+                        code="IMPORT",
+                        name="Import Project",
+                    ),
+                    Programme(id=PROGRAMME_ID, project_id=PROJECT_ID),
+                ]
             )
             database.commit()
+
+    @staticmethod
+    def _confirm(database, project, *, filename, code, name):
+        import_record, preview = create_import_preview(
+            database,
+            project,
+            filename=filename,
+            content=programme_xml(code, name),
+        )
+        assert preview.can_confirm
+        return import_record, confirm_import(database, project, import_record)
 
     def test_successive_confirmed_imports_preserve_history_and_activity_identity(
         self,
     ) -> None:
         with self.session_factory() as database:
             project = database.get(Project, PROJECT_ID)
-            first_import, first_preview = create_import_preview(
+            first_import, first_revision = self._confirm(
                 database,
                 project,
                 filename="programme-r1.xml",
-                content=programme_xml(
-                    project_name="Programme R1",
-                    activity_code="1",
-                    activity_name="Design package",
-                ),
+                code="1",
+                name="Design package",
             )
-            self.assertTrue(first_preview.can_confirm)
-
-            first_revision = confirm_import(database, project, first_import)
             first_revision_id = first_revision.id
 
             database.expire_all()
-            persisted_first_revision = database.get(
-                ProgrammeRevision,
-                first_revision_id,
-            )
+            first_revision = database.get(ProgrammeRevision, first_revision_id)
             first_activity = database.scalar(
                 select(ProgrammeActivity).where(
                     ProgrammeActivity.programme_revision_id == first_revision_id,
                     ProgrammeActivity.external_id == "1",
                 )
             )
-
-            self.assertIsNotNone(persisted_first_revision)
-            self.assertTrue(persisted_first_revision.is_current)
-            self.assertEqual(persisted_first_revision.revision_code, "R1")
-            self.assertIsNotNone(first_activity)
+            self.assertTrue(first_revision.is_current)
+            self.assertEqual(first_revision.revision_code, "R1")
             self.assertEqual(first_activity.name, "Design package")
             first_identity_id = first_activity.activity_identity_id
             self.assertIsNotNone(
                 database.get(ProgrammeActivityIdentity, first_identity_id)
             )
 
-            second_import, second_preview = create_import_preview(
+            second_import, second_revision = self._confirm(
                 database,
                 project,
                 filename="programme-r2.xml",
-                content=programme_xml(
-                    project_name="Programme R2",
-                    activity_code="1A",
-                    activity_name="Design package revised",
-                ),
+                code="1A",
+                name="Design package revised",
             )
-            self.assertTrue(second_preview.can_confirm)
-
-            second_revision = confirm_import(database, project, second_import)
             second_revision_id = second_revision.id
 
             database.expire_all()
@@ -187,14 +158,6 @@ class ProgrammeImportCommitTestCase(unittest.TestCase):
                     .where(ProgrammeRevision.programme_id == PROGRAMME_ID)
                     .order_by(ProgrammeRevision.revision_code)
                 ).all()
-            )
-            persisted_first_revision = database.get(
-                ProgrammeRevision,
-                first_revision_id,
-            )
-            persisted_second_revision = database.get(
-                ProgrammeRevision,
-                second_revision_id,
             )
             historical_activity = database.scalar(
                 select(ProgrammeActivity).where(
@@ -208,43 +171,32 @@ class ProgrammeImportCommitTestCase(unittest.TestCase):
                     ProgrammeActivity.external_id == "1",
                 )
             )
-            identities = list(
-                database.scalars(
-                    select(ProgrammeActivityIdentity).where(
-                        ProgrammeActivityIdentity.programme_id == PROGRAMME_ID
-                    )
-                ).all()
-            )
 
-            self.assertEqual(len(revisions), 2)
-            self.assertEqual(
-                [revision.revision_code for revision in revisions],
-                ["R1", "R2"],
-            )
-            self.assertFalse(persisted_first_revision.is_current)
-            self.assertTrue(persisted_second_revision.is_current)
+            self.assertEqual([revision.revision_code for revision in revisions], ["R1", "R2"])
+            self.assertFalse(database.get(ProgrammeRevision, first_revision_id).is_current)
+            self.assertTrue(database.get(ProgrammeRevision, second_revision_id).is_current)
             self.assertEqual(historical_activity.name, "Design package")
             self.assertEqual(historical_activity.activity_code, "1")
             self.assertEqual(current_activity.name, "Design package revised")
             self.assertEqual(current_activity.activity_code, "1A")
+            self.assertEqual(current_activity.activity_identity_id, first_identity_id)
             self.assertEqual(
-                current_activity.activity_identity_id,
-                first_identity_id,
+                len(
+                    database.scalars(
+                        select(ProgrammeActivityIdentity).where(
+                            ProgrammeActivityIdentity.programme_id == PROGRAMME_ID
+                        )
+                    ).all()
+                ),
+                1,
             )
-            self.assertEqual(len(identities), 1)
 
-            persisted_first_import = database.get(ProgrammeImport, first_import.id)
-            persisted_second_import = database.get(ProgrammeImport, second_import.id)
-            self.assertEqual(persisted_first_import.status, "completed")
-            self.assertEqual(persisted_second_import.status, "completed")
-            self.assertEqual(
-                persisted_first_import.programme_revision_id,
-                first_revision_id,
-            )
-            self.assertEqual(
-                persisted_second_import.programme_revision_id,
-                second_revision_id,
-            )
+            first_import = database.get(ProgrammeImport, first_import.id)
+            second_import = database.get(ProgrammeImport, second_import.id)
+            self.assertEqual(first_import.status, "completed")
+            self.assertEqual(second_import.status, "completed")
+            self.assertEqual(first_import.programme_revision_id, first_revision_id)
+            self.assertEqual(second_import.programme_revision_id, second_revision_id)
 
 
 if __name__ == "__main__":
