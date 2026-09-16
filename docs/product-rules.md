@@ -29,6 +29,27 @@ one Activity. Existing legacy Packages remain viewable even where a Programme ha
 not yet been established, so migration and historical data are not hidden or
 deleted.
 
+## Programme import rules
+
+- Microsoft Project XML is the first supported external Programme import format.
+- An import must be parsed and previewed before it changes the current Programme.
+- Confirming an import creates a new `ProgrammeRevision`; it must never overwrite
+  the Activity rows of the previous revision.
+- A newly imported revision becomes current only after its Activities and supported
+  Dependencies have been created successfully in the same transaction.
+- Previous revisions remain available for traceability and future comparison.
+- Imported source task IDs are evidence, not durable Package identity.
+- The first XML importer should preserve useful schedule structure without trying
+  to reproduce all Microsoft Project features. Tasks, hierarchy, dates, duration,
+  progress, milestones and supported predecessor links are in scope. Resources,
+  costs, assignments, calendars, constraints and baselines are deferred until a
+  validated Call-Off workflow needs them.
+- Cross-project predecessor links must be reported to the user rather than silently
+  converted into internal dependencies.
+- Native `.mpp` and configurable XLSX imports are future formats and should
+  normalise into the same Programme Revision model rather than create separate
+  operational domains.
+
 ## Product boundaries
 
 Call-Off is not intended to reproduce every capability of large construction platforms or scheduling tools.
