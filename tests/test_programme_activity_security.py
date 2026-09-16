@@ -15,6 +15,7 @@ from app.backend.models.programme.programme_activity import ProgrammeActivity
 from app.backend.models.programme.programme_activity_identity import (
     ProgrammeActivityIdentity,
 )
+from app.backend.models.programme.programme_dependency import ProgrammeDependency
 from app.backend.models.programme.programme_revision import ProgrammeRevision
 from app.backend.models.project import Project
 from app.backend.schemas.programme_activity import (
@@ -45,6 +46,7 @@ TABLES = (
     ProgrammeRevision.__table__,
     ProgrammeActivityIdentity.__table__,
     ProgrammeActivity.__table__,
+    ProgrammeDependency.__table__,
 )
 
 
