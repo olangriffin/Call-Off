@@ -101,15 +101,14 @@ class ProgrammeImportCommitTestCase(unittest.TestCase):
             )
             database.commit()
 
-    @staticmethod
-    def _confirm(database, project, *, filename, code, name):
+    def _confirm(self, database, project, *, filename, code, name):
         import_record, preview = create_import_preview(
             database,
             project,
             filename=filename,
             content=programme_xml(code, name),
         )
-        assert preview.can_confirm
+        self.assertTrue(preview.can_confirm)
         return import_record, confirm_import(database, project, import_record)
 
     def test_successive_confirmed_imports_preserve_history_and_activity_identity(
