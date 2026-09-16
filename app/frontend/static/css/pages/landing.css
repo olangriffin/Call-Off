@@ -225,15 +225,6 @@
   );
 }
 
-.problem-grid .feature-card::before {
-  content: "";
-  display: block;
-  width: 28px;
-  height: 3px;
-  margin-bottom: 22px;
-  border-radius: 999px;
-  background: var(--accent);
-}
 
 .problem-grid .feature-card h3 {
   max-width: 240px;
