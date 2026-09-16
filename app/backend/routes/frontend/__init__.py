@@ -10,6 +10,9 @@ from app.backend.routes.frontend.programme import router as programme_router
 from app.backend.routes.frontend.programme_activities import (
     router as programme_activities_router,
 )
+from app.backend.routes.frontend.programme_imports import (
+    router as programme_imports_router,
+)
 from app.backend.routes.frontend.projects import router as projects_router
 from app.backend.routes.frontend.work_packages import (
     router as work_packages_router,
@@ -26,4 +29,5 @@ router.include_router(work_packages_router)
 router.include_router(deliverables_router)
 router.include_router(programme_router)
 router.include_router(programme_activities_router)
+router.include_router(programme_imports_router)
 router.include_router(package_identification_router)
