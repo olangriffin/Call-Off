@@ -7,8 +7,6 @@ from "partials/components/metric_card.html" import metric_card %} {% block title
   <div>
     <h1 class="page-title" id="dashboard-title">Project control</h1>
   </div>
-  {% if can_create_projects %} {{ primary_button("New project",
-  href="/app/projects/new") }} {% endif %}
 </section>
 <section aria-labelledby="portfolio-summary-title">
   <h2 id="portfolio-summary-title" class="visually-hidden">
@@ -148,7 +146,8 @@ overview.project_health_rows %}
   </p>
   {% endif %}
 </div>
-{% endif %} {% endcall %} {% call
+{% endif %} {% if can_create_projects %} {{ primary_button("New project",
+href="/app/projects/new") }} {% endif %} {% endcall %} {% call
 section(labelledby="portfolio-distribution-title",
 section_class="dashboard-supporting") %} {{ section_header("Project health
 distribution", title_id="portfolio-distribution-title") }} {% if
