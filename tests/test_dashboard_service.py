@@ -16,6 +16,9 @@ from app.backend.models.package.package import WorkPackage
 from app.backend.models.package.revision import DeliverableRevision
 from app.backend.models.programme.programme import Programme
 from app.backend.models.programme.programme_activity import ProgrammeActivity
+from app.backend.models.programme.programme_activity_identity import (
+    ProgrammeActivityIdentity,
+)
 from app.backend.models.programme.programme_revision import ProgrammeRevision
 from app.backend.models.project import Project
 from app.backend.services.approval import (
@@ -50,6 +53,7 @@ class DashboardServiceTestCase(TestCase):
             Approval.__table__,
             Programme.__table__,
             ProgrammeRevision.__table__,
+            ProgrammeActivityIdentity.__table__,
             ProgrammeActivity.__table__,
         ):
             table.create(self.engine)
@@ -108,11 +112,13 @@ class DashboardServiceTestCase(TestCase):
             revision_code="P01",
             is_current=True,
         )
-        database.add(revision)
+        identity = ProgrammeActivityIdentity(programme_id=programme.id)
+        database.add_all([revision, identity])
         database.flush()
         database.add(
             ProgrammeActivity(
                 programme_revision_id=revision.id,
+                activity_identity_id=identity.id,
                 activity_code="A-001",
                 name="Coordinate facade",
                 activity_type="task",
