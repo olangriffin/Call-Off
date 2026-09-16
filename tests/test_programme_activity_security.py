@@ -12,6 +12,9 @@ from app.backend.models.organisation import Organisation
 from app.backend.models.package.package import WorkPackage
 from app.backend.models.programme.programme import Programme
 from app.backend.models.programme.programme_activity import ProgrammeActivity
+from app.backend.models.programme.programme_activity_identity import (
+    ProgrammeActivityIdentity,
+)
 from app.backend.models.programme.programme_revision import ProgrammeRevision
 from app.backend.models.project import Project
 from app.backend.schemas.programme_activity import (
@@ -19,8 +22,10 @@ from app.backend.schemas.programme_activity import (
     ProgrammeActivityUpdate,
 )
 from app.backend.services.programme_activity import (
+    ProgrammeActivityParentCycleError,
     ProgrammeActivityWorkPackageNotFoundError,
     create_activity,
+    delete_activity,
     update_activity,
 )
 
@@ -38,6 +43,7 @@ TABLES = (
     WorkPackage.__table__,
     Programme.__table__,
     ProgrammeRevision.__table__,
+    ProgrammeActivityIdentity.__table__,
     ProgrammeActivity.__table__,
 )
 
@@ -68,7 +74,6 @@ class ProgrammeActivitySecurityTestCase(unittest.TestCase):
             table.create(self.engine, checkfirst=True)
 
         now = datetime.now(timezone.utc)
-
         with self.session_factory() as database:
             database.add_all(
                 [
@@ -119,6 +124,17 @@ class ProgrammeActivitySecurityTestCase(unittest.TestCase):
             )
             database.commit()
 
+    @staticmethod
+    def _create_activity(database, **overrides) -> ProgrammeActivity:
+        values = {"activity_code": "A100", "name": "Activity"}
+        values.update(overrides)
+        revision = database.get(ProgrammeRevision, REVISION_A_ID)
+        return create_activity(
+            database,
+            revision,
+            ProgrammeActivityCreate(**values),
+        )
+
     def test_create_rejects_work_package_outside_programme_project(self) -> None:
         with self.session_factory() as database:
             revision = database.get(ProgrammeRevision, REVISION_A_ID)
@@ -142,15 +158,11 @@ class ProgrammeActivitySecurityTestCase(unittest.TestCase):
 
     def test_update_rejects_work_package_outside_programme_project(self) -> None:
         with self.session_factory() as database:
-            revision = database.get(ProgrammeRevision, REVISION_A_ID)
-            activity = create_activity(
+            activity = self._create_activity(
                 database,
-                revision,
-                ProgrammeActivityCreate(
-                    activity_code="A200",
-                    name="Valid activity",
-                    work_package_id=PACKAGE_A_ID,
-                ),
+                activity_code="A200",
+                name="Valid activity",
+                work_package_id=PACKAGE_A_ID,
             )
 
             with self.assertRaises(ProgrammeActivityWorkPackageNotFoundError):
@@ -165,18 +177,13 @@ class ProgrammeActivitySecurityTestCase(unittest.TestCase):
 
     def test_activity_type_canonically_controls_milestone_flag(self) -> None:
         with self.session_factory() as database:
-            revision = database.get(ProgrammeRevision, REVISION_A_ID)
-            activity = create_activity(
+            activity = self._create_activity(
                 database,
-                revision,
-                ProgrammeActivityCreate(
-                    activity_code="M100",
-                    name="Milestone",
-                    activity_type="milestone",
-                    is_milestone=False,
-                ),
+                activity_code="M100",
+                name="Milestone",
+                activity_type="milestone",
+                is_milestone=False,
             )
-
             self.assertTrue(activity.is_milestone)
 
             updated = update_activity(
@@ -187,9 +194,134 @@ class ProgrammeActivitySecurityTestCase(unittest.TestCase):
                     is_milestone=True,
                 ),
             )
-
             self.assertEqual(updated.activity_type, "task")
             self.assertFalse(updated.is_milestone)
+
+    def test_creating_child_persists_parent_summary_state(self) -> None:
+        with self.session_factory() as database:
+            parent = self._create_activity(
+                database,
+                activity_code="P100",
+                name="Parent",
+            )
+            parent_id = parent.id
+            self._create_activity(
+                database,
+                activity_code="C100",
+                name="Child",
+                parent_activity_id=parent_id,
+            )
+
+        with self.session_factory() as database:
+            persisted_parent = database.get(ProgrammeActivity, parent_id)
+            self.assertIsNotNone(persisted_parent)
+            self.assertTrue(persisted_parent.is_summary)
+
+    def test_moving_child_persists_old_and_new_parent_summary_state(self) -> None:
+        with self.session_factory() as database:
+            parent_a = self._create_activity(
+                database,
+                activity_code="P200",
+                name="Parent A",
+            )
+            parent_b = self._create_activity(
+                database,
+                activity_code="P300",
+                name="Parent B",
+            )
+            child = self._create_activity(
+                database,
+                activity_code="C200",
+                name="Child",
+                parent_activity_id=parent_a.id,
+            )
+            parent_a_id, parent_b_id, child_id = parent_a.id, parent_b.id, child.id
+
+            update_activity(
+                database,
+                child,
+                ProgrammeActivityUpdate(parent_activity_id=parent_b_id),
+            )
+
+        with self.session_factory() as database:
+            parent_a = database.get(ProgrammeActivity, parent_a_id)
+            parent_b = database.get(ProgrammeActivity, parent_b_id)
+            child = database.get(ProgrammeActivity, child_id)
+            self.assertFalse(parent_a.is_summary)
+            self.assertTrue(parent_b.is_summary)
+            self.assertEqual(child.parent_activity_id, parent_b_id)
+
+    def test_deleting_final_child_persists_parent_not_summary(self) -> None:
+        with self.session_factory() as database:
+            parent = self._create_activity(
+                database,
+                activity_code="P400",
+                name="Parent",
+            )
+            child = self._create_activity(
+                database,
+                activity_code="C400",
+                name="Child",
+                parent_activity_id=parent.id,
+            )
+            parent_id, child_id = parent.id, child.id
+            delete_activity(database, child)
+
+        with self.session_factory() as database:
+            self.assertFalse(database.get(ProgrammeActivity, parent_id).is_summary)
+            self.assertIsNone(database.get(ProgrammeActivity, child_id))
+
+    def test_cycle_rejection_leaves_persisted_hierarchy_unchanged(self) -> None:
+        with self.session_factory() as database:
+            parent = self._create_activity(
+                database,
+                activity_code="P500",
+                name="Parent",
+            )
+            child = self._create_activity(
+                database,
+                activity_code="C500",
+                name="Child",
+                parent_activity_id=parent.id,
+            )
+            parent_id, child_id = parent.id, child.id
+
+            with self.assertRaises(ProgrammeActivityParentCycleError):
+                update_activity(
+                    database,
+                    parent,
+                    ProgrammeActivityUpdate(parent_activity_id=child_id),
+                )
+
+        with self.session_factory() as database:
+            parent = database.get(ProgrammeActivity, parent_id)
+            child = database.get(ProgrammeActivity, child_id)
+            self.assertIsNone(parent.parent_activity_id)
+            self.assertEqual(child.parent_activity_id, parent_id)
+
+    def test_auto_generated_activity_codes_are_sequential_and_persisted(self) -> None:
+        with self.session_factory() as database:
+            first = self._create_activity(
+                database,
+                activity_code=None,
+                name="First generated activity",
+            )
+            second = self._create_activity(
+                database,
+                activity_code=None,
+                name="Second generated activity",
+            )
+            first_id, second_id = first.id, second.id
+
+        with self.session_factory() as database:
+            self.assertEqual(
+                database.get(ProgrammeActivity, first_id).activity_code,
+                "A-00010",
+            )
+            self.assertEqual(
+                database.get(ProgrammeActivity, second_id).activity_code,
+                "A-00020",
+            )
 
 
 if __name__ == "__main__":
