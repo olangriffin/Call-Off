@@ -10,7 +10,7 @@
 {% block content %}
     {% if project %}
         {{ breadcrumbs(project=project, current_label="Import Programme") }}
-        {{ project_workspace_nav(project, "programme") }}
+        {{ project_workspace_nav(project, "programme_import") }}
 
         {% call section(labelledby="programme-import-title") %}
             {% call section_header(
