@@ -305,7 +305,7 @@ class PublicSiteTestCase(unittest.TestCase):
         self.assertNotIn('href="/login" class="ghost-button"', body)
         self.assertIn('href="/early-access" class="primary-button"', body)
         self.assertIn("Call-Off", body)
-        self.assertIn("<h2>Log in</h2>", body)
+        self.assertIn("<h1>Log in</h1>", body)
 
         register_status, _headers, register_body = self.request("GET", "/register")
         self.assertEqual(register_status, 403)
