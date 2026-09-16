@@ -16,10 +16,10 @@ from app.backend.routes.frontend.common import (
 from app.backend.services.programme_import import (
     InvalidProgrammeImportError,
     ProgrammeImportError,
-    confirm_import,
     create_import_preview,
     get_import_for_programme,
 )
+from app.backend.services.programme_import_commit import confirm_import
 from app.backend.services.project import get_project
 
 router = APIRouter(include_in_schema=False)
