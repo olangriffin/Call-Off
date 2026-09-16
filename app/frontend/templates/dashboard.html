@@ -6,10 +6,6 @@ from "partials/components/metric_card.html" import metric_card %} {% block title
 <section class="dashboard-hero" aria-labelledby="dashboard-title">
   <div>
     <h1 class="page-title" id="dashboard-title">Project control</h1>
-    <p>
-      See current control exceptions first. These signals are not yet calculated
-      Programme position.
-    </p>
   </div>
   {% if can_create_projects %} {{ primary_button("New project",
   href="/app/projects/new") }} {% endif %}
