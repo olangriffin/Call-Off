@@ -26,6 +26,8 @@
            {% if active_area == 'overview' %} aria-current="page"{% endif %}>Overview</a>
         <a href="/app/projects/{{ project.id }}/programme"
            {% if active_area == 'programme' %} aria-current="page"{% endif %}>Programme</a>
+        <a href="/app/projects/{{ project.id }}/programme/import"
+           {% if active_area == 'programme_import' %} aria-current="page"{% endif %}>Import programme</a>
         <a href="/app/projects/{{ project.id }}/programme/package-identification"
            {% if active_area == 'package_identification' %} aria-current="page"{% endif %}>Identify packages</a>
         <a href="/app/projects/{{ project.id }}#work-packages"
