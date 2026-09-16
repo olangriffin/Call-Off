@@ -103,16 +103,37 @@ Until provenance and override rules are decided:
 - do not claim Package dates are Programme-derived;
 - make calculations explicit about which date source they use.
 
-### Current versus future Programme capability
+### Programme import and revision capability
 
 Manual hierarchical activity editing and the Gantt-style workspace are active.
-Models for dependencies, imports, baselines and calendars are useful Programme
-foundations but do not yet have complete operational workflows. Preserve them;
-do not describe their mere persistence as finished functionality.
+Microsoft Project XML is the first supported Programme import format.
+
+The XML import flow is:
+
+1. upload and parse the file without altering the current Programme revision;
+2. persist a validated import preview and validation issues in `ProgrammeImport`;
+3. show hierarchy, dates, milestones, progress and supported predecessor links for
+   user review;
+4. on confirmation, create a new `ProgrammeRevision` and its Activities and
+   Dependencies transactionally;
+5. make that revision current only after the import has been fully created; and
+6. retain the previous revision for history rather than overwriting its rows.
+
+Imported task `UID` values are stored as `ProgrammeActivity.external_id`. WBS,
+Outline Number or source task ID is used as the Activity code where available.
+`OutlineLevel` provides hierarchy. Internal Microsoft Project predecessor links are
+imported with dependency type and lag; cross-project predecessors are reported as
+warnings rather than silently fabricated.
+
+Microsoft Project XML import intentionally does not yet import resources, costs,
+assignments, calendars, constraints or baselines. Native `.mpp` and configurable
+XLSX imports remain future formats. The import boundary should remain format-
+specific while normalising confirmed data into the same Programme Revision and
+Activity model.
 
 A new Project creates the Programme container but does not choose an input method.
-The first manual activity creates the initial manual revision; a future import flow
-must establish its own revision without first requiring a manual one.
+The first manual activity creates the initial manual revision. An XML import creates
+its own revision directly and does not require a manual revision first.
 
 ## Multi-tenancy
 Every operational request must derive organisation access from authenticated membership.
