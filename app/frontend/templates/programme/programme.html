@@ -27,9 +27,13 @@
                     </p>
                 </div>
                 {% if can_operational_write %}
-                    <a href="/app/projects/{{ project.id }}/programme/new"
-                       class="primary-button"
-                       data-programme-add-trigger>New activity</a>
+                    <div class="form-actions">
+                        <a href="/app/projects/{{ project.id }}/programme/import"
+                           class="ghost-button-sm">Import XML</a>
+                        <a href="/app/projects/{{ project.id }}/programme/new"
+                           class="primary-button"
+                           data-programme-add-trigger>New activity</a>
+                    </div>
                 {% endif %}
             </div>
             {% if error_message %}
@@ -108,15 +112,15 @@
                 <div class="empty-state programme-empty-state" data-programme-empty-panel>
                     <h2>No programme activities yet</h2>
                     {% if can_operational_write %}
-                        <p>Create the first task or milestone manually to establish this project’s delivery sequence. Programme import will be added later.</p>
+                        <p>Import a Microsoft Project XML Programme or create the first task or milestone manually.</p>
                     {% else %}
                         <p>An owner or project manager must establish this Programme before activities can be reviewed.</p>
                     {% endif %}
                     <div class="form-actions">
                         {% if can_operational_write %}
-                            <a href="/app/projects/{{ project.id }}/programme/new"
-                               class="primary-button"
-                               data-programme-add-trigger>Add first activity</a>
+                            <a href="/app/projects/{{ project.id }}/programme/import"
+                               class="primary-button">Import programme</a>
+                            {{ secondary_button("Create manually", href="/app/projects/" ~ project.id ~ "/programme/new", button_class="ghost-button-sm") }}
                         {% endif %}
                         {{ secondary_button("Back to project", href="/app/projects/" ~ project.id, button_class="ghost-button-sm") }}
                     </div>
