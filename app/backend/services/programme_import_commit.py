@@ -11,6 +11,9 @@ from sqlalchemy.orm import Session
 
 from app.backend.models.programme.programme import Programme
 from app.backend.models.programme.programme_activity import ProgrammeActivity
+from app.backend.models.programme.programme_activity_identity import (
+    ProgrammeActivityIdentity,
+)
 from app.backend.models.programme.programme_dependency import ProgrammeDependency
 from app.backend.models.programme.programme_import import ProgrammeImport
 from app.backend.models.programme.programme_revision import ProgrammeRevision
@@ -67,18 +70,111 @@ def _mark_import_failed(
     database.commit()
 
 
+def _unique_identity_map(
+    activities: list[ProgrammeActivity],
+    attribute_name: str,
+) -> dict[str, uuid.UUID]:
+    """Return only unambiguous source-value -> durable identity mappings."""
+
+    identities: dict[str, uuid.UUID] = {}
+    ambiguous: set[str] = set()
+
+    for activity in activities:
+        value = getattr(activity, attribute_name)
+        if not value:
+            continue
+
+        existing = identities.get(value)
+        if existing is None:
+            identities[value] = activity.activity_identity_id
+        elif existing != activity.activity_identity_id:
+            ambiguous.add(value)
+
+    for value in ambiguous:
+        identities.pop(value, None)
+
+    return identities
+
+
+def _current_revision_identity_maps(
+    database: Session,
+    programme_id: uuid.UUID,
+) -> tuple[dict[str, uuid.UUID], dict[str, uuid.UUID]]:
+    current_revision = database.scalar(
+        select(ProgrammeRevision).where(
+            ProgrammeRevision.programme_id == programme_id,
+            ProgrammeRevision.is_current.is_(True),
+        )
+    )
+    if current_revision is None:
+        return {}, {}
+
+    activities = list(
+        database.scalars(
+            select(ProgrammeActivity).where(
+                ProgrammeActivity.programme_revision_id == current_revision.id
+            )
+        ).all()
+    )
+
+    return (
+        _unique_identity_map(activities, "external_id"),
+        _unique_identity_map(activities, "activity_code"),
+    )
+
+
+def _resolve_import_identities(
+    database: Session,
+    programme_id: uuid.UUID,
+    tasks,
+) -> dict[str, uuid.UUID]:
+    """Resolve stable identities before revision-specific Activities are built.
+
+    Microsoft Project UID is the strongest deterministic continuity signal for
+    successive exports of the same Programme. Activity code is the fallback.
+    If neither can be reused safely, create a new durable identity.
+    """
+
+    identity_by_external_id, identity_by_code = _current_revision_identity_maps(
+        database,
+        programme_id,
+    )
+    used_identity_ids: set[uuid.UUID] = set()
+    identity_ids_by_source_uid: dict[str, uuid.UUID] = {}
+
+    for task in tasks:
+        identity_id = identity_by_external_id.get(task.source_uid)
+        if identity_id in used_identity_ids:
+            identity_id = None
+
+        if identity_id is None:
+            identity_id = identity_by_code.get(task.activity_code)
+            if identity_id in used_identity_ids:
+                identity_id = None
+
+        if identity_id is None:
+            identity = ProgrammeActivityIdentity(
+                id=uuid.uuid4(),
+                programme_id=programme_id,
+            )
+            database.add(identity)
+            identity_id = identity.id
+
+        used_identity_ids.add(identity_id)
+        identity_ids_by_source_uid[task.source_uid] = identity_id
+
+    # Persist newly-created identities before Activities reference them. Existing
+    # identities are already present and simply pass through this flush.
+    database.flush()
+    return identity_ids_by_source_uid
+
+
 def confirm_import(
     database: Session,
     project: Project,
     import_record: ProgrammeImport,
 ) -> ProgrammeRevision:
-    """Commit a validated Programme import without exposing a half-built revision.
-
-    Imported hierarchy rows are flushed level-by-level so every parent exists
-    before its children are inserted. The new revision is kept non-current until
-    activities and dependencies have been persisted successfully; only then is
-    the current-revision switch performed in the same transaction.
-    """
+    """Commit a validated Programme import without exposing a half-built revision."""
 
     import_id = import_record.id
 
@@ -113,6 +209,14 @@ def confirm_import(
         )
 
     try:
+        # Resolve continuity against the current revision before the new revision
+        # exists. This keeps logical Activity identity stable across imports.
+        identity_ids_by_uid = _resolve_import_identities(
+            database,
+            programme.id,
+            preview.tasks,
+        )
+
         revision = ProgrammeRevision(
             programme_id=programme.id,
             revision_code=_next_revision_code(database, programme.id),
@@ -151,6 +255,7 @@ def confirm_import(
                 activity = ProgrammeActivity(
                     id=uuid.uuid4(),
                     programme_revision_id=revision.id,
+                    activity_identity_id=identity_ids_by_uid[task.source_uid],
                     activity_code=task.activity_code,
                     name=task.name,
                     activity_type="milestone" if task.is_milestone else "task",

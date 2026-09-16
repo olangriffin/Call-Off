@@ -10,6 +10,9 @@ from app.backend.models.package.deliverable import Deliverable
 from app.backend.models.package.package import WorkPackage
 from app.backend.models.package.revision import DeliverableRevision
 from app.backend.models.programme.programme import Programme
+from app.backend.models.programme.programme_activity_identity import (
+    ProgrammeActivityIdentity,
+)
 from app.backend.models.programme.programme_activity import ProgrammeActivity
 from app.backend.models.programme.programme_baseline import ProgrammeBaseline
 from app.backend.models.programme.programme_baseline_activity import (
@@ -32,6 +35,7 @@ __all__ = [
     "Membership",
     "Organisation",
     "Programme",
+    "ProgrammeActivityIdentity",
     "ProgrammeActivity",
     "ProgrammeBaseline",
     "ProgrammeBaselineActivity",

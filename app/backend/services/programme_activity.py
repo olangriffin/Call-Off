@@ -7,9 +7,12 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
-from app.backend.models.programme.programme_activity import ProgrammeActivity
-from app.backend.models.programme.programme_revision import ProgrammeRevision
 from app.backend.models.package.package import WorkPackage
+from app.backend.models.programme.programme_activity import ProgrammeActivity
+from app.backend.models.programme.programme_activity_identity import (
+    ProgrammeActivityIdentity,
+)
+from app.backend.models.programme.programme_revision import ProgrammeRevision
 from app.backend.schemas.programme_activity import (
     ProgrammeActivityCreate,
     ProgrammeActivityUpdate,
@@ -135,14 +138,7 @@ _AUTO_ACTIVITY_CODE_MAX_ATTEMPTS = 5
 
 
 def _generate_next_activity_code(database: Session, revision_id: uuid.UUID) -> str:
-    """Produce the next zero-padded auto code (A-00010, A-00020, ...).
-
-    Zero-padded so codes stay in the right order under the plain string sort
-    `list_activities` uses — "A-00020" sorts before "A-00100" the way you'd
-    expect, unlike "A-20" vs "A-100". Continues on from the highest
-    auto-generated code already in the revision; hand-entered codes that
-    don't match the A-NNNNN shape are left alone and just don't collide.
-    """
+    """Produce the next zero-padded auto code (A-00010, A-00020, ...)."""
 
     existing_codes = database.scalars(
         select(ProgrammeActivity.activity_code).where(
@@ -194,8 +190,18 @@ def create_activity(
                 revision.id,
             )
 
+        # A manually-created Activity is a new logical Activity, so it receives
+        # a fresh durable identity. Future Programme revisions may reuse this
+        # identity when continuity can be established.
+        identity = ProgrammeActivityIdentity(
+            programme_id=revision.programme_id,
+        )
+        database.add(identity)
+        database.flush()
+
         activity = ProgrammeActivity(
             programme_revision_id=revision.id,
+            activity_identity_id=identity.id,
             **activity_values,
         )
 
@@ -371,7 +377,7 @@ def get_descendant_ids(
 ) -> set[uuid.UUID]:
     """Return the IDs of every descendant of root_id within the given flat list."""
 
-    children_by_parent: dict[uuid.UUID, list[ProgrammeActivity]] = {}
+    children_by_parent: dict[uuid.UUID | None, list[ProgrammeActivity]] = {}
 
     for activity in activities:
         if activity.parent_activity_id is not None:
@@ -394,8 +400,7 @@ def get_descendant_ids(
 def build_activity_tree(
     activities: list[ProgrammeActivity],
 ) -> list[dict]:
-    """Order a flat list of activities into depth-first hierarchy order,
-    returning [{"activity": ..., "depth": ...}, ...] for indented display."""
+    """Order a flat list of activities into depth-first hierarchy order."""
 
     children_by_parent: dict[uuid.UUID | None, list[ProgrammeActivity]] = {}
 

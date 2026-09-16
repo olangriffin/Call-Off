@@ -10,6 +10,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.backend.database.base import Base
 
 if TYPE_CHECKING:
+    from app.backend.models.programme.programme_activity_identity import (
+        ProgrammeActivityIdentity,
+    )
     from app.backend.models.programme.programme_calendar import ProgrammeCalendar
     from app.backend.models.programme.programme_baseline import ProgrammeBaseline
     from app.backend.models.programme.programme_import import ProgrammeImport
@@ -74,6 +77,13 @@ class Programme(Base):
         back_populates="programme",
         cascade="all, delete-orphan",
     )
+
+    activity_identities: Mapped[list[ProgrammeActivityIdentity]] = relationship(
+        back_populates="programme",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
     baselines: Mapped[list[ProgrammeBaseline]] = relationship(
         back_populates="programme",
         cascade="all, delete-orphan",

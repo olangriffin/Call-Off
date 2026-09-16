@@ -15,7 +15,7 @@ from app.backend.core.config import get_settings
 
 MIGRATION_TEST_DATABASE_URL = os.getenv("MIGRATION_TEST_DATABASE_URL")
 RESET_ALLOWED = os.getenv("ALLOW_MIGRATION_TEST_DATABASE_RESET") == "1"
-CURRENT_HEAD = "c4e21d8a3f70"
+CURRENT_HEAD = "e31f6a2c9d40"
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -130,10 +130,23 @@ class PostgreSQLMigrationTestCase(unittest.TestCase):
                     "WHERE id = 'migration-test-org'"
                 )
             )
+            identity_table = connection.scalar(
+                text("SELECT to_regclass('public.programme_activity_identities')::text")
+            )
+            identity_nullable = connection.scalar(
+                text(
+                    "SELECT is_nullable FROM information_schema.columns "
+                    "WHERE table_schema='public' "
+                    "AND table_name='programme_activities' "
+                    "AND column_name='activity_identity_id'"
+                )
+            )
 
         self.assertEqual(revision, CURRENT_HEAD)
         self.assertEqual(user_marker, "auth-user-preserved")
         self.assertEqual(organisation_marker, "organisation-preserved")
+        self.assertEqual(identity_table, "programme_activity_identities")
+        self.assertEqual(identity_nullable, "NO")
 
     def test_empty_application_schema_upgrades_to_head_twice(self) -> None:
         self._upgrade("head")

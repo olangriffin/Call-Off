@@ -20,6 +20,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.backend.database.base import Base
+from app.backend.models.programme.programme_activity_identity import (
+    ProgrammeActivityIdentity,
+)
 from app.backend.models.programme.programme_calendar import ProgrammeCalendar
 
 if TYPE_CHECKING:
@@ -37,6 +40,11 @@ class ProgrammeActivity(Base):
             "activity_code",
             name="uq_programme_activity_revision_code",
         ),
+        UniqueConstraint(
+            "programme_revision_id",
+            "activity_identity_id",
+            name="uq_programme_activity_revision_identity",
+        ),
         CheckConstraint(
             "percent_complete >= 0 AND percent_complete <= 100",
             name="ck_programme_activity_percent_complete",
@@ -52,6 +60,17 @@ class ProgrammeActivity(Base):
     programme_revision_id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True),
         ForeignKey("programme_revisions.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    activity_identity_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "programme_activity_identities.id",
+            name="fk_programme_activities_identity_id",
+            ondelete="CASCADE",
+        ),
         nullable=False,
         index=True,
     )
@@ -144,6 +163,10 @@ class ProgrammeActivity(Base):
     )
 
     programme_revision: Mapped[ProgrammeRevision] = relationship(
+        back_populates="activities",
+    )
+
+    activity_identity: Mapped[ProgrammeActivityIdentity] = relationship(
         back_populates="activities",
     )
 
