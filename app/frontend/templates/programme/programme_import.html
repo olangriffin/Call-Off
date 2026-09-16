@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% from "partials/app_context.html" import breadcrumbs, project_workspace_nav %}
+{% from "partials/components/button.html" import primary_button, secondary_button %}
+{% from "partials/components/metric_card.html" import metric_card %}
+{% from "partials/components/section.html" import section %}
+{% from "partials/components/section_header.html" import section_header %}
+{% block title %}
+    {% if project %}Import Programme | {{ project.code }} | Calloff{% else %}Project not found | Calloff{% endif %}
+{% endblock %}
+{% block content %}
+    {% if project %}
+        {{ breadcrumbs(project=project, current_label="Import Programme") }}
+        {{ project_workspace_nav(project, "programme") }}
+
+        {% call section(labelledby="programme-import-title") %}
+            {% call section_header(
+                "Import Programme",
+                description="Import a Microsoft Project XML export as a new Programme revision. Nothing becomes current until you confirm the preview.",
+                heading_level=1,
+                title_id="programme-import-title"
+            ) %}
+                {{ secondary_button("Back to programme", href="/app/projects/" ~ project.id ~ "/programme", button_class="ghost-button-sm") }}
+            {% endcall %}
+
+            {% if error_message %}
+                <div class="form-alert" role="alert">
+                    <strong>Unable to import Programme</strong>
+                    <p>{{ error_message }}</p>
+                </div>
+            {% endif %}
+
+            <form method="post"
+                  action="/app/projects/{{ project.id }}/programme/import"
+                  enctype="multipart/form-data"
+                  class="form-grid">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+                <div class="form-field form-field-full">
+                    <label for="programme_file">Microsoft Project XML</label>
+                    <input id="programme_file"
+                           name="programme_file"
+                           type="file"
+                           accept=".xml,application/xml,text/xml"
+                           required>
+                    <small>Export the Programme from Microsoft Project as XML. Maximum file size: 10 MB.</small>
+                </div>
+                <div class="form-actions form-field-full">
+                    {{ primary_button("Preview import", type="submit") }}
+                </div>
+            </form>
+        {% endcall %}
+
+        {% if preview %}
+            {% call section(labelledby="programme-import-preview-title") %}
+                {% call section_header(
+                    "Import preview",
+                    description="Review the Programme structure before creating a new current revision.",
+                    title_id="programme-import-preview-title"
+                ) %}
+                    {% if preview.can_confirm and import_record %}
+                        <form method="post"
+                              action="/app/projects/{{ project.id }}/programme/import/{{ import_record.id }}/confirm"
+                              class="inline-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+                            {{ primary_button("Confirm import", type="submit") }}
+                        </form>
+                    {% endif %}
+                {% endcall %}
+
+                <div class="metric-grid project-metrics">
+                    {{ metric_card("Activities", preview.tasks|length, "Importable tasks") }}
+                    {{ metric_card("Milestones", preview.milestone_count, "Marked in source") }}
+                    {{ metric_card("Dependencies", preview.dependencies|length, "Internal predecessor links") }}
+                    {{ metric_card("Warnings", preview.warnings|length, "Review before confirmation") }}
+                </div>
+
+                {% if preview.project_name %}
+                    <p class="form-help"><strong>Source project:</strong> {{ preview.project_name }}</p>
+                {% endif %}
+
+                {% if preview.errors %}
+                    <div class="form-alert" role="alert">
+                        <strong>Import blocked</strong>
+                        <ul>
+                            {% for message in preview.errors %}<li>{{ message }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                {% if preview.warnings %}
+                    <details>
+                        <summary>{{ preview.warnings|length }} warning{% if preview.warnings|length != 1 %}s{% endif %}</summary>
+                        <ul>
+                            {% for message in preview.warnings %}<li>{{ message }}</li>{% endfor %}
+                        </ul>
+                    </details>
+                {% endif %}
+
+                {% if preview.tasks %}
+                    <div class="table-container" tabindex="0" aria-label="Programme import preview">
+                        <table>
+                            <caption class="visually-hidden">Programme activities parsed from the uploaded Microsoft Project XML file</caption>
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Activity</th>
+                                    <th>Start</th>
+                                    <th>Finish</th>
+                                    <th>Progress</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in preview.tasks %}
+                                    <tr>
+                                        <td class="mono">{{ task.activity_code }}</td>
+                                        <td>
+                                            <div style="padding-left: {{ task.depth * 18 }}px">
+                                                <strong>{{ task.name }}</strong>
+                                                {% if task.parent_uid %}<small>UID {{ task.source_uid }} · parent {{ task.parent_uid }}</small>{% else %}<small>UID {{ task.source_uid }}</small>{% endif %}
+                                            </div>
+                                        </td>
+                                        <td>{% if task.planned_start %}{{ task.planned_start[:10] }}{% else %}<span class="missing-value">Not set</span>{% endif %}</td>
+                                        <td>{% if task.planned_finish %}{{ task.planned_finish[:10] }}{% else %}<span class="missing-value">Not set</span>{% endif %}</td>
+                                        <td>{{ task.percent_complete }}%</td>
+                                        <td>
+                                            {% if task.is_milestone %}Milestone{% elif task.is_summary %}Summary{% else %}Task{% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+
+                {% if preview.can_confirm and import_record %}
+                    <div class="form-actions">
+                        <form method="post"
+                              action="/app/projects/{{ project.id }}/programme/import/{{ import_record.id }}/confirm"
+                              class="inline-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token(request) }}" />
+                            {{ primary_button("Confirm import", type="submit") }}
+                        </form>
+                        {{ secondary_button("Cancel", href="/app/projects/" ~ project.id ~ "/programme", button_class="ghost-button-sm") }}
+                    </div>
+                    <p class="form-help">Confirming creates a new Programme revision and makes it current only after the full import succeeds.</p>
+                {% endif %}
+            {% endcall %}
+        {% endif %}
+    {% else %}
+        {% call section() %}
+            <div class="empty-state">
+                <h1 class="page-title">Project not found</h1>
+                <p>The requested project does not exist or is unavailable.</p>
+                <a href="/app">Return to dashboard</a>
+            </div>
+        {% endcall %}
+    {% endif %}
+{% endblock %}
