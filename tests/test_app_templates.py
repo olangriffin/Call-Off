@@ -201,8 +201,11 @@ class AppTemplateTestCase(unittest.TestCase):
         self.assertIn("View project", body)
         self.assertIn("98%", body)
         self.assertNotIn("Procurement", body)
-        self.assertIn("Recorded deliverable readiness", body)
-        self.assertIn('<a class="attention-row attention-row--critical"', body)
+        self.assertRegex(body, r"Recorded deliverable\s+readiness")
+        self.assertRegex(
+            body,
+            r'<a\s+class="attention-row attention-row--critical"',
+        )
         self.assertEqual(body.count('href="/app/projects/project-1"'), 3)
 
         for active_count, expected in (
@@ -608,7 +611,7 @@ class AppTemplateTestCase(unittest.TestCase):
             "data-programme-package",
             "data-programme-today",
             '<span class="visually-hidden">Timeline</span>',
-            "Add first activity",
+            "Create manually",
         ):
             self.assertIn(expected, source)
 

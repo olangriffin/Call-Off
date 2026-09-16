@@ -12,10 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.backend.models.programme.programme import Programme
-from app.backend.models.programme.programme_activity import ProgrammeActivity
-from app.backend.models.programme.programme_dependency import ProgrammeDependency
 from app.backend.models.programme.programme_import import ProgrammeImport
-from app.backend.models.programme.programme_revision import ProgrammeRevision
 from app.backend.models.project import Project
 
 
@@ -152,7 +149,6 @@ class ProgrammeImportPreview:
 _DURATION_PATTERN = re.compile(
     r"^P(?:(?P<days>\d+)D)?(?:T(?:(?P<hours>\d+)H)?(?:(?P<minutes>\d+)M)?(?:(?P<seconds>[\d.]+)S)?)?$"
 )
-_REVISION_PATTERN = re.compile(r"^R(\d+)$", re.IGNORECASE)
 _DEPENDENCY_TYPES = {"0": "FF", "1": "FS", "2": "SF", "3": "SS"}
 
 
@@ -461,153 +457,3 @@ def preview_from_import(import_record: ProgrammeImport) -> ProgrammeImportPrevie
     if not isinstance(payload, dict):
         raise InvalidProgrammeImportError("The validated import preview is unavailable.")
     return ProgrammeImportPreview.from_payload(payload)
-
-
-def _next_revision_code(database: Session, programme_id: uuid.UUID) -> str:
-    codes = database.scalars(
-        select(ProgrammeRevision.revision_code).where(
-            ProgrammeRevision.programme_id == programme_id
-        )
-    ).all()
-    highest = 0
-    for code in codes:
-        match = _REVISION_PATTERN.fullmatch(code or "")
-        if match:
-            highest = max(highest, int(match.group(1)))
-    candidate = highest + 1
-    existing = set(codes)
-    while f"R{candidate}" in existing:
-        candidate += 1
-    return f"R{candidate}"
-
-
-def _parse_stored_datetime(value: str | None) -> datetime | None:
-    if not value:
-        return None
-    return datetime.fromisoformat(value)
-
-
-def confirm_import(
-    database: Session,
-    project: Project,
-    import_record: ProgrammeImport,
-) -> ProgrammeRevision:
-    if import_record.status == "completed" and import_record.programme_revision_id:
-        existing_revision = database.get(
-            ProgrammeRevision,
-            import_record.programme_revision_id,
-        )
-        if existing_revision is not None:
-            return existing_revision
-
-    if import_record.status != "validated":
-        raise InvalidProgrammeImportError("Only a validated Programme import can be confirmed.")
-
-    programme = database.scalar(
-        select(Programme).where(
-            Programme.id == import_record.programme_id,
-            Programme.project_id == project.id,
-        )
-    )
-    if programme is None:
-        raise InvalidProgrammeImportError("The Programme import is not available for this project.")
-
-    preview = preview_from_import(import_record)
-    if not preview.can_confirm:
-        raise InvalidProgrammeImportError("The Programme import contains validation errors.")
-
-    try:
-        current_revisions = database.scalars(
-            select(ProgrammeRevision).where(
-                ProgrammeRevision.programme_id == programme.id,
-                ProgrammeRevision.is_current.is_(True),
-            )
-        ).all()
-        for current in current_revisions:
-            current.is_current = False
-        database.flush()
-
-        revision = ProgrammeRevision(
-            programme_id=programme.id,
-            revision_code=_next_revision_code(database, programme.id),
-            name=preview.project_name or import_record.source_filename,
-            source_type="ms_project_xml",
-            source_filename=import_record.source_filename,
-            status="active",
-            is_current=True,
-        )
-        database.add(revision)
-        database.flush()
-
-        activity_ids: dict[str, uuid.UUID] = {}
-        for task in preview.tasks:
-            activity_id = uuid.uuid4()
-            parent_activity_id = (
-                activity_ids.get(task.parent_uid) if task.parent_uid is not None else None
-            )
-            status = (
-                "complete"
-                if task.percent_complete >= 100
-                else "in_progress"
-                if task.percent_complete > 0
-                else "not_started"
-            )
-            activity = ProgrammeActivity(
-                id=activity_id,
-                programme_revision_id=revision.id,
-                activity_code=task.activity_code,
-                name=task.name,
-                activity_type="milestone" if task.is_milestone else "task",
-                external_id=task.source_uid,
-                planned_start=_parse_stored_datetime(task.planned_start),
-                planned_finish=_parse_stored_datetime(task.planned_finish),
-                duration_minutes=task.duration_minutes,
-                percent_complete=task.percent_complete,
-                is_milestone=task.is_milestone,
-                status=status,
-                parent_activity_id=parent_activity_id,
-                is_summary=task.is_summary,
-            )
-            database.add(activity)
-            activity_ids[task.source_uid] = activity_id
-
-        database.flush()
-
-        for dependency in preview.dependencies:
-            predecessor_id = activity_ids.get(dependency.predecessor_uid)
-            successor_id = activity_ids.get(dependency.successor_uid)
-            if predecessor_id is None or successor_id is None:
-                continue
-            database.add(
-                ProgrammeDependency(
-                    predecessor_id=predecessor_id,
-                    successor_id=successor_id,
-                    dependency_type=dependency.dependency_type,
-                    lag_minutes=dependency.lag_minutes,
-                )
-            )
-
-        import_record.programme_revision_id = revision.id
-        import_record.status = "completed"
-        import_record.imported_records = len(preview.tasks)
-        import_record.completed_at = datetime.now(timezone.utc)
-        database.commit()
-        database.refresh(revision)
-        return revision
-    except Exception:
-        database.rollback()
-        failed_import = database.get(ProgrammeImport, import_record.id)
-        if failed_import is not None:
-            failed_import.status = "failed"
-            failed_import.error_count = max(failed_import.error_count, 1)
-            issues = list(failed_import.validation_issues or [])
-            issues.append(
-                {
-                    "severity": "error",
-                    "message": "The import could not be committed. No Programme revision was activated.",
-                }
-            )
-            failed_import.validation_issues = issues
-            failed_import.completed_at = datetime.now(timezone.utc)
-            database.commit()
-        raise

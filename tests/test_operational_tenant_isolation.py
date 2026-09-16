@@ -24,6 +24,9 @@ from app.backend.models.package.package import WorkPackage
 from app.backend.models.package.revision import DeliverableRevision
 from app.backend.models.programme.programme import Programme
 from app.backend.models.programme.programme_activity import ProgrammeActivity
+from app.backend.models.programme.programme_activity_identity import (
+    ProgrammeActivityIdentity,
+)
 from app.backend.models.programme.programme_baseline import ProgrammeBaseline
 from app.backend.models.programme.programme_baseline_activity import (
     ProgrammeBaselineActivity,
@@ -61,6 +64,8 @@ PROGRAMME_REVISION_A_ID = uuid.UUID("10000000-0000-0000-0000-000000000007")
 PROGRAMME_REVISION_B_ID = uuid.UUID("20000000-0000-0000-0000-000000000007")
 ACTIVITY_A_ID = uuid.UUID("10000000-0000-0000-0000-000000000008")
 ACTIVITY_B_ID = uuid.UUID("20000000-0000-0000-0000-000000000008")
+ACTIVITY_IDENTITY_A_ID = uuid.UUID("10000000-0000-0000-0000-000000000009")
+ACTIVITY_IDENTITY_B_ID = uuid.UUID("20000000-0000-0000-0000-000000000009")
 
 
 @compiles(JSONB, "sqlite")
@@ -77,6 +82,7 @@ TABLES = [
     Approval.__table__,
     Programme.__table__,
     ProgrammeRevision.__table__,
+    ProgrammeActivityIdentity.__table__,
     ProgrammeActivity.__table__,
     ProgrammeDependency.__table__,
     ProgrammeBaseline.__table__,
@@ -137,6 +143,7 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
         cls.application.dependency_overrides[require_frontend_organisation_access] = (
             override_access
         )
+
     @classmethod
     def tearDownClass(cls) -> None:
         cls.application.dependency_overrides.clear()
@@ -251,15 +258,25 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
                         revision_code="R1",
                         is_current=True,
                     ),
+                    ProgrammeActivityIdentity(
+                        id=ACTIVITY_IDENTITY_A_ID,
+                        programme_id=PROGRAMME_A_ID,
+                    ),
+                    ProgrammeActivityIdentity(
+                        id=ACTIVITY_IDENTITY_B_ID,
+                        programme_id=PROGRAMME_B_ID,
+                    ),
                     ProgrammeActivity(
                         id=ACTIVITY_A_ID,
                         programme_revision_id=PROGRAMME_REVISION_A_ID,
+                        activity_identity_id=ACTIVITY_IDENTITY_A_ID,
                         activity_code="A-ACT",
                         name="Activity A",
                     ),
                     ProgrammeActivity(
                         id=ACTIVITY_B_ID,
                         programme_revision_id=PROGRAMME_REVISION_B_ID,
+                        activity_identity_id=ACTIVITY_IDENTITY_B_ID,
                         activity_code="B-ACT",
                         name="Activity B",
                     ),
@@ -564,6 +581,13 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
             200,
         )
 
+        activity_path = f"/projects/{project_id}/programme/activities"
+        bootstrap_activity = await self.client.post(
+            activity_path,
+            json={"name": "Programme bootstrap"},
+        )
+        self.assertEqual(bootstrap_activity.status_code, 201, bootstrap_activity.text)
+
         package_path = f"/projects/{project_id}/work-packages"
         package = await self.client.post(
             package_path, json={"code": "WP", "name": "Package"}
@@ -610,7 +634,6 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
             200,
         )
 
-        activity_path = f"/projects/{project_id}/programme/activities"
         activity = await self.client.post(activity_path, json={"name": "Activity"})
         self.assertEqual(activity.status_code, 201, activity.text)
         activity_id = activity.json()["id"]
@@ -683,6 +706,13 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
             200,
         )
 
+        activity_path = f"/projects/{project_id}/programme/activities"
+        bootstrap_activity = await self.client.post(
+            activity_path,
+            json={"name": "Programme bootstrap"},
+        )
+        self.assertEqual(bootstrap_activity.status_code, 201, bootstrap_activity.text)
+
         package_path = f"/projects/{project_id}/work-packages"
         package = await self.client.post(package_path, json={"code": "WP", "name": "Package"})
         self.assertEqual(package.status_code, 201, package.text)
@@ -727,7 +757,6 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
             200,
         )
 
-        activity_path = f"/projects/{project_id}/programme/activities"
         activity = await self.client.post(activity_path, json={"name": "Activity"})
         self.assertEqual(activity.status_code, 201, activity.text)
         self.assertEqual(
@@ -891,14 +920,21 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
                     for index in range(100)
                 ]
             )
+            identities = [
+                ProgrammeActivityIdentity(programme_id=PROGRAMME_A_ID)
+                for _ in range(200)
+            ]
+            database.add_all(identities)
+            database.flush()
             database.add_all(
                 [
                     ProgrammeActivity(
                         programme_revision_id=PROGRAMME_REVISION_A_ID,
+                        activity_identity_id=identity.id,
                         activity_code=f"A-ACT-{index:03}",
                         name=f"Activity {index}",
                     )
-                    for index in range(200)
+                    for index, identity in enumerate(identities)
                 ]
             )
             database.commit()
