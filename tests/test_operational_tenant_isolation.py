@@ -581,6 +581,13 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
             200,
         )
 
+        activity_path = f"/projects/{project_id}/programme/activities"
+        bootstrap_activity = await self.client.post(
+            activity_path,
+            json={"name": "Programme bootstrap"},
+        )
+        self.assertEqual(bootstrap_activity.status_code, 201, bootstrap_activity.text)
+
         package_path = f"/projects/{project_id}/work-packages"
         package = await self.client.post(
             package_path, json={"code": "WP", "name": "Package"}
@@ -627,7 +634,6 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
             200,
         )
 
-        activity_path = f"/projects/{project_id}/programme/activities"
         activity = await self.client.post(activity_path, json={"name": "Activity"})
         self.assertEqual(activity.status_code, 201, activity.text)
         activity_id = activity.json()["id"]
@@ -700,6 +706,13 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
             200,
         )
 
+        activity_path = f"/projects/{project_id}/programme/activities"
+        bootstrap_activity = await self.client.post(
+            activity_path,
+            json={"name": "Programme bootstrap"},
+        )
+        self.assertEqual(bootstrap_activity.status_code, 201, bootstrap_activity.text)
+
         package_path = f"/projects/{project_id}/work-packages"
         package = await self.client.post(package_path, json={"code": "WP", "name": "Package"})
         self.assertEqual(package.status_code, 201, package.text)
@@ -744,7 +757,6 @@ class OperationalTenantIsolationTestCase(unittest.IsolatedAsyncioTestCase):
             200,
         )
 
-        activity_path = f"/projects/{project_id}/programme/activities"
         activity = await self.client.post(activity_path, json={"name": "Activity"})
         self.assertEqual(activity.status_code, 201, activity.text)
         self.assertEqual(
