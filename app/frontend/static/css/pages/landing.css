@@ -289,17 +289,7 @@
   background: rgba(255, 255, 255, 0.035);
 }
 
-#features .feature-card::after {
-  content: "";
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--accent);
-  box-shadow: none;
-}
+
 
 #features .feature-card h3 {
   max-width: 230px;
