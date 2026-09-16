@@ -1,4 +1,6 @@
 (() => {
+  const workspaceCleanup = new WeakMap();
+
   function parseDetailMessage(detail) {
     if (!detail) return null;
     if (typeof detail === "string") return detail;
@@ -194,6 +196,9 @@
     }
 
     compactViewport.addEventListener("change", setResponsiveDefault);
+    workspaceCleanup.set(workspace, () => {
+      compactViewport.removeEventListener("change", setResponsiveDefault);
+    });
     setResponsiveDefault(compactViewport);
     applyFilters();
 
@@ -453,6 +458,8 @@
       return;
     }
 
+    workspaceCleanup.get(workspace)?.();
+    workspaceCleanup.delete(workspace);
     workspace.replaceWith(freshWorkspace);
     initWorkspace(freshWorkspace);
 
